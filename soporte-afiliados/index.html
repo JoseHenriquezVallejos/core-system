@@ -45,7 +45,6 @@
     .then(res => res.text())
     .then(data => {
       const filas = data.split("\n").map(r => r.split(","));
-      const headers = filas[0];
       const fila = filas.find(r => r[0] === afiliadoID);
 
       if (!fila) {
@@ -61,7 +60,7 @@
       // desde columna D (índice 3), de dos en dos: botón + descripción
       for (let i = 3; i < fila.length; i += 2) {
         const nombre = fila[i];
-        const descripcion = fila[i+1] || "⚠️ Sin descripción";
+        const descripcion = fila[i+1] ? fila[i+1] : "⚠️ Sin descripción";
         if (nombre) opciones[nombre] = descripcion;
       }
 
