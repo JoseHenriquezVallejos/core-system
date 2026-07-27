@@ -46,11 +46,11 @@
   const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfovEU326ybyI9IoKroxh_4nvHWAYeeyv6X6rTebAKr45YY7E38eOevdi8-2r9rv712S5aTSO6QdoS/pub?gid=0&single=true&output=csv";
 
   async function init() {
-    // Buscar el ID en la URL
+    // Buscar el ID en la URL (?id=josehenriquez)
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
     if (!id) {
-      console.error("No se encontró parámetro ?id en la URL");
+      document.getElementById("nombre-visual").innerText = "⚠️ Falta parámetro ?id en la URL";
       return;
     }
 
@@ -73,7 +73,7 @@
         if (panel && user[cCol]) panel.querySelector("p").innerText = user[cCol].trim();
       });
     } else {
-      console.error("No se encontró el ID en la planilla:", id);
+      document.getElementById("nombre-visual").innerText = "⚠️ ID no encontrado en la planilla";
     }
   }
   init();
