@@ -29,7 +29,7 @@
   </div>
 
   <div class="button-grid" id="botones">
-    <!-- Los botones se generan dinámicamente -->
+    <!-- Botones se generan dinámicamente -->
     <a href="https://wa.me/569XXXXXXXX" target="_blank" class="btn-small">📤 Enviar petición</a>
   </div>
 
@@ -40,8 +40,8 @@
 
 <script>
   // URL pública de tu Google Sheets en formato CSV
-  // Reemplaza con el enlace de tu planilla publicada
-  const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-XXXXX/pub?gid=0&single=true&output=csv";
+  // Reemplaza ID_DE_TU_SHEET con el ID real de tu planilla
+  const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfovEU326ybyI9IoKroxh_4nvHWAYeeyv6X6rTebAKr45YY7E38eOevdi8-2r9rv712S5aTSO6QdoS/pub?gid=0&single=true&output=csv";
 
   fetch(sheetUrl)
     .then(res => res.text())
@@ -52,35 +52,16 @@
 
       const opciones = {};
       headers.forEach((h, i) => {
+        // Detecta columnas que empiezan con "b" (b1, b2, b3…)
         if (h.startsWith("b") && valores[i]) {
-          const descKey = "Desc" + h;
+          const descKey = "Desc-" + h; // usa el guion como en tu planilla
           const nombre = valores[i];
-          const descripcion = valores[headers.indexOf(descKey)];
+          const descIndex = headers.indexOf(descKey);
+          const descripcion = descIndex !== -1 ? valores[descIndex] : "";
           opciones[nombre] = descripcion;
         }
       });
 
       // Render dinámico de botones
       const contenedor = document.getElementById("botones");
-      const btnSmall = contenedor.querySelector(".btn-small");
-      Object.keys(opciones).forEach(nombre => {
-        const btn = document.createElement("button");
-        btn.className = "btn-option";
-        btn.textContent = nombre;
-        btn.onclick = () => sendChoice(nombre, opciones[nombre]);
-        contenedor.insertBefore(btn, btnSmall);
-      });
-    })
-    .catch(err => {
-      console.error("Error cargando planilla:", err);
-    });
-
-  function sendChoice(choice, respuesta) {
-    const history = document.getElementById('chat-history');
-    history.innerHTML += `<div class="msg user-msg"><button class="btn-option">${choice}</button></div>`;
-    history.innerHTML += `<div class="msg bot-msg">${respuesta}</div>`;
-    history.scrollTop = history.scrollHeight;
-  }
-</script>
-</body>
-</html>
+      const btnSmall = contenedor.query
