@@ -3,24 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Academia Llave en Mano - Ayuda</title>
+  <title>Academia Llave en Mano 🚀</title>
   <style>
     body { font-family: 'Segoe UI', sans-serif; background:#f1f5f9; margin:0; padding:20px; }
-    h1 { color:#0f172a; }
-    .accordion { background:#fff; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:10px; }
-    .accordion-header { padding:12px; cursor:pointer; font-weight:600; background:#f8fafc; }
-    .accordion-header:hover { background:#0fb396; color:#fff; }
-    .accordion-content { display:none; padding:12px; border-top:1px solid #cbd5e1; }
-    .accordion.active .accordion-content { display:block; }
-    .btn-small { background:#fffdf0; border:1px solid #d4af37; color:#8b6b00; font-size:0.85rem; padding:8px 10px; border-radius:6px; text-decoration:none; display:inline-block; margin-bottom:15px; }
+    h1 { color:#0f172a; text-align:center; }
+    p { text-align:center; color:#475569; }
+    .btn-small { background:#fffdf0; border:1px solid #d4af37; color:#8b6b00; font-size:0.85rem; padding:10px 14px; border-radius:6px; text-decoration:none; display:inline-block; margin:15px auto; }
     .btn-small:hover { background:#0fb396; color:#fff; }
+    #acordeones { margin-top:20px; }
+    .accordion { background:#fff; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:10px; overflow:hidden; }
+    .accordion-header { padding:14px; cursor:pointer; font-weight:600; background:#f8fafc; display:flex; align-items:center; gap:10px; }
+    .accordion-header:hover { background:#0fb396; color:#fff; }
+    .accordion-content { display:none; padding:14px; border-top:1px solid #cbd5e1; color:#334155; }
+    .accordion.active .accordion-content { display:block; }
+    /* Responsive: en pantallas grandes mostrar en 2 columnas */
+    @media (min-width: 768px) {
+      #acordeones { 
+        display:grid; 
+        grid-template-columns: 1fr 1fr; 
+        gap:15px; 
+      }
+    }
   </style>
 </head>
 <body>
   <h1>Academia Llave en Mano 🚀</h1>
   <p>Centro de apoyo para afiliados</p>
 
-  <a href="#" target="_blank" class="btn-small" id="whatsapp">📤 Enviar petición</a>
+  <div style="text-align:center;">
+    <a href="#" target="_blank" class="btn-small" id="whatsapp">📤 Enviar petición</a>
+  </div>
 
   <div id="acordeones"></div>
 
@@ -28,11 +40,19 @@
   const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfovEU326ybyI9IoKroxh_4nvHWAYeeyv6X6rTebAKr45YY7E38eOevdi8-2r9rv712S5aTSO6QdoS/pub?gid=0&single=true&output=csv";
   const afiliadoID = "josehenriquez"; // ID en columna A
 
+  // Íconos fijos para cada bloque (puedes ampliarlos o ponerlos en la planilla)
+  const iconMap = {
+    "Embudo Gratis": "📬",
+    "Reels Publicitarios": "🎬",
+    "Comisiones": "💰",
+    "Soporte": "🧰",
+    "Preguntas Frecuentes": "💬"
+  };
+
   fetch(sheetUrl)
     .then(res => res.text())
     .then(data => {
       const filas = data.split("\n").map(r => r.split(","));
-      const headers = filas[0];
       const fila = filas.find(r => r[0] === afiliadoID);
 
       if (!fila) {
@@ -53,8 +73,9 @@
         if (nombre) {
           const acc = document.createElement("div");
           acc.className = "accordion";
+          const icono = iconMap[nombre] || "📌";
           acc.innerHTML = `
-            <div class="accordion-header">${nombre}</div>
+            <div class="accordion-header">${icono} ${nombre}</div>
             <div class="accordion-content">${descripcion || "⚠️ Sin descripción"}</div>
           `;
           contenedor.appendChild(acc);
