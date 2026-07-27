@@ -39,25 +39,26 @@
 </div>
 
 <script>
-  // URL pública de tu Google Sheets en formato CSV
-  const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfovEU326ybyI9IoKroxh_4nvHWAYeeyv6X6rTebAKr45YY7E38eOevdi8-2r9rv712S5aTSO6QdoS/pub?gid=0&single=true&output=csv";
-  
-
+  // URL pública de tu Google Sheets en formato JSON
+  const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfovEU326ybyI9IoKroxh_4nvHWAYeeyv6X6rTebAKr45YY7E38eOevdi8-2r9rv712S5aTSO6QdoS/gviz/tq?tqx=out:json";
 
   fetch(sheetUrl)
     .then(res => res.text())
-    .then(data => {
-      const filas = data.split("\n").map(r => r.split(","));
-      const headers = filas[0];
-      const valores = filas[1]; // primera fila de datos
+    .then(text => {
+      const json = JSON.parse(text.substr(47).slice(0, -2));
+      const row = json.table.rows[1].c; // fila 2 (José Henríquez)
+      const headers = json.table.cols.map(c => c.label.trim());
 
       const opciones = {};
       headers.forEach((h, i) => {
-        if (h.startsWith("b") && valores[i]) {
-          const descKey = "Desc" + h;
-          const nombre = valores[i];
-          const descIndex = headers.indexOf(descKey);
-          const descripcion = descIndex !== -1 ? valores[descIndex] : "";
+        const key = h.trim();
+        if (key.startsWith("b") && row[i] && row[i].v) {
+          const descKey = "Desc-" + key;
+          const descIndex = headers.findIndex(col => col.trim() === descKey);
+          const nombre = row[i].v;
+          const descripcion = (descIndex !== -1 && row[descIndex] && row[descIndex].v) 
+            ? row[descIndex].v 
+            : "⚠️ No se encontró descripción";
           opciones[nombre] = descripcion;
         }
       });
