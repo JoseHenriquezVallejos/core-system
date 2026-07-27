@@ -3,39 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Academia Llave en Mano</title>
+  <title>Academia Llave en Mano - Ayuda</title>
   <style>
-    body { margin:0; font-family: 'Segoe UI', sans-serif; background:#f1f5f9; }
-    .chat-container { max-width:700px; margin:auto; height:100vh; display:flex; flex-direction:column; background:#fff; box-shadow:0 0 10px rgba(0,0,0,0.1); }
-    .header { background:#0f172a; color:#fff; padding:20px; }
-    .header h1 { margin:0; font-size:1.5rem; }
-    .header p { margin:0; opacity:0.7; }
-    .button-grid { display:flex; flex-wrap:wrap; gap:8px; padding:15px; }
-    .btn-option { background:#f8fafc; border:1px solid #cbd5e1; padding:10px 14px; border-radius:8px; cursor:pointer; font-weight:600; font-size:0.9rem; text-align:center; display:inline-block; }
-    .btn-option:hover { background:#0fb396; color:#fff; }
-    .btn-small { background:#fffdf0; border:1px solid #d4af37; color:#8b6b00; font-size:0.75rem; padding:8px 10px; border-radius:6px; text-align:center; text-decoration:none; display:inline-block; }
+    body { font-family: 'Segoe UI', sans-serif; background:#f1f5f9; margin:0; padding:20px; }
+    h1 { color:#0f172a; }
+    .accordion { background:#fff; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:10px; }
+    .accordion-header { padding:12px; cursor:pointer; font-weight:600; background:#f8fafc; }
+    .accordion-header:hover { background:#0fb396; color:#fff; }
+    .accordion-content { display:none; padding:12px; border-top:1px solid #cbd5e1; }
+    .accordion.active .accordion-content { display:block; }
+    .btn-small { background:#fffdf0; border:1px solid #d4af37; color:#8b6b00; font-size:0.85rem; padding:8px 10px; border-radius:6px; text-decoration:none; display:inline-block; margin-bottom:15px; }
     .btn-small:hover { background:#0fb396; color:#fff; }
-    #chat-history { flex:1; overflow-y:auto; padding:20px; background:#f8fafc; }
-    .msg { padding:12px; border-radius:10px; margin-bottom:10px; max-width:90%; }
-    .bot-msg { background:#fff; border:1px solid #e2e8f0; }
-    .user-msg { background:transparent; margin-left:auto; padding:0; }
   </style>
 </head>
 <body>
-<div class="chat-container">
-  <div class="header">
-    <h1>Academia Llave en Mano</h1>
-    <p>Centro de apoyo para afiliados 🚀</p>
-  </div>
+  <h1>Academia Llave en Mano 🚀</h1>
+  <p>Centro de apoyo para afiliados</p>
 
-  <div class="button-grid" id="botones">
-    <a href="#" target="_blank" class="btn-small" id="whatsapp">📤 Enviar petición</a>
-  </div>
+  <a href="#" target="_blank" class="btn-small" id="whatsapp">📤 Enviar petición</a>
 
-  <div id="chat-history">
-    <div class="msg bot-msg">Bienvenido, selecciona una opción para comenzar.</div>
-  </div>
-</div>
+  <div id="acordeones"></div>
 
 <script>
   const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfovEU326ybyI9IoKroxh_4nvHWAYeeyv6X6rTebAKr45YY7E38eOevdi8-2r9rv712S5aTSO6QdoS/pub?gid=0&single=true&output=csv";
@@ -57,33 +44,32 @@
       const whatsappLink = fila[2];
       document.getElementById("whatsapp").href = whatsappLink;
 
-      const opciones = {};
-      // desde columna D (índice 3), de dos en dos: botón + descripción
+      const contenedor = document.getElementById("acordeones");
+
+      // desde columna D (índice 3), pares: bX + Desc-bX
       for (let i = 3; i < fila.length; i += 2) {
         const nombre = fila[i];
         const descripcion = fila[i+1];
-        if (nombre) opciones[nombre] = descripcion || "⚠️ Sin descripción";
+        if (nombre) {
+          const acc = document.createElement("div");
+          acc.className = "accordion";
+          acc.innerHTML = `
+            <div class="accordion-header">${nombre}</div>
+            <div class="accordion-content">${descripcion || "⚠️ Sin descripción"}</div>
+          `;
+          contenedor.appendChild(acc);
+        }
       }
 
-      // Render dinámico de botones
-      const contenedor = document.getElementById("botones");
-      const btnSmall = contenedor.querySelector(".btn-small");
-      Object.keys(opciones).forEach(nombre => {
-        const btn = document.createElement("button");
-        btn.className = "btn-option";
-        btn.textContent = nombre;
-        btn.onclick = () => sendChoice(nombre, opciones[nombre]);
-        contenedor.insertBefore(btn, btnSmall);
+      // activar acordeones
+      document.querySelectorAll('.accordion-header').forEach(header => {
+        header.addEventListener('click', () => {
+          const accordion = header.parentElement;
+          accordion.classList.toggle('active');
+        });
       });
     })
     .catch(err => console.error("Error cargando planilla:", err));
-
-  function sendChoice(choice, respuesta) {
-    const history = document.getElementById('chat-history');
-    history.innerHTML += `<div class="msg user-msg"><button class="btn-option">${choice}</button></div>`;
-    history.innerHTML += `<div class="msg bot-msg">${respuesta}</div>`;
-    history.scrollTop = history.scrollHeight;
-  }
 </script>
 </body>
 </html>
