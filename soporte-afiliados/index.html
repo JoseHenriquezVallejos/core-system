@@ -80,15 +80,15 @@
 
       if (rol === "a") {
         document.getElementById("subtitulo").textContent = "Centro de apoyo para afiliados 🚀";
-        mostrarOpciones(opcionesAfiliados);
+        mostrarOpciones(opcionesAfiliados, "afiliado", nombreVisual);
       } else if (rol === "c") {
         document.getElementById("subtitulo").textContent = "Centro de apoyo para clientes 🚀";
-        mostrarOpciones(opcionesClientes);
+        mostrarOpciones(opcionesClientes, "cliente", nombreVisual);
       }
     })
     .catch(err => console.error("Error cargando planilla:", err));
 
-  function mostrarOpciones(opciones) {
+  function mostrarOpciones(opciones, rol, nombreVisual) {
     const contenedor = document.getElementById("botones");
     const btnSmall = contenedor.querySelector(".btn-small");
     contenedor.querySelectorAll(".btn-option").forEach(b => b.remove());
