@@ -24,11 +24,13 @@
 <div class="chat-container">
   <div class="header">
     <h1 id="nombre-visual">Cargando...</h1>
-    <p id="subtitulo-visual">Cargando...</p>
+    <p>Centro de apoyo para afiliados</p>
   </div>
 
   <!-- Sección de acordeones -->
   <div class="faq-section">
+    <button class="accordion">...</button><div class="panel"><p></p></div>
+    <button class="accordion">...</button><div class="panel"><p></p></div>
     <button class="accordion">...</button><div class="panel"><p></p></div>
     <button class="accordion">...</button><div class="panel"><p></p></div>
     <button class="accordion">...</button><div class="panel"><p></p></div>
@@ -41,38 +43,37 @@
 </div>
 
 <script>
-  const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSfovEU326ybyI9IoKroxh_4nvHWAYeeyv6X6rTebAKr45YY7E38eOevdi8-2r9rv712S5aTSO6QdoS/pub?gid=0&single=true&output=csv';
+  const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfovEU326ybyI9IoKroxh_4nvHWAYeeyv6X6rTebAKr45YY7E38eOevdi8-2r9rv712S5aTSO6QdoS/pub?gid=0&single=true&output=csv";
 
   async function init() {
     const params = new URLSearchParams(window.location.search);
-    const id = params.get('id');
+    const id = params.get("id");
     if (!id) return;
 
     const res = await fetch(SHEET_URL);
     const data = await res.text();
-    const rows = data.split('\n').map(r => r.split(','));
+    const rows = data.split("\n").map(r => r.split(","));
     const user = rows.find(r => r[0] && r[0].trim() === id.trim());
 
     if (user) {
-      document.getElementById('nombre-visual').innerText = user[1].trim();
-      document.getElementById('subtitulo-visual').innerText = "Centro de apoyo para afiliados";
-      document.getElementById('btn-wa').href = user[2].trim();
+      document.getElementById("nombre-visual").innerText = user[1].trim();
+      document.getElementById("btn-wa").href = user[2].trim();
 
-      // Rellenar 3 acordeones
-      document.querySelectorAll('.accordion').forEach((acc, index) => {
-        let tCol = 3 + (index * 2); // b1, b2, b3
-        let cCol = 4 + (index * 2); // Desc-b1, Desc-b2, Desc-b3
+      // Rellenar 5 acordeones (b1–b5)
+      document.querySelectorAll(".accordion").forEach((acc, index) => {
+        let tCol = 3 + (index * 2); // b1, b2, b3, b4, b5
+        let cCol = 4 + (index * 2); // Desc-b1, Desc-b2, Desc-b3, Desc-b4, Desc-b5
         if (user[tCol]) acc.innerHTML = user[tCol].trim();
         let panel = acc.nextElementSibling;
-        if (panel && user[cCol]) panel.querySelector('p').innerText = user[cCol].trim();
+        if (panel && user[cCol]) panel.querySelector("p").innerText = user[cCol].trim();
       });
     }
   }
   init();
 
   // Script para abrir/cerrar acordeones
-  document.querySelectorAll('.accordion').forEach(acc => {
-    acc.addEventListener('click', function() {
+  document.querySelectorAll(".accordion").forEach(acc => {
+    acc.addEventListener("click", function() {
       this.classList.toggle("active");
       var panel = this.nextElementSibling;
       panel.style.maxHeight = panel.style.maxHeight ? null : panel.scrollHeight + "px";
