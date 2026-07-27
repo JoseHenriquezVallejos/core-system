@@ -25,7 +25,7 @@
 <div class="chat-container">
   <div class="header">
     <h1>Academia Llave en Mano</h1>
-    <p>Centro de apoyo para afiliados 🚀</p>
+    <p id="subtitulo">Centro de apoyo 🚀</p>
   </div>
 
   <div class="button-grid" id="botones">
@@ -33,7 +33,7 @@
   </div>
 
   <div id="chat-history">
-    <div class="msg bot-msg">Bienvenido, selecciona una opción para comenzar.</div>
+    <div class="msg bot-msg">Bienvenido, selecciona si eres afiliado o cliente.</div>
   </div>
 </div>
 
@@ -41,16 +41,25 @@
   const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfovEU326ybyI9IoKroxh_4nvHWAYeeyv6X6rTebAKr45YY7E38eOevdi8-2r9rv712S5aTSO6QdoS/pub?gid=0&single=true&output=csv";
   const afiliadoID = "josehenriquez"; // ID en columna A
 
-  // Definimos directamente los botones y sus descripciones
-  const opciones = {
+  // Botones para afiliados
+  const opcionesAfiliados = {
     "✨ Paso 1 – Embudo Gratis ✨": "📲 Envía tu nombre por WhatsApp y recibe tu funnel personalizado ⚡",
     "📱 Reels Publicitarios": "🎬 Descarga tus reels listos y publícalos hoy mismo 🔥",
     "💰 Comisiones": "📈 Cada cliente activo genera mínimo USD $4/mes acumulables 💸",
-    "📞 Soporte": "🤝 Contáctanos por WhatsApp para acompañamiento personalizado 🗂️",
+    "📞 Soporte Afiliados": "🤝 Contáctanos por WhatsApp para acompañamiento personalizado 🗂️",
     "❓ Preguntas Frecuentes": "📖 Aquí respondemos las dudas más comunes ✅"
   };
 
-  // Cargar WhatsApp desde la planilla
+  // Botones para clientes
+  const opcionesClientes = {
+    "🛒 Cómo Comprar": "💳 Elige tu producto y sigue el enlace de pago seguro.",
+    "📂 Acceso al Curso": "📧 Recibirás un correo con tus credenciales en minutos.",
+    "💳 Formas de Pago": "✅ Puedes pagar con tarjeta, transferencia o PayPal.",
+    "⚙️ Soporte Técnico": "🔧 Si tienes problemas de acceso, contáctanos por WhatsApp.",
+    "❓ Preguntas Frecuentes": "📖 Aquí respondemos las dudas más comunes."
+  };
+
+  // Cargar datos desde la planilla
   fetch(sheetUrl)
     .then(res => res.text())
     .then(data => {
@@ -62,24 +71,49 @@
         return;
       }
 
-      // WhatsApp en columna C
-      const whatsappLink = fila[2];
-      document.getElementById("whatsapp").href = whatsappLink;
+      const nombreVisual = fila[1]; // Columna B
+      const whatsappLink = fila[2]; // Columna C
 
-      // Render dinámico de botones
+      document.getElementById("whatsapp").href = whatsappLink;
+      document.getElementById("subtitulo").textContent = `Centro de apoyo para ${nombreVisual} 🚀`;
+
+      // Render inicial: elegir afiliado o cliente
       const contenedor = document.getElementById("botones");
       const btnSmall = contenedor.querySelector(".btn-small");
-      Object.keys(opciones).forEach(nombre => {
-        const btn = document.createElement("button");
-        btn.className = "btn-option";
-        btn.textContent = nombre;
-        btn.onclick = () => sendChoice(nombre, opciones[nombre]);
-        contenedor.insertBefore(btn, btnSmall);
-      });
+
+      const btnAfiliado = document.createElement("button");
+      btnAfiliado.className = "btn-option";
+      btnAfiliado.textContent = "🙋 Soy Afiliado";
+      btnAfiliado.onclick = () => mostrarOpciones(opcionesAfiliados, nombreVisual);
+
+      const btnCliente = document.createElement("button");
+      btnCliente.className = "btn-option";
+      btnCliente.textContent = "🛒 Soy Cliente";
+      btnCliente.onclick = () => mostrarOpciones(opcionesClientes, nombreVisual);
+
+      contenedor.insertBefore(btnAfiliado, btnSmall);
+      contenedor.insertBefore(btnCliente, btnSmall);
     })
     .catch(err => console.error("Error cargando planilla:", err));
 
-  function sendChoice(choice, respuesta) {
+  function mostrarOpciones(opciones, nombreVisual) {
+    const contenedor = document.getElementById("botones");
+    const btnSmall = contenedor.querySelector(".btn-small");
+    contenedor.querySelectorAll(".btn-option").forEach(b => b.remove());
+
+    Object.keys(opciones).forEach(nombre => {
+      const btn = document.createElement("button");
+      btn.className = "btn-option";
+      btn.textContent = nombre;
+      btn.onclick = () => sendChoice(nombre, opciones[nombre], nombreVisual);
+      contenedor.insertBefore(btn, btnSmall);
+    });
+
+    const history = document.getElementById('chat-history');
+    history.innerHTML = `<div class="msg bot-msg">Bienvenido ${nombreVisual}, selecciona una opción para comenzar.</div>`;
+  }
+
+  function sendChoice(choice, respuesta, nombreVisual) {
     const history = document.getElementById('chat-history');
     history.innerHTML += `<div class="msg user-msg"><button class="btn-option">${choice}</button></div>`;
     history.innerHTML += `<div class="msg bot-msg">${respuesta}</div>`;
