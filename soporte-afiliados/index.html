@@ -13,6 +13,8 @@
     .button-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; padding:15px; }
     .btn-option { background:#f8fafc; border:1px solid #cbd5e1; padding:12px; border-radius:8px; cursor:pointer; font-weight:600; font-size:0.85rem; }
     .btn-option:hover { background:#0fb396; color:#fff; }
+    .btn-small { background:#fffdf0; border:1px solid #d4af37; color:#8b6b00; font-size:0.7rem; padding:8px 10px; border-radius:6px; text-align:center; text-decoration:none; }
+    .btn-small:hover { background:#0fb396; color:#fff; }
     #chat-history { flex:1; overflow-y:auto; padding:20px; }
     .msg { padding:12px; border-radius:10px; margin-bottom:10px; max-width:90%; }
     .bot-msg { background:#f8fafc; border:1px solid #e2e8f0; }
@@ -25,36 +27,3 @@
     <h1>Academia Llave en Mano</h1>
     <p>Centro de apoyo para afiliados 🚀</p>
   </div>
-
-  <div class="button-grid">
-    <button class="btn-option" onclick="sendChoice('Embudo Gratis')">Embudo Gratis</button>
-    <button class="btn-option" onclick="sendChoice('Reels Publicitarios')">Reels Publicitarios</button>
-    <button class="btn-option" onclick="sendChoice('Comisiones')">Comisiones</button>
-    <button class="btn-option" onclick="sendChoice('Soporte')">Soporte</button>
-    <button class="btn-option" onclick="sendChoice('Preguntas Frecuentes')">Preguntas Frecuentes</button>
-  </div>
-
-  <div id="chat-history">
-    <div class="msg bot-msg">Bienvenido, selecciona una opción para comenzar.</div>
-  </div>
-</div>
-
-<script>
-  function sendChoice(choice) {
-    const history = document.getElementById('chat-history');
-    let respuesta = "";
-    switch(choice) {
-      case "Embudo Gratis": respuesta = "Aquí recibirás tu embudo de prueba. (Enlace ficticio 👉 #)"; break;
-      case "Reels Publicitarios": respuesta = "Descarga tus reels de ejemplo aquí. (Enlace ficticio 👉 #)"; break;
-      case "Comisiones": respuesta = "Cada cliente activo genera mínimo USD $4/mes acumulables 💰"; break;
-      case "Soporte": respuesta = "Contáctanos por WhatsApp para acompañamiento personalizado 📲"; break;
-      case "Preguntas Frecuentes": respuesta = "Aquí encontrarás respuestas rápidas a dudas comunes. (Texto ficticio)"; break;
-      default: respuesta = "Opción no válida.";
-    }
-    history.innerHTML += `<div class="msg user-msg">${choice}</div>`;
-    history.innerHTML += `<div class="msg bot-msg">${respuesta}</div>`;
-    history.scrollTop = history.scrollHeight;
-  }
-</script>
-</body>
-</html>
