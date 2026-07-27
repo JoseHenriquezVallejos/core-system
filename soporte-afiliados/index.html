@@ -2,64 +2,61 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Academia Llave en Mano</title>
+  <title>Mini Chat Funnel</title>
   <style>
-    body { margin:0; font-family: 'Segoe UI', sans-serif; background:#f1f5f9; }
-    .chat-container { max-width:700px; margin:auto; height:100vh; display:flex; flex-direction:column; background:#fff; box-shadow:0 0 10px rgba(0,0,0,0.1); }
-    .header { background:#0f172a; color:#fff; padding:20px; }
-    .header h1 { margin:0; font-size:1.5rem; }
-    .header p { margin:0; opacity:0.7; }
-    .button-grid { display:flex; flex-wrap:wrap; gap:8px; padding:15px; }
-    .btn-option { background:#f8fafc; border:1px solid #cbd5e1; padding:10px 14px; border-radius:8px; cursor:pointer; font-weight:600; font-size:0.9rem; text-align:center; display:inline-block; }
-    .btn-option:hover { background:#0fb396; color:#fff; }
-    .btn-small { background:#fffdf0; border:1px solid #d4af37; color:#8b6b00; font-size:0.75rem; padding:8px 10px; border-radius:6px; text-align:center; text-decoration:none; display:inline-block; }
-    .btn-small:hover { background:#0fb396; color:#fff; }
-    #chat-history { flex:1; overflow-y:auto; padding:20px; background:#f8fafc; }
-    .msg { padding:12px; border-radius:10px; margin-bottom:10px; max-width:90%; }
-    .bot-msg { background:#fff; border:1px solid #e2e8f0; }
-    .user-msg { background:transparent; margin-left:auto; padding:0; }
+    body { font-family: Arial, sans-serif; background:#f4f4f4; }
+    #chat { max-width: 400px; margin: 20px auto; background:#fff; padding:15px; border-radius:8px; }
+    .msg { margin:8px 0; padding:10px; border-radius:6px; }
+    .bot { background:#e0e0e0; text-align:left; }
+    .user { background:#d1ffd1; text-align:right; }
+    .btns { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .chat-btn { flex:1; padding:8px; background:#007bff; color:#fff; border:none; border-radius:6px; cursor:pointer; }
   </style>
 </head>
 <body>
-<div class="chat-container">
-  <div class="header">
-    <h1>Academia Llave en Mano</h1>
-    <p>Centro de apoyo para afiliados 🚀</p>
+  <div id="chat">
+    <div class="msg bot"><strong id="nombreAfiliado">NOMBRE_AFILIADO</strong> te da la bienvenida 👋</div>
+    <div class="btns" id="botones"></div>
+    <div class="msg bot"><a id="waLink" href="NUMERO_WHATSAPP" target="_blank">📲 Contacto directo por WhatsApp</a></div>
   </div>
 
-  <div class="button-grid">
-    <button class="btn-option" onclick="sendChoice('🛠️ Embudo Gratis')">🛠️ Embudo Gratis</button>
-    <button class="btn-option" onclick="sendChoice('🎬 Reels Publicitarios')">🎬 Reels Publicitarios</button>
-    <button class="btn-option" onclick="sendChoice('📈 Comisiones')">📈 Comisiones</button>
-    <button class="btn-option" onclick="sendChoice('📞 Soporte')">📞 Soporte</button>
-    <button class="btn-option" onclick="sendChoice('❓ Preguntas Frecuentes')">❓ Preguntas Frecuentes</button>
-    <!-- Botón pequeño de aviso -->
-    <a href="https://wa.me/569XXXXXXXX" target="_blank" class="btn-small">📤 Enviar petición</a>
-  </div>
+  <script>
+    // Datos simulados (estos vendrían de tu planilla)
+    const datos = {
+      nombre: "José Henríquez",
+      whatsapp: "https://wa.me/6545948112",
+      botones: {
+        b1: { nombre: "Embudo Gratis", desc: "Aquí recibirás tu embudo de prueba." },
+        b2: { nombre: "Reels Publicitarios", desc: "Descarga tus reels de ejemplo aquí." },
+        b3: { nombre: "Comisiones", desc: "Cada cliente activo genera mínimo USD $4/mes." },
+        b4: { nombre: "Soporte", desc: "Contáctanos por WhatsApp para acompañamiento personalizado." },
+        b5: { nombre: "Preguntas Frecuentes", desc: "Aquí encontrarás respuestas rápidas." }
+        // Si agregas b6, b7… el script los detecta automáticamente
+      }
+    };
 
-  <div id="chat-history">
-    <div class="msg bot-msg">Bienvenido, selecciona una opción para comenzar.</div>
-  </div>
-</div>
+    // Personalización
+    document.getElementById("nombreAfiliado").textContent = datos.nombre;
+    document.getElementById("waLink").href = datos.whatsapp;
 
-<script>
-  function sendChoice(choice) {
-    const history = document.getElementById('chat-history');
-    let respuesta = "";
-    switch(choice) {
-      case "🛠️ Embudo Gratis": respuesta = "🛠️ Aquí recibirás tu embudo de prueba. (Enlace ficticio 👉 #)"; break;
-      case "🎬 Reels Publicitarios": respuesta = "🎬 Descarga tus reels de ejemplo aquí. (Enlace ficticio 👉 #)"; break;
-      case "📈 Comisiones": respuesta = "📈 Cada cliente activo genera mínimo USD $4/mes acumulables 💰"; break;
-      case "📞 Soporte": respuesta = "📞 Contáctanos por WhatsApp para acompañamiento personalizado 📲"; break;
-      case "❓ Preguntas Frecuentes": respuesta = "❓ Aquí encontrarás respuestas rápidas a dudas comunes. (Texto ficticio)"; break;
-      default: respuesta = "Opción no válida.";
+    // Render dinámico de botones
+    const contenedor = document.getElementById("botones");
+    Object.keys(datos.botones).forEach(key => {
+      const btn = document.createElement("button");
+      btn.className = "chat-btn";
+      btn.textContent = datos.botones[key].nombre;
+      btn.onclick = () => mostrarMensaje(datos.botones[key].desc);
+      contenedor.appendChild(btn);
+    });
+
+    // Función para mostrar mensajes en el chat
+    function mostrarMensaje(texto) {
+      const chat = document.getElementById("chat");
+      const msgUser = document.createElement("div");
+      msgUser.className = "msg user";
+      msgUser.textContent = "👉 " + texto;
+      chat.appendChild(msgUser);
     }
-    // Mostrar el botón igual que arriba en el chat
-    history.innerHTML += `<div class="msg user-msg"><button class="btn-option">${choice}</button></div>`;
-    history.innerHTML += `<div class="msg bot-msg">${respuesta}</div>`;
-    history.scrollTop = history.scrollHeight;
-  }
-</script>
+  </script>
 </body>
 </html>
