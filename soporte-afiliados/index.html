@@ -28,42 +28,65 @@
   </div>
 
   <!-- Sección de acordeones -->
-  <div class="faq-section">
-    <button class="accordion">📬 Embudo Gratis</button>
-    <div class="panel"><p>Aquí recibirás tu embudo de prueba. (Enlace ficticio 🔗 #)</p></div>
-
-    <button class="accordion">🎬 Reels Publicitarios</button>
-    <div class="panel"><p>Descarga tus reels de ejemplo aquí. (Enlace ficticio 🔗 #)</p></div>
-
-    <button class="accordion">💰 Comisiones</button>
-    <div class="panel"><p>Cada cliente activo genera mínimo USD $4/mes acumulable 💰</p></div>
-
-    <button class="accordion">🧰 Soporte</button>
-    <div class="panel"><p>Contáctanos por WhatsApp para acompañamiento personalizado 📋</p></div>
-
-    <button class="accordion">💬 Preguntas Frecuentes</button>
-    <div class="panel"><p>Aquí encontrarás respuestas rápidas a dudas 💬</p></div>
-  </div>
+  <div class="faq-section" id="acordeones"></div>
 
   <!-- Botón de WhatsApp -->
   <div class="button-grid">
-    <a id="btn-wa" href="https://wa.me/569XXXXXXXX" target="_blank" class="btn-action">💬 WhatsApp</a>
+    <a id="btn-wa" href="#" target="_blank" class="btn-action">💬 WhatsApp</a>
   </div>
 </div>
 
 <script>
-  // Script para abrir/cerrar acordeones
-  document.querySelectorAll('.accordion').forEach(acc => {
-    acc.addEventListener('click', function() {
-      this.classList.toggle("active");
-      var panel = this.nextElementSibling;
-      if (panel.style.maxHeight) {
-        panel.style.maxHeight = null;
-      } else {
-        panel.style.maxHeight = panel.scrollHeight + "px";
+  const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfovEU326ybyI9IoKroxh_4nvHWAYeeyv6X6rTebAKr45YY7E38eOevdi8-2r9rv712S5aTSO6QdoS/pub?gid=0&single=true&output=csv";
+
+  async function init() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+    if (!id) return;
+
+    const res = await fetch(SHEET_URL);
+    const data = await res.text();
+    const rows = data.split("\n").map(r => r.split(","));
+    const user = rows.find(r => r[0] && r[0].trim() === id.trim());
+
+    if (user) {
+      document.getElementById("nombre-visual").innerText = user[1].trim();
+      document.getElementById("subtitulo-visual").innerText = "Centro de apoyo para afiliados";
+      document.getElementById("btn-wa").href = user[2].trim();
+
+      const contenedor = document.getElementById("acordeones");
+      for (let i = 3; i < user.length; i += 2) {
+        const titulo = user[i];
+        const contenido = user[i+1];
+        if (titulo) {
+          const acc = document.createElement("button");
+          acc.className = "accordion";
+          acc.innerText = titulo.trim();
+
+          const panel = document.createElement("div");
+          panel.className = "panel";
+          panel.innerHTML = `<p>${contenido || ""}</p>`;
+
+          contenedor.appendChild(acc);
+          contenedor.appendChild(panel);
+        }
       }
-    });
-  });
+
+      // activar acordeones
+      document.querySelectorAll(".accordion").forEach(acc => {
+        acc.addEventListener("click", function() {
+          this.classList.toggle("active");
+          var panel = this.nextElementSibling;
+          if (panel.style.maxHeight) {
+            panel.style.maxHeight = null;
+          } else {
+            panel.style.maxHeight = panel.scrollHeight + "px";
+          }
+        });
+      });
+    }
+  }
+  init();
 </script>
 </body>
 </html>
