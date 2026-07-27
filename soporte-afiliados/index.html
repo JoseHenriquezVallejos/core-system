@@ -24,7 +24,7 @@
 <body>
 <div class="chat-container">
   <div class="header">
-    <h1>Academia Llave en Mano</h1>
+    <h1 id="nombreVisual">Academia Llave en Mano</h1>
     <p id="subtitulo">Centro de apoyo 🚀</p>
   </div>
 
@@ -33,7 +33,7 @@
   </div>
 
   <div id="chat-history">
-    <div class="msg bot-msg">Bienvenido, selecciona si eres afiliado o cliente.</div>
+    <div class="msg bot-msg">Cargando datos...</div>
   </div>
 </div>
 
@@ -73,30 +73,22 @@
 
       const nombreVisual = fila[1]; // Columna B
       const whatsappLink = fila[2]; // Columna C
+      const rol = fila[3];          // Columna D: "a" o "c"
 
+      document.getElementById("nombreVisual").textContent = nombreVisual;
       document.getElementById("whatsapp").href = whatsappLink;
-      document.getElementById("subtitulo").textContent = `Centro de apoyo para ${nombreVisual} 🚀`;
 
-      // Render inicial: elegir afiliado o cliente
-      const contenedor = document.getElementById("botones");
-      const btnSmall = contenedor.querySelector(".btn-small");
-
-      const btnAfiliado = document.createElement("button");
-      btnAfiliado.className = "btn-option";
-      btnAfiliado.textContent = "🙋 Soy Afiliado";
-      btnAfiliado.onclick = () => mostrarOpciones(opcionesAfiliados, nombreVisual);
-
-      const btnCliente = document.createElement("button");
-      btnCliente.className = "btn-option";
-      btnCliente.textContent = "🛒 Soy Cliente";
-      btnCliente.onclick = () => mostrarOpciones(opcionesClientes, nombreVisual);
-
-      contenedor.insertBefore(btnAfiliado, btnSmall);
-      contenedor.insertBefore(btnCliente, btnSmall);
+      if (rol === "a") {
+        document.getElementById("subtitulo").textContent = "Centro de apoyo para afiliados 🚀";
+        mostrarOpciones(opcionesAfiliados, "afiliado", nombreVisual);
+      } else if (rol === "c") {
+        document.getElementById("subtitulo").textContent = "Centro de apoyo para clientes 🚀";
+        mostrarOpciones(opcionesClientes, "cliente", nombreVisual);
+      }
     })
     .catch(err => console.error("Error cargando planilla:", err));
 
-  function mostrarOpciones(opciones, nombreVisual) {
+  function mostrarOpciones(opciones, rol, nombreVisual) {
     const contenedor = document.getElementById("botones");
     const btnSmall = contenedor.querySelector(".btn-small");
     contenedor.querySelectorAll(".btn-option").forEach(b => b.remove());
@@ -105,15 +97,19 @@
       const btn = document.createElement("button");
       btn.className = "btn-option";
       btn.textContent = nombre;
-      btn.onclick = () => sendChoice(nombre, opciones[nombre], nombreVisual);
+      btn.onclick = () => sendChoice(nombre, opciones[nombre]);
       contenedor.insertBefore(btn, btnSmall);
     });
 
     const history = document.getElementById('chat-history');
-    history.innerHTML = `<div class="msg bot-msg">Bienvenido ${nombreVisual}, selecciona una opción para comenzar.</div>`;
+    if (rol === "afiliado") {
+      history.innerHTML = `<div class="msg bot-msg">Bienvenido Jose Henríquez, selecciona una opción para comenzar.</div>`;
+    } else {
+      history.innerHTML = `<div class="msg bot-msg">Bienvenido, este es el soporte de ${nombreVisual}. Selecciona una opción para comenzar.</div>`;
+    }
   }
 
-  function sendChoice(choice, respuesta, nombreVisual) {
+  function sendChoice(choice, respuesta) {
     const history = document.getElementById('chat-history');
     history.innerHTML += `<div class="msg user-msg"><button class="btn-option">${choice}</button></div>`;
     history.innerHTML += `<div class="msg bot-msg">${respuesta}</div>`;
