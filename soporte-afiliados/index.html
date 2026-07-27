@@ -39,30 +39,45 @@
 </div>
 
 <script>
-  // Datos simulados (estos vendrían de tu planilla o JSON exportado)
-  const opciones = {
-    "🛠️ Embudo Gratis": "🛠️ Aquí recibirás tu embudo de prueba. (Enlace ficticio 👉 #)",
-    "🎬 Reels Publicitarios": "🎬 Descarga tus reels de ejemplo aquí. (Enlace ficticio 👉 #)",
-    "📈 Comisiones": "📈 Cada cliente activo genera mínimo USD $4/mes acumulables 💰",
-    "📞 Soporte": "📞 Contáctanos por WhatsApp para acompañamiento personalizado 📲",
-    "❓ Preguntas Frecuentes": "❓ Aquí encontrarás respuestas rápidas a dudas comunes. (Texto ficticio)"
-    // Si agregas más botones en la planilla, solo añades aquí la clave y descripción
-  };
+  // URL pública de tu Google Sheets en formato CSV
+  // Reemplaza ID_DE_TU_SHEET con el ID real de tu planilla
+  const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfovEU326ybyI9IoKroxh_4nvHWAYeeyv6X6rTebAKr45YY7E38eOevdi8-2r9rv712S5aTSO6QdoS/pub?gid=0&single=true&output=csv";
 
-  // Render dinámico de botones
-  const contenedor = document.getElementById("botones");
-  const btnSmall = contenedor.querySelector(".btn-small");
-  Object.keys(opciones).forEach(nombre => {
-    const btn = document.createElement("button");
-    btn.className = "btn-option";
-    btn.textContent = nombre;
-    btn.onclick = () => sendChoice(nombre);
-    contenedor.insertBefore(btn, btnSmall);
-  });
+  fetch(sheetUrl)
+    .then(res => res.text())
+    .then(data => {
+      const filas = data.split("\n").map(r => r.split(","));
+      const headers = filas[0];
+      const valores = filas[1]; // primera fila de datos
 
-  // Función para mostrar mensajes en el chat
-  function sendChoice(choice) {
+      const opciones = {};
+      headers.forEach((h, i) => {
+        if (h.startsWith("b") && valores[i]) {
+          const descKey = "Desc" + h;
+          const nombre = valores[i];
+          const descripcion = valores[headers.indexOf(descKey)];
+          opciones[nombre] = descripcion;
+        }
+      });
+
+      // Render dinámico de botones
+      const contenedor = document.getElementById("botones");
+      const btnSmall = contenedor.querySelector(".btn-small");
+      Object.keys(opciones).forEach(nombre => {
+        const btn = document.createElement("button");
+        btn.className = "btn-option";
+        btn.textContent = nombre;
+        btn.onclick = () => sendChoice(nombre, opciones[nombre]);
+        contenedor.insertBefore(btn, btnSmall);
+      });
+    });
+
+  function sendChoice(choice, respuesta) {
     const history = document.getElementById('chat-history');
-    const respuesta = opciones[choice] || "Opción no válida.";
     history.innerHTML += `<div class="msg user-msg"><button class="btn-option">${choice}</button></div>`;
-    history.innerHTML += `<div class="msg bot-msg">${respuesta}</div>
+    history.innerHTML += `<div class="msg bot-msg">${respuesta}</div>`;
+    history.scrollTop = history.scrollHeight;
+  }
+</script>
+</body>
+</html>
