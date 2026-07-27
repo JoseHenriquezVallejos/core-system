@@ -38,29 +38,42 @@
 </div>
 
 <script>
+  // URL pública de tu Google Sheets en formato JSON
   const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfovEU326ybyI9IoKroxh_4nvHWAYeeyv6X6rTebAKr45YY7E38eOevdi8-2r9rv712S5aTSO6QdoS/gviz/tq?tqx=out:json";
+
+  // ID del afiliado en la columna A
+  const afiliadoID = "josehenriquez";
 
   fetch(sheetUrl)
     .then(res => res.text())
     .then(text => {
       const json = JSON.parse(text.substr(47).slice(0, -2));
-      const row = json.table.rows[1].c; // fila 2 (José Henríquez)
       const headers = json.table.cols.map(c => c.label.trim());
 
+      // buscar la fila que corresponde al afiliado
+      const fila = json.table.rows.find(r => r.c[0] && r.c[0].v === afiliadoID);
+      if (!fila) {
+        console.error("No se encontró el afiliado:", afiliadoID);
+        return;
+      }
+
+      const row = fila.c;
       const opciones = {};
+
       headers.forEach((h, i) => {
         const key = h.trim();
         if (key.startsWith("b") && row[i] && row[i].v) {
           const descKey = "Desc-" + key;
           const descIndex = headers.findIndex(col => col.trim() === descKey);
           const nombre = row[i].v;
-          const descripcion = (descIndex !== -1 && row[descIndex] && row[descIndex].v) 
-            ? row[descIndex].v 
+          const descripcion = (descIndex !== -1 && row[descIndex] && row[descIndex].v)
+            ? row[descIndex].v
             : "⚠️ No se encontró descripción";
           opciones[nombre] = descripcion;
         }
       });
 
+      // Render dinámico de botones
       const contenedor = document.getElementById("botones");
       const btnSmall = contenedor.querySelector(".btn-small");
       Object.keys(opciones).forEach(nombre => {
