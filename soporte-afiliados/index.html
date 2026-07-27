@@ -24,7 +24,7 @@
 <div class="chat-container">
   <div class="header">
     <h1 id="nombre-visual">Academia Llave en Mano 🚀</h1>
-    <p id="subtitulo-visual">Centro de apoyo para afiliados</p>
+    <p>Centro de apoyo para afiliados</p>
   </div>
 
   <!-- Sección de acordeones -->
@@ -51,11 +51,12 @@
 
     if (user) {
       document.getElementById("nombre-visual").innerText = user[1].trim();
-      document.getElementById("subtitulo-visual").innerText = "Centro de apoyo para afiliados";
       document.getElementById("btn-wa").href = user[2].trim();
 
       const contenedor = document.getElementById("acordeones");
-      for (let i = 3; i < user.length; i += 2) {
+
+      // Generar 5 acordeones fijos
+      for (let i = 3; i <= 12; i += 2) {
         const titulo = user[i];
         const contenido = user[i+1];
         if (titulo) {
