@@ -29,7 +29,6 @@
   </div>
 
   <div class="button-grid" id="botones">
-    <!-- Botones se generan dinámicamente -->
     <a href="https://wa.me/569XXXXXXXX" target="_blank" class="btn-small">📤 Enviar petición</a>
   </div>
 
@@ -39,7 +38,6 @@
 </div>
 
 <script>
-  // URL pública de tu Google Sheets en formato JSON
   const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfovEU326ybyI9IoKroxh_4nvHWAYeeyv6X6rTebAKr45YY7E38eOevdi8-2r9rv712S5aTSO6QdoS/gviz/tq?tqx=out:json";
 
   fetch(sheetUrl)
@@ -63,7 +61,6 @@
         }
       });
 
-      // Render dinámico de botones
       const contenedor = document.getElementById("botones");
       const btnSmall = contenedor.querySelector(".btn-small");
       Object.keys(opciones).forEach(nombre => {
