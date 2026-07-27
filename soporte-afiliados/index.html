@@ -1,96 +1,133 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Academia Llave en Mano 🚀</title>
-  <style>
-    body { font-family: 'Segoe UI', sans-serif; background:#f1f5f9; margin:0; padding:20px; }
-    h1 { color:#0f172a; text-align:center; margin-bottom:5px; }
-    p { text-align:center; color:#475569; margin-top:0; }
-    .btn-small { background:#fffdf0; border:1px solid #d4af37; color:#8b6b00; font-size:0.9rem; padding:12px 16px; border-radius:6px; text-decoration:none; display:inline-block; margin:20px auto; }
-    .btn-small:hover { background:#0fb396; color:#fff; }
-    #acordeones { margin-top:20px; }
-    .accordion { background:#fff; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:12px; overflow:hidden; }
-    .accordion-header { padding:14px; cursor:pointer; font-weight:600; background:#f8fafc; display:flex; align-items:center; gap:10px; }
-    .accordion-header:hover { background:#0fb396; color:#fff; }
-    .accordion-content { display:none; padding:14px; border-top:1px solid #cbd5e1; color:#334155; }
-    .accordion.active .accordion-content { display:block; }
-    /* Responsive: en pantallas grandes mostrar en 2 columnas */
-    @media (min-width: 768px) {
-      #acordeones { 
-        display:grid; 
-        grid-template-columns: 1fr 1fr; 
-        gap:15px; 
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funnel Riman Academy</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+    <style>
+        body { margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #f1f5f9; display: flex; justify-content: center; }
+        .chat-container { width: 100%; max-width: 700px; background: white; padding-bottom: 20px; }
+        .header { background: #0f172a; color: #ffffff; padding: 30px 20px; text-align: center; border-bottom: 4px solid #d4af37; }
+        .header h1 { margin: 0; font-size: 28px; font-weight: 300; letter-spacing: 1px; text-transform: uppercase; }
+        .header p { margin: 5px 0 0 0; font-size: 14px; color: #d4af37; letter-spacing: 2px; }
+        
+        .swiper { width: 100%; height: auto !important; background: #ffffff; padding: 10px 10px 30px 10px; box-sizing: border-box; }
+        .swiper-slide { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 320px; }
+        .swiper-slide img { width: 100%; max-height: 250px; object-fit: contain; display: block; }
+        
+        .slide-desc { 
+            font-size: 15px; 
+            color: #d4af37; 
+            margin-top: 15px; 
+            font-weight: 600; 
+            text-align: center; 
+            padding: 0 15px;
+            line-height: 1.4; 
+            min-height: 3em; 
+        }
+        
+        .faq-section { padding: 15px; margin-top: 20px; }
+        .accordion { background: #0f172a; color: white; cursor: pointer; padding: 15px; width: 100%; border: none; text-align: left; border-radius: 8px; margin-bottom: 8px; font-weight: bold; }
+        .panel { padding: 0 15px; background-color: #f8fafc; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; border-left: 3px solid #d4af37; margin-bottom: 8px; text-align: justify; }
+        
+        /* Contenedor de botones en columna para que ambos ocupen todo el ancho uniformemente */
+        .button-grid { display: flex; flex-direction: column; gap: 10px; padding: 15px; }
+        .btn-action { background: #334155; color: white; padding: 14px; border-radius: 8px; text-align: center; text-decoration: none; font-weight: 600; font-size: 15px; display: flex; align-items: center; justify-content: center; width: 100%; box-sizing: border-box; }
+        .btn-green { background: #0fb396; }
+        .btn-hotmart { background: #eb5757; }
+    </style>
 </head>
 <body>
-  <h1>Academia Llave en Mano 🚀</h1>
-  <p>Centro de apoyo para afiliados</p>
 
-  <div style="text-align:center;">
-    <a href="#" target="_blank" class="btn-small" id="whatsapp">📤 Enviar petición</a>
-  </div>
+<div class="chat-container">
+    <div class="header">
+        <h1 id="nombre-visual">Cargando...</h1>
+        <p id="subtitulo-visual">Cargando...</p>
+    </div>
+    
+    <div class="swiper main-swiper">
+        <div class="swiper-wrapper">
+            <div class="swiper-slide"><img id="f1" src=""><p id="desc1" class="slide-desc"></p></div>
+            <div class="swiper-slide"><img id="f2" src=""><p id="desc2" class="slide-desc"></p></div>
+            <div class="swiper-slide"><img id="f3" src=""><p id="desc3" class="slide-desc"></p></div>
+            <div class="swiper-slide"><img id="f4" src=""><p id="desc4" class="slide-desc"></p></div>
+            <div class="swiper-slide"><img id="f5" src=""><p id="desc5" class="slide-desc"></p></div>
+            <div class="swiper-slide"><img id="f6" src=""><p id="desc6" class="slide-desc"></p></div>
+            <div class="swiper-slide"><img id="f7" src=""><p id="desc7" class="slide-desc"></p></div>
+            <div class="swiper-slide"><img id="f8" src=""><p id="desc8" class="slide-desc"></p></div>
+        </div>
+        <div class="swiper-pagination"></div>
+    </div>
 
-  <div id="acordeones"></div>
+    <div class="faq-section">
+        <button class="accordion">...</button><div class="panel"><p></p></div>
+        <button class="accordion">...</button><div class="panel"><p></p></div>
+        <button class="accordion">...</button><div class="panel"><p></p></div>
+    </div>
 
+    <div class="button-grid">
+        <a id="btn-wa" href="#" class="btn-action btn-green">💬 WhatsApp</a>
+        <a id="btn-hotmart" href="#" class="btn-action btn-hotmart">🔥 Comprar en Hotmart</a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
-  const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfovEU326ybyI9IoKroxh_4nvHWAYeeyv6X6rTebAKr45YY7E38eOevdi8-2r9rv712S5aTSO6QdoS/pub?gid=0&single=true&output=csv";
-  const afiliadoID = "josehenriquez"; // ID en columna A
+    new Swiper('.main-swiper', { loop: true, autoplay: { delay: 3500 }, pagination: { el: '.swiper-pagination' } });
 
-  // Íconos fijos (puedes ampliarlos o ponerlos en la planilla)
-  const iconMap = {
-    "Embudo Gratis": "📬",
-    "Reels Publicitarios": "🎬",
-    "Comisiones": "💰",
-    "Soporte": "🧰",
-    "Preguntas Frecuentes": "💬"
-  };
+    const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ5JVh7CU6HrRSvH1hzI_LSD61AMNNQokYez2snOaS0WgNNCLZszqaDDsRhe7yLpEtwL3PAffa4AN9T/pub?gid=0&single=true&output=csv';
 
-  fetch(sheetUrl)
-    .then(res => res.text())
-    .then(data => {
-      const filas = data.split("\n").map(r => r.split(","));
-      const fila = filas.find(r => r[0] === afiliadoID);
+    async function init() {
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+        if (!id) return;
 
-      if (!fila) {
-        console.error("No se encontró el afiliado:", afiliadoID);
-        return;
-      }
-
-      // WhatsApp en columna C
-      const whatsappLink = fila[2];
-      document.getElementById("whatsapp").href = whatsappLink;
-
-      const contenedor = document.getElementById("acordeones");
-
-      // desde columna D (índice 3), pares: bX + Desc-bX
-      for (let i = 3; i < fila.length; i += 2) {
-        const nombre = fila[i];
-        const descripcion = fila[i+1];
-        if (nombre) {
-          const acc = document.createElement("div");
-          acc.className = "accordion";
-          const icono = iconMap[nombre] || "📌";
-          acc.innerHTML = `
-            <div class="accordion-header">${icono} ${nombre}</div>
-            <div class="accordion-content">${descripcion || "⚠️ Sin descripción"}</div>
-          `;
-          contenedor.appendChild(acc);
-        }
-      }
-
-      // activar acordeones
-      document.querySelectorAll('.accordion-header').forEach(header => {
-        header.addEventListener('click', () => {
-          const accordion = header.parentElement;
-          accordion.classList.toggle('active');
+        const res = await fetch(SHEET_URL);
+        const data = await res.text();
+        const rows = data.split('\n').map(row => {
+            const result = []; let cell = ''; let inQuotes = false;
+            for (let char of row) {
+                if (char === '"') inQuotes = !inQuotes;
+                else if (char === ',' && !inQuotes) { result.push(cell); cell = ''; }
+                else cell += char;
+            }
+            result.push(cell);
+            return result;
         });
-      });
-    })
-    .catch(err => console.error("Error cargando planilla:", err));
+
+        const user = rows.find(r => r[0] && r[0].trim() === id.trim());
+        if (user) {
+            document.getElementById('nombre-visual').innerText = user[1].trim();
+            document.getElementById('subtitulo-visual').innerText = user[2].trim();
+
+            document.getElementById('btn-wa').href = user[3].trim();
+            document.getElementById('btn-hotmart').href = user[4].trim();
+            
+            for(let i=0; i<8; i++) {
+                let fotoCol = 5 + (i * 2);
+                let descCol = 6 + (i * 2);
+                if(document.getElementById('f'+(i+1))) document.getElementById('f'+(i+1)).src = user[fotoCol] ? user[fotoCol].trim() : "";
+                if(document.getElementById('desc'+(i+1))) document.getElementById('desc'+(i+1)).innerText = user[descCol] ? user[descCol].trim() : "";
+            }
+
+            document.querySelectorAll('.accordion').forEach((acc, index) => {
+                let tCol = 21 + (index * 2); let cCol = 22 + (index * 2);
+                if (user[tCol]) acc.innerHTML = user[tCol].trim();
+                let panel = acc.nextElementSibling;
+                if (panel && user[cCol]) panel.querySelector('p').innerText = user[cCol].trim();
+            });
+        }
+    }
+    init();
+
+    document.querySelectorAll('.accordion').forEach(acc => {
+        acc.addEventListener('click', function() {
+            this.classList.toggle("active");
+            var panel = this.nextElementSibling;
+            panel.style.maxHeight = panel.style.maxHeight ? null : panel.scrollHeight + "px";
+        });
+    });
 </script>
 </body>
 </html>
