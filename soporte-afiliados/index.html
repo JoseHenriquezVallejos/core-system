@@ -40,7 +40,9 @@
 
 <script>
   // URL pública de tu Google Sheets en formato CSV
-  const sheetUrl = "https://docs.google.com/spreadsheets/d/ID_DE_TU_SHEET/export?format=json";
+  const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfovEU326ybyI9IoKroxh_4nvHWAYeeyv6X6rTebAKr45YY7E38eOevdi8-2r9rv712S5aTSO6QdoS/pub?gid=0&single=true&output=csv";
+  
+
 
   fetch(sheetUrl)
     .then(res => res.text())
