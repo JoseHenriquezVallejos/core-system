@@ -41,6 +41,16 @@
   const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfovEU326ybyI9IoKroxh_4nvHWAYeeyv6X6rTebAKr45YY7E38eOevdi8-2r9rv712S5aTSO6QdoS/pub?gid=0&single=true&output=csv";
   const afiliadoID = "josehenriquez"; // ID en columna A
 
+  // Definimos directamente los botones y sus descripciones
+  const opciones = {
+    "✨ Paso 1 – Embudo Gratis ✨": "📲 Envía tu nombre por WhatsApp y recibe tu funnel personalizado ⚡",
+    "📱 Reels Publicitarios": "🎬 Descarga tus reels listos y publícalos hoy mismo 🔥",
+    "💰 Comisiones": "📈 Cada cliente activo genera mínimo USD $4/mes acumulables 💸",
+    "📞 Soporte": "🤝 Contáctanos por WhatsApp para acompañamiento personalizado 🗂️",
+    "❓ Preguntas Frecuentes": "📖 Aquí respondemos las dudas más comunes ✅"
+  };
+
+  // Cargar WhatsApp desde la planilla
   fetch(sheetUrl)
     .then(res => res.text())
     .then(data => {
@@ -55,14 +65,6 @@
       // WhatsApp en columna C
       const whatsappLink = fila[2];
       document.getElementById("whatsapp").href = whatsappLink;
-
-      const opciones = {};
-      // desde columna D (índice 3), de dos en dos: botón + descripción
-      for (let i = 3; i < fila.length; i += 2) {
-        const nombre = fila[i];
-        const descripcion = fila[i+1] ? fila[i+1] : "⚠️ Sin descripción";
-        if (nombre) opciones[nombre] = descripcion;
-      }
 
       // Render dinámico de botones
       const contenedor = document.getElementById("botones");
