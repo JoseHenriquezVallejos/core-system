@@ -33,7 +33,7 @@
   </div>
 
   <div id="chat-history">
-    <div class="msg bot-msg">Cargando datos...</div>
+    <div class="msg bot-msg">Bienvenido, selecciona una opción para comenzar.</div>
   </div>
 </div>
 
@@ -80,15 +80,15 @@
 
       if (rol === "a") {
         document.getElementById("subtitulo").textContent = "Centro de apoyo para afiliados 🚀";
-        mostrarOpciones(opcionesAfiliados, "afiliado", nombreVisual);
+        mostrarOpciones(opcionesAfiliados);
       } else if (rol === "c") {
         document.getElementById("subtitulo").textContent = "Centro de apoyo para clientes 🚀";
-        mostrarOpciones(opcionesClientes, "cliente", nombreVisual);
+        mostrarOpciones(opcionesClientes);
       }
     })
     .catch(err => console.error("Error cargando planilla:", err));
 
-  function mostrarOpciones(opciones, rol, nombreVisual) {
+  function mostrarOpciones(opciones) {
     const contenedor = document.getElementById("botones");
     const btnSmall = contenedor.querySelector(".btn-small");
     contenedor.querySelectorAll(".btn-option").forEach(b => b.remove());
@@ -102,11 +102,7 @@
     });
 
     const history = document.getElementById('chat-history');
-    if (rol === "afiliado") {
-      history.innerHTML = `<div class="msg bot-msg">Bienvenido Jose Henríquez, selecciona una opción para comenzar.</div>`;
-    } else {
-      history.innerHTML = `<div class="msg bot-msg">Bienvenido, este es el soporte de ${nombreVisual}. Selecciona una opción para comenzar.</div>`;
-    }
+    history.innerHTML = `<div class="msg bot-msg">Bienvenido, selecciona una opción para comenzar.</div>`;
   }
 
   function sendChoice(choice, respuesta) {
