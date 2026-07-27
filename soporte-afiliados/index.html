@@ -46,9 +46,13 @@
   const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfovEU326ybyI9IoKroxh_4nvHWAYeeyv6X6rTebAKr45YY7E38eOevdi8-2r9rv712S5aTSO6QdoS/pub?gid=0&single=true&output=csv";
 
   async function init() {
+    // Buscar el ID en la URL
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
-    if (!id) return;
+    if (!id) {
+      console.error("No se encontró parámetro ?id en la URL");
+      return;
+    }
 
     const res = await fetch(SHEET_URL);
     const data = await res.text();
@@ -56,6 +60,7 @@
     const user = rows.find(r => r[0] && r[0].trim() === id.trim());
 
     if (user) {
+      // Header y botón
       document.getElementById("nombre-visual").innerText = user[1].trim();
       document.getElementById("btn-wa").href = user[2].trim();
 
@@ -67,6 +72,8 @@
         let panel = acc.nextElementSibling;
         if (panel && user[cCol]) panel.querySelector("p").innerText = user[cCol].trim();
       });
+    } else {
+      console.error("No se encontró el ID en la planilla:", id);
     }
   }
   init();
