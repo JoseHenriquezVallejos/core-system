@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Academia Llave en Mano</title>
+  <title>Producto Llave en Mano</title>
   <style>
     body { margin:0; font-family: 'Segoe UI', sans-serif; background:#f1f5f9; }
     .chat-container { max-width:700px; margin:auto; height:100vh; display:flex; flex-direction:column; background:#fff; box-shadow:0 0 10px rgba(0,0,0,0.1); }
     .header { background:#0f172a; color:#fff; padding:20px; }
     .header h1 { margin:0; font-size:1.5rem; }
-    .header p { margin:0; opacity:0.7; }
+    .header p { margin:0; opacity:0.85; font-size:0.95rem; }
     .button-grid { display:flex; flex-wrap:wrap; gap:8px; padding:15px; }
     .btn-option { background:#f8fafc; border:1px solid #cbd5e1; padding:10px 14px; border-radius:8px; cursor:pointer; font-weight:600; font-size:0.9rem; text-align:center; display:inline-block; }
     .btn-option:hover { background:#0fb396; color:#fff; }
@@ -25,7 +25,7 @@
 <div class="chat-container">
   <div class="header">
     <h1 id="nombreVisual">Academia Llave en Mano</h1>
-    <p id="subtitulo">Centro de apoyo 🚀</p>
+    <p id="subtitulo">Producto Llave en Mano – Centro de apoyo 🚀</p>
   </div>
 
   <div class="button-grid" id="botones">
@@ -79,16 +79,16 @@
       document.getElementById("whatsapp").href = whatsappLink;
 
       if (rol === "a") {
-        document.getElementById("subtitulo").textContent = "Centro de apoyo para afiliados 🚀";
-        mostrarOpciones(opcionesAfiliados, "afiliado", nombreVisual);
+        document.getElementById("subtitulo").textContent = "Producto Llave en Mano – Centro de apoyo para afiliados 🚀";
+        mostrarOpciones(opcionesAfiliados);
       } else if (rol === "c") {
-        document.getElementById("subtitulo").textContent = "Centro de apoyo para clientes 🚀";
-        mostrarOpciones(opcionesClientes, "cliente", nombreVisual);
+        document.getElementById("subtitulo").textContent = "Producto Llave en Mano – Centro de apoyo para clientes 🚀";
+        mostrarOpciones(opcionesClientes);
       }
     })
     .catch(err => console.error("Error cargando planilla:", err));
 
-  function mostrarOpciones(opciones, rol, nombreVisual) {
+  function mostrarOpciones(opciones) {
     const contenedor = document.getElementById("botones");
     const btnSmall = contenedor.querySelector(".btn-small");
     contenedor.querySelectorAll(".btn-option").forEach(b => b.remove());
