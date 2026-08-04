@@ -31,7 +31,6 @@
         .accordion { background: #0f172a; color: white; cursor: pointer; padding: 15px; width: 100%; border: none; text-align: left; border-radius: 8px; margin-bottom: 8px; font-weight: bold; }
         .panel { padding: 0 15px; background-color: #f8fafc; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; border-left: 3px solid #d4af37; margin-bottom: 8px; text-align: justify; }
         
-        /* Contenedor de botones en columna para que ambos ocupen todo el ancho uniformemente */
         .button-grid { display: flex; flex-direction: column; gap: 10px; padding: 15px; }
         .btn-action { background: #334155; color: white; padding: 14px; border-radius: 8px; text-align: center; text-decoration: none; font-weight: 600; font-size: 15px; display: flex; align-items: center; justify-content: center; width: 100%; box-sizing: border-box; }
         .btn-green { background: #0fb396; }
@@ -111,11 +110,21 @@
                 if(document.getElementById('desc'+(i+1))) document.getElementById('desc'+(i+1)).innerText = user[descCol] ? user[descCol].trim() : "";
             }
 
+            const accordionsData = [
+                { title: 21, content: 22 }, // Acordeón 1 (Columnas V y W)
+                { title: 23, content: 24 }, // Acordeón 2 (Columnas X y Y)
+                { title: 25, content: 26 }  // Acordeón 3 (Columnas Z y AA)
+            ];
+
             document.querySelectorAll('.accordion').forEach((acc, index) => {
-                let tCol = 21 + (index * 2); let cCol = 22 + (index * 2);
-                if (user[tCol]) acc.innerHTML = user[tCol].trim();
-                let panel = acc.nextElementSibling;
-                if (panel && user[cCol]) panel.querySelector('p').innerText = user[cCol].trim();
+                let config = accordionsData[index];
+                if (config) {
+                    if (user[config.title]) acc.innerHTML = user[config.title].trim();
+                    let panel = acc.nextElementSibling;
+                    if (panel && user[config.content]) {
+                        panel.querySelector('p').innerText = user[config.content].trim();
+                    }
+                }
             });
         }
     }
