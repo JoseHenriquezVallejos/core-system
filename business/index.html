@@ -29,7 +29,7 @@
         
         .faq-section { padding: 15px; margin-top: 20px; }
         .accordion { background: #0f172a; color: white; cursor: pointer; padding: 15px; width: 100%; border: none; text-align: left; border-radius: 8px; margin-bottom: 8px; font-weight: bold; }
-        .panel { padding: 0 15px; background-color: #f8fafc; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; border-left: 3px solid #d4af37; margin-bottom: 8px; text-align: justify; }
+        .panel { padding: 0 15px; background-color: #f8fafc; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; border-left: 3px solid #d4af37; margin-bottom: 8px; text-align: justify; white-space: pre-line; }
         
         .button-grid { display: flex; flex-direction: column; gap: 10px; padding: 15px; }
         .btn-action { background: #334155; color: white; padding: 14px; border-radius: 8px; text-align: center; text-decoration: none; font-weight: 600; font-size: 15px; display: flex; align-items: center; justify-content: center; width: 100%; box-sizing: border-box; }
@@ -84,30 +84,58 @@
 
         const res = await fetch(SHEET_URL);
         const data = await res.text();
-        const rows = data.split('\n').map(row => {
-            const result = []; let cell = ''; let inQuotes = false;
-            for (let char of row) {
-                if (char === '"') inQuotes = !inQuotes;
-                else if (char === ',' && !inQuotes) { result.push(cell); cell = ''; }
-                else cell += char;
+        
+        // Lector robusto de CSV que tolera saltos de línea dentro de celdas y comillas
+        const rows = [];
+        let currentRow = [];
+        let currentCell = '';
+        let inQuotes = false;
+
+        for (let i = 0; i < data.length; i++) {
+            let char = data[i];
+            let nextChar = data[i + 1];
+
+            if (char === '"') {
+                if (inQuotes && nextChar === '"') {
+                    currentCell += '"';
+                    i++;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (char === ',' && !inQuotes) {
+                currentRow.push(currentCell.trim());
+                currentCell = '';
+            } else if ((char === '\r' && nextChar === '\n' || char === '\n') && !inQuotes) {
+                if (char === '\r') i++;
+                currentRow.push(currentCell.trim());
+                rows.push(currentRow);
+                currentRow = [];
+                currentCell = '';
+            } else {
+                currentCell += char;
             }
-            result.push(cell);
-            return result;
-        });
+        }
+        if (currentCell !== '' || currentRow.length > 0) {
+            currentRow.push(currentCell.trim());
+            rows.push(currentRow);
+        }
 
-        const user = rows.find(r => r[0] && r[0].trim() === id.trim());
+        const user = rows.find(r => r[0] && r[0].replace(/^"+|"+$/g, '').trim() === id.trim());
+        
         if (user) {
-            document.getElementById('nombre-visual').innerText = user[1].trim();
-            document.getElementById('subtitulo-visual').innerText = user[2].trim();
+            const cleanVal = val => val ? val.replace(/^"+|"+$/g, '').trim() : '';
 
-            document.getElementById('btn-wa').href = user[3].trim();
-            document.getElementById('btn-hotmart').href = user[4].trim();
+            document.getElementById('nombre-visual').innerText = cleanVal(user[1]);
+            document.getElementById('subtitulo-visual').innerText = cleanVal(user[2]);
+
+            document.getElementById('btn-wa').href = cleanVal(user[3]);
+            document.getElementById('btn-hotmart').href = cleanVal(user[4]);
             
             for(let i=0; i<8; i++) {
                 let fotoCol = 5 + (i * 2);
                 let descCol = 6 + (i * 2);
-                if(document.getElementById('f'+(i+1))) document.getElementById('f'+(i+1)).src = user[fotoCol] ? user[fotoCol].trim() : "";
-                if(document.getElementById('desc'+(i+1))) document.getElementById('desc'+(i+1)).innerText = user[descCol] ? user[descCol].trim() : "";
+                if(document.getElementById('f'+(i+1))) document.getElementById('f'+(i+1)).src = cleanVal(user[fotoCol]);
+                if(document.getElementById('desc'+(i+1))) document.getElementById('desc'+(i+1)).innerText = cleanVal(user[descCol]);
             }
 
             const accordionsData = [
@@ -119,10 +147,12 @@
             document.querySelectorAll('.accordion').forEach((acc, index) => {
                 let config = accordionsData[index];
                 if (config) {
-                    if (user[config.title]) acc.innerHTML = user[config.title].trim();
+                    if (user[config.title]) {
+                        acc.innerHTML = cleanVal(user[config.title]);
+                    }
                     let panel = acc.nextElementSibling;
                     if (panel && user[config.content]) {
-                        panel.querySelector('p').innerText = user[config.content].trim();
+                        panel.querySelector('p').innerText = cleanVal(user[config.content]);
                     }
                 }
             });
