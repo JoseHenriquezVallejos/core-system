@@ -16,10 +16,19 @@
         .accordion-container { padding: 20px; }
         .accordion-item { margin-bottom: 12px; border-radius: 8px; overflow: hidden; border: 2px solid #0f172a; }
         .accordion-header { width: 100%; padding: 15px 20px; background: #0f172a; color: white; border: none; text-align: left; font-size: 18px; font-weight: bold; cursor: pointer; display: flex; align-items: center; }
-        .accordion-content { padding: 20px; display: none; background: #0f172a; font-size: 17px; line-height: 1.6; color: #ffffff; text-align: justify; }
+        .accordion-content { padding: 20px; display: none; background: #0f172a; font-size: 17px; line-height: 1.6; color: #ffffff; text-align: center; }
         .btn-container { padding: 20px; text-align: center; }
         .btn-wa { display: inline-block; background: linear-gradient(135deg, #25d366, #128c7e); color: white; padding: 18px 30px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 17px; box-shadow: 0 6px 15px rgba(37, 211, 102, 0.4); }
-        audio { width: 100%; margin-top: 10px; }
+        
+        /* Estilo para los videos en los acordeones */
+        video { 
+            width: 100%; 
+            max-width: 280px; 
+            height: auto; 
+            margin-top: 10px; 
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
     </style>
 </head>
 <body>
@@ -34,10 +43,8 @@
         <div class="swiper-pagination"></div>
     </div>
     <div style="text-align: center; margin: 15px; color: #334155; font-size: 15px;">
-
         <p><strong>👉 Toca el botón de la oración que buscas</strong></p>
         <p><strong>📲 ¿Necesitas una oración especial? Solicítala por WhatsApp</strong></p>
-        
     </div>
     <div class="accordion-container" id="accordion-container"></div>
     <div class="btn-container">
@@ -51,25 +58,25 @@
     const BUSCAR_ID = params.get('id');
     
     const oraciones = [
-        { t: "❤️ Salud", id: "audio1" },
-        { t: "👪 Familia", id: "audio2" },
-        { t: "💼 Trabajo y Providencia", id: "audio3" },
-        { t: "🌅 Comenzar de nuevo", id: "audio4" }
+        { t: "❤️ Salud", id: "video1" },
+        { t: "👪 Familia", id: "video2" },
+        { t: "💼 Trabajo y Providencia", id: "video3" },
+        { t: "🌅 Comenzar de nuevo", id: "video4" }
     ];
 
     const accContainer = document.getElementById('accordion-container');
     
-    function detenerAudios() {
-        document.querySelectorAll('audio').forEach(audio => { audio.pause(); });
+    function detenerVideos() {
+        document.querySelectorAll('video').forEach(video => { video.pause(); });
     }
 
     oraciones.forEach(item => {
         accContainer.innerHTML += `
             <div class="accordion-item">
-                <button class="accordion-header" onclick="detenerAudios(); this.nextElementSibling.style.display=(this.nextElementSibling.style.display==='block'?'none':'block')">
+                <button class="accordion-header" onclick="detenerVideos(); this.nextElementSibling.style.display=(this.nextElementSibling.style.display==='block'?'none':'block')">
                     ${item.t}
                 </button>
-                <div class="accordion-content" id="${item.id}" data-url=""></div>
+                <div class="accordion-content" id="${item.id}"></div>
             </div>`;
     });
 
@@ -101,14 +108,15 @@
                 new Swiper('.main-swiper', { loop: true, autoplay: { delay: 3000 }, pagination: { el: '.swiper-pagination' } });
 
                 for(let i=0; i<oraciones.length; i++) {
-                    const audioLink = user[8 + i]?.trim();
-                    if(audioLink && audioLink !== "") {
-                        const container = document.getElementById(`audio${i+1}`);
+                    const videoLink = user[8 + i]?.trim();
+                    if(videoLink && videoLink !== "") {
+                        const container = document.getElementById(`video${i+1}`);
                         const btn = container.previousElementSibling;
                         btn.onclick = function() {
-                            detenerAudios();
+                            detenerVideos();
                             if(!container.innerHTML) {
-                                container.innerHTML = `<audio controls preload="auto"><source src="${audioLink}" type="audio/mpeg"></audio>`;
+                                // Se usa preload="none" para que no consuma datos hasta abrirlos, y controls para que el usuario reproduzca cuando quiera con voz
+                                container.innerHTML = `<video controls preload="none"><source src="${videoLink}" type="video/mp4">Tu navegador no soporta videos.</video>`;
                             }
                             container.style.display = (container.style.display==='block'?'none':'block');
                         };
