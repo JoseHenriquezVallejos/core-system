@@ -20,7 +20,6 @@
         .btn-container { padding: 20px; text-align: center; }
         .btn-wa { display: inline-block; background: linear-gradient(135deg, #25d366, #128c7e); color: white; padding: 18px 30px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 17px; box-shadow: 0 6px 15px rgba(37, 211, 102, 0.4); }
         
-        /* Estilo para los videos en los acordeones */
         video { 
             width: 100%; 
             max-width: 280px; 
@@ -70,10 +69,11 @@
         document.querySelectorAll('video').forEach(video => { video.pause(); });
     }
 
+    // Se generan los acordeones limpios sin inline onclick
     oraciones.forEach(item => {
         accContainer.innerHTML += `
             <div class="accordion-item">
-                <button class="accordion-header" onclick="detenerVideos(); this.nextElementSibling.style.display=(this.nextElementSibling.style.display==='block'?'none':'block')">
+                <button class="accordion-header">
                     ${item.t}
                 </button>
                 <div class="accordion-content" id="${item.id}"></div>
@@ -109,16 +109,22 @@
 
                 for(let i=0; i<oraciones.length; i++) {
                     const videoLink = user[8 + i]?.trim();
+                    const container = document.getElementById(`video${i+1}`);
+                    const btn = container.previousElementSibling;
+
                     if(videoLink && videoLink !== "") {
-                        const container = document.getElementById(`video${i+1}`);
-                        const btn = container.previousElementSibling;
+                        // Asignamos correctamente la función que abre el acordeón Y carga el video
                         btn.onclick = function() {
                             detenerVideos();
                             if(!container.innerHTML) {
-                                // Se usa preload="none" para que no consuma datos hasta abrirlos, y controls para que el usuario reproduzca cuando quiera con voz
                                 container.innerHTML = `<video controls preload="none"><source src="${videoLink}" type="video/mp4">Tu navegador no soporta videos.</video>`;
                             }
-                            container.style.display = (container.style.display==='block'?'none':'block');
+                            container.style.display = (container.style.display === 'block' ? 'none' : 'block');
+                        };
+                    } else {
+                        // Si no hay video en el Sheet, el botón solo abre/cierra o se puede ocultar
+                        btn.onclick = function() {
+                            container.style.display = (container.style.display === 'block' ? 'none' : 'block');
                         };
                     }
                 }
