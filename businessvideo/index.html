@@ -1,1 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mesa de Oración</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+    <style>
+        body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background: #f8fafc; display: flex; justify-content: center; }
+        .chat-container { width: 100%; max-width: 600px; background: white; padding-bottom: 40px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); min-height: 100vh; }
+        .header { background: #0f172a; color: #ffffff; padding: 40px 20px; text-align: center; border-bottom: 4px solid #d4af37; }
+        .header h1 { margin: 0; font-size: 26px; font-weight: 700; text-transform: uppercase; }
+        .header p { margin: 8px 0 0 0; font-size: 14px; color: #d4af37; letter-spacing: 3px; font-weight: bold; }
+        .swiper { width: 100%; height: 300px; padding: 20px 0; }
+        .swiper-slide img { width: 90%; height: 100%; object-fit: cover; border-radius: 12px; margin: auto; display: block; }
+        .accordion-container { padding: 20px; }
+        .accordion-item { margin-bottom: 12px; border-radius: 8px; overflow: hidden; border: 2px solid #0f172a; }
+        .accordion-header { width: 100%; padding: 15px 20px; background: #0f172a; color: white; border: none; text-align: left; font-size: 18px; font-weight: bold; cursor: pointer; display: flex; align-items: center; }
+        .accordion-content { padding: 20px; display: none; background: #0f172a; font-size: 17px; line-height: 1.6; color: #ffffff; text-align: justify; }
+        .btn-container { padding: 20px; text-align: center; }
+        .btn-wa { display: inline-block; background: linear-gradient(135deg, #25d366, #128c7e); color: white; padding: 18px 30px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 17px; box-shadow: 0 6px 15px rgba(37, 211, 102, 0.4); }
+        audio { width: 100%; margin-top: 10px; }
+    </style>
+</head>
+<body>
 
+<div class="chat-container">
+    <div class="header">
+        <h1 id="nombre-visual">Cargando...</h1>
+        <p>MESA DE ORACIÓN</p>
+    </div>
+    <div class="swiper main-swiper">
+        <div class="swiper-wrapper" id="swiper-content"></div>
+        <div class="swiper-pagination"></div>
+    </div>
+    <div style="text-align: center; margin: 15px; color: #334155; font-size: 15px;">
+
+        <p><strong>👉 Toca el botón de la oración que buscas</strong></p>
+        <p><strong>📲 ¿Necesitas una oración especial? Solicítala por WhatsApp</strong></p>
+        
+    </div>
+    <div class="accordion-container" id="accordion-container"></div>
+    <div class="btn-container">
+        <a id="btn-wa" href="#" class="btn-wa">🙏 Enviar Petición de Oración</a>
+    </div>
+</div>
+    
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const BUSCAR_ID = params.get('id');
+    
+    const oraciones = [
+        { t: "❤️ Salud", id: "audio1" },
+        { t: "👪 Familia", id: "audio2" },
+        { t: "💼 Trabajo y Providencia", id: "audio3" },
+        { t: "🌅 Comenzar de nuevo", id: "audio4" }
+    ];
+
+    const accContainer = document.getElementById('accordion-container');
+    
+    function detenerAudios() {
+        document.querySelectorAll('audio').forEach(audio => { audio.pause(); });
+    }
+
+    oraciones.forEach(item => {
+        accContainer.innerHTML += `
+            <div class="accordion-item">
+                <button class="accordion-header" onclick="detenerAudios(); this.nextElementSibling.style.display=(this.nextElementSibling.style.display==='block'?'none':'block')">
+                    ${item.t}
+                </button>
+                <div class="accordion-content" id="${item.id}" data-url=""></div>
+            </div>`;
+    });
+
+    const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTGa4eqew0ZuG7AI1ZPZyo27jWSj9drWXH8JTvOxVqOtl5U-1YSa0ozV4gk5wk9nj6zvOjdnp8pKAms/pub?gid=0&single=true&output=csv';
+
+    async function init() {
+        if (!BUSCAR_ID) {
+            document.getElementById('nombre-visual').innerText = "ID NO ESPECIFICADO";
+            return;
+        }
+
+        try {
+            const res = await fetch(SHEET_URL);
+            const data = await res.text();
+            const rows = data.split('\n').map(r => r.split(','));
+            const user = rows.find(row => row[0] && row[0].trim() === BUSCAR_ID);
+            
+            if (user) {
+                document.getElementById('nombre-visual').innerText = user[1].trim();
+                document.getElementById('btn-wa').href = user[2].trim();
+
+                const swiperWrapper = document.getElementById('swiper-content');
+                for(let i=0; i<3; i++) {
+                    if(user[3+i] && user[3+i].trim() !== "") {
+                        swiperWrapper.innerHTML += `<div class="swiper-slide"><img src="${user[3+i].trim()}" loading="lazy"></div>`;
+                    }
+                }
+                
+                new Swiper('.main-swiper', { loop: true, autoplay: { delay: 3000 }, pagination: { el: '.swiper-pagination' } });
+
+                for(let i=0; i<oraciones.length; i++) {
+                    const audioLink = user[8 + i]?.trim();
+                    if(audioLink && audioLink !== "") {
+                        const container = document.getElementById(`audio${i+1}`);
+                        const btn = container.previousElementSibling;
+                        btn.onclick = function() {
+                            detenerAudios();
+                            if(!container.innerHTML) {
+                                container.innerHTML = `<audio controls preload="auto"><source src="${audioLink}" type="audio/mpeg"></audio>`;
+                            }
+                            container.style.display = (container.style.display==='block'?'none':'block');
+                        };
+                    }
+                }
+            } else {
+                document.getElementById('nombre-visual').innerText = "ID NO ENCONTRADO";
+            }
+        } catch (e) { console.error("Error cargando datos:", e); }
+    }
+    init();
+</script>
+</body>
+</html>
