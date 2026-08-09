@@ -39,7 +39,7 @@
             <span id="intentos">Intentos: 0</span>
             <span id="parejas">Parejas: 0 / 6</span>
         </div>
-        <div class="grid" id="game-grid"></div>
+        .grid" id="game-grid"></div>
     </div>
 
     <button class="btn-restart" onclick="iniciarJuego()">Reiniciar Juego</button>
@@ -47,8 +47,127 @@
 
 <script>
     // Enlace CSV publicado de tu Google Sheet
-    const SHEET_URL = 'AQUÍ_PEGAS_EL_ENLACE_CSV_DE_TU_GOOGLE_SHEET';
+    const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRIUB0nwYzeRBhfb39ZYeQQPsVxhQDaRQjh744I6XysR4GVNsqB-0Wqv5uZlQzVHySPViKK4gOsSxwk/pub?gid=0&single=true&output=csv';
 
     // Lista fija de las 6 parejas de imágenes con su nombre integrado
     const personajesBase = [
-        { id: 0, img: "http://googleusercontent.com/image_generation_content/0
+        { id: 0, img: "https://images.unsplash.com/photo-1544717305-2782549b5136?w=150" }, // Moisés (reemplazar por tu enlace definitivo)
+        { id: 1, img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150" }, // David (reemplazar por tu enlace definitivo)
+        { id: 2, img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150" }, // Abraham (reemplazar por tu enlace definitivo)
+        { id: 3, img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150" }, // Noé (reemplazar por tu enlace definitivo)
+        { id: 4, img: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150" }, // Daniel (reemplazar por tu enlace definitivo)
+        { id: 5, img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" }  // Ester (reemplazar por tu enlace definitivo)
+    ];
+
+    let cartasArray = [];
+    let cartaPrimero = null, cartaSegundo = null, bloqueado = false;
+    let intentos = 0, parejasEncontradas = 0;
+
+    async function init() {
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+        if (!id) {
+            document.getElementById('titulo-visual').innerText = "ID Requerido";
+            document.getElementById('subtitulo-visual').innerText = "Agrega ?id=memoriabiblica en el link";
+            return;
+        }
+
+        try {
+            const res = await fetch(SHEET_URL);
+            const data = await res.text();
+            const rows = data.split('\n').map(row => {
+                const result = []; let cell = '', inQuotes = false;
+                for (let char of row) {
+                    if (char === '"') inQuotes = !inQuotes;
+                    else if (char === ',' && !inQuotes) { result.push(cell); cell = ''; }
+                    else cell += char;
+                }
+                result.push(cell); return result;
+            });
+
+            // Buscamos la fila que coincida con el ID (Columna A), ignorando espacios y mayúsculas
+            const rowData = rows.find(r => r[0] && r[0].replace(/['"]+/g, '').trim().toLowerCase() === id.trim().toLowerCase());
+            
+            if (rowData) {
+                // Columna B: Nombre_Visual (Título) | Columna C: Subtitulo
+                document.getElementById('titulo-visual').innerText = rowData[1] ? rowData[1].replace(/['"]+/g, '').trim() : "Memoria Bíblica";
+                document.getElementById('subtitulo-visual').innerText = rowData[2] ? rowData[2].replace(/['"]+/g, '').trim() : "Encuentra las 6 parejas";
+
+                // Duplicamos las imágenes fijas para armar las 12 cartas del juego
+                cartasArray = [];
+                personajesBase.forEach(p => {
+                    cartasArray.push({ id: p.id, img: p.img });
+                    cartasArray.push({ id: p.id, img: p.img });
+                });
+
+                iniciarJuego();
+            } else {
+                document.getElementById('titulo-visual').innerText = "ID no encontrado";
+                document.getElementById('subtitulo-visual').innerText = "Verifica el parámetro en el enlace";
+            }
+        } catch (e) {
+            console.error(e);
+            document.getElementById('titulo-visual').innerText = "Error de conexión";
+            document.getElementById('subtitulo-visual').innerText = "No se pudo leer el Google Sheet";
+        }
+    }
+
+    function iniciarJuego() {
+        if (cartasArray.length === 0) return;
+
+        const grid = document.getElementById('game-grid');
+        grid.innerHTML = '';
+        intentos = 0; parejasEncontradas = 0;
+        document.getElementById('intentos').innerText = `Intentos: 0`;
+        document.getElementById('parejas').innerText = `Parejas: 0 / 6`;
+        
+        // Mezclar aleatoriamente las 12 cartas en el tablero
+        let cartasMezcladas = [...cartasArray].sort(() => Math.random() - 0.5);
+
+        cartasMezcladas.forEach((carta, i) => {
+            const cardEl = document.createElement('div');
+            cardEl.className = 'card';
+            cardEl.dataset.id = carta.id;
+            cardEl.innerHTML = `<span>${i+1}</span><img src="${carta.img}" alt="Personaje">`;
+            
+            cardEl.onclick = function() {
+                if (bloqueado || this === cartaPrimero || this.classList.contains('matched')) return;
+                this.classList.add('flipped');
+                if (!cartaPrimero) { cartaPrimero = this; return; }
+                
+                cartaSegundo = this; 
+                intentos++;
+                document.getElementById('intentos').innerText = `Intentos: ${intentos}`;
+                verificarPareja();
+            };
+            grid.appendChild(cardEl);
+        });
+    }
+
+    function verificarPareja() {
+        if (cartaPrimero.dataset.id === cartaSegundo.dataset.id) {
+            cartaPrimero.classList.add('matched'); 
+            cartaSegundo.classList.add('matched');
+            parejasEncontradas++;
+            document.getElementById('parejas').innerText = `Parejas: ${parejasEncontradas} / 6`;
+            cartaPrimero = null; cartaSegundo = null;
+            
+            if (parejasEncontradas === 6) {
+                setTimeout(() => {
+                    alert(`¡Felicitaciones! Completaste el juego en ${intentos} intentos.`);
+                }, 300);
+            }
+        } else {
+            bloqueado = true;
+            setTimeout(() => {
+                cartaPrimero.classList.remove('flipped'); 
+                cartaSegundo.classList.remove('flipped');
+                cartaPrimero = null; cartaSegundo = null; bloqueado = false;
+            }, 1000);
+        }
+    }
+
+    init();
+</script>
+</body>
+</html>
