@@ -31,7 +31,7 @@
 <div class="chat-container">
     <div class="header">
         <h1 id="titulo-visual">Cargando...</h1>
-        <p id="subtitulo-visual">Buscando juego por ID...</p>
+        <p id="subtitulo-visual">Buscando configuración...</p>
     </div>
     
     <div class="game-area">
@@ -46,8 +46,18 @@
 </div>
 
 <script>
-    // Reemplaza con tu enlace CSV publicado de Google Sheets
-    const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRIUB0nwYzeRBhfb39ZYeQQPsVxhQDaRQjh744I6XysR4GVNsqB-0Wqv5uZlQzVHySPViKK4gOsSxwk/pub?gid=0&single=true&output=csv';
+    // Enlace CSV publicado de tu Google Sheet (lee ID, Título y Subtítulo)
+    const SHEET_URL = 'AQUÍ_PEGAS_EL_ENLACE_CSV_DE_TU_GOOGLE_SHEET';
+
+    // Lista fija de las 6 parejas de imágenes con su nombre integrado
+    const personajesBase = [
+        { id: 0, img: "http://googleusercontent.com/image_generation_content/0" }, // Moisés
+        { id: 1, img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150" }, // David (reemplazar por tu enlace definitivo)
+        { id: 2, img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150" }, // Abraham (reemplazar por tu enlace definitivo)
+        { id: 3, img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150" }, // Noé (reemplazar por tu enlace definitivo)
+        { id: 4, img: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150" }, // Daniel (reemplazar por tu enlace definitivo)
+        { id: 5, img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" }  // Ester (reemplazar por tu enlace definitivo)
+    ];
 
     let cartasArray = [];
     let cartaPrimero = null, cartaSegundo = null, bloqueado = false;
@@ -75,30 +85,18 @@
                 result.push(cell); return result;
             });
 
+            // Buscamos la fila que coincida con el ID (Columna A)
             const rowData = rows.find(r => r[0] && r[0].trim().toLowerCase() === id.trim().toLowerCase());
             if (rowData) {
+                // Columna B: Nombre_Visual (Título) | Columna C: Subtitulo
                 document.getElementById('titulo-visual').innerText = rowData[1] ? rowData[1].trim() : "Memoria Bíblica";
                 document.getElementById('subtitulo-visual').innerText = rowData[2] ? rowData[2].trim() : "Encuentra las 6 parejas";
 
-                // Columnas D hasta O (índices 3 a 14) corresponden a p1 hasta p12
-                let imagenes = [];
-                for (let i = 3; i <= 14; i++) {
-                    if (rowData[i] && rowData[i].trim() !== "") {
-                        imagenes.push(rowData[i].trim());
-                    }
-                }
-
-                if (imagenes.length < 6) {
-                    document.getElementById('subtitulo-visual').innerText = "Faltan imágenes en la planilla (mínimo 6)";
-                    return;
-                }
-
-                // Tomamos las primeras 6 imágenes únicas de la planilla y las duplicamos para formar las 6 parejas (12 cartas)
-                let unicas = imagenes.slice(0, 6);
+                // Duplicamos las imágenes fijas para armar las 12 cartas del juego
                 cartasArray = [];
-                unicas.forEach((img, idx) => {
-                    cartasArray.push({ id: idx, img: img });
-                    cartasArray.push({ id: idx, img: img });
+                personajesBase.forEach(p => {
+                    cartasArray.push({ id: p.id, img: p.img });
+                    cartasArray.push({ id: p.id, img: p.img });
                 });
 
                 iniciarJuego();
@@ -122,7 +120,7 @@
         document.getElementById('intentos').innerText = `Intentos: 0`;
         document.getElementById('parejas').innerText = `Parejas: 0 / 6`;
         
-        // Mezclar aleatoriamente las 12 cartas
+        // Mezclar aleatoriamente las 12 cartas en el tablero
         let cartasMezcladas = [...cartasArray].sort(() => Math.random() - 0.5);
 
         cartasMezcladas.forEach((carta, i) => {
