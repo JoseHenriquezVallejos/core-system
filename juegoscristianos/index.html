@@ -5,216 +5,155 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Juego de Memoria Bíblica</title>
     <style>
-        body { 
-            margin: 0; 
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; 
-            background: #f1f5f9; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center;
-            min-height: 100vh;
-        }
-        .game-container { 
-            width: 100%; 
-            max-width: 600px; 
-            background: white; 
-            padding: 20px; 
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            box-sizing: border-box;
-        }
-        .header { 
-            background: #0f172a; 
-            color: #ffffff; 
-            padding: 20px; 
-            text-align: center; 
-            border-bottom: 4px solid #d4af37; 
-            border-radius: 8px 8px 0 0;
-            margin-bottom: 20px;
-        }
-        .header h1 { margin: 0; font-size: 24px; font-weight: 400; letter-spacing: 1px; text-transform: uppercase; }
-        .header p { margin: 5px 0 0 0; font-size: 14px; color: #d4af37; letter-spacing: 1px; }
+        body { margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #f1f5f9; display: flex; justify-content: center; }
+        .chat-container { width: 100%; max-width: 450px; background: white; min-height: 100vh; display: flex; flex-direction: column; }
+        .header { background: #0f172a; color: #ffffff; padding: 25px 20px; text-align: center; border-bottom: 4px solid #d4af37; }
+        .header h1 { margin: 0; font-size: 22px; font-weight: 300; letter-spacing: 1px; text-transform: uppercase; }
+        .header p { margin: 5px 0 0 0; font-size: 13px; color: #d4af37; letter-spacing: 1px; }
         
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            font-weight: bold;
-            color: #334155;
-            font-size: 14px;
-            padding: 0 5px;
-        }
+        .game-area { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+        .stats { display: flex; justify-content: space-between; margin-bottom: 15px; color: #334155; font-size: 13px; font-weight: bold; }
 
-        /* Cuadrícula de 24 cartas (6 columnas x 4 filas o adaptada) */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            padding: 5px;
-        }
-        @media (max-width: 480px) {
-            .grid { grid-template-columns: repeat(3, 1fr); }
-        }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .card { aspect-ratio: 1; background: #334155; border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 24px; color: white; position: relative; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .card.flipped, .card.matched { background: white; border: 2px solid #d4af37; }
+        .card img { width: 100%; height: 100%; object-fit: cover; display: none; border-radius: 6px; }
+        .card.flipped img, .card.matched img { display: block; }
+        .card.flipped span, .card.matched span { display: none; }
+        .card.matched { opacity: 0.6; cursor: default; }
 
-        .card {
-            aspect-ratio: 1;
-            background: #334155;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            font-weight: bold;
-            color: white;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .card.flipped, .card.matched {
-            background: #ffffff;
-            border: 2px solid #d4af37;
-        }
-
-        .card img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: none;
-        }
-
-        .card.flipped img, .card.matched img {
-            display: block;
-        }
-
-        .card.flipped span, .card.matched span {
-            display: none;
-        }
-
-        .card.matched {
-            opacity: 0.7;
-            cursor: default;
-        }
-
-        .btn-restart {
-            margin-top: 20px;
-            background: #0fb396;
-            color: white;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            width: 100%;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+        .btn-restart { margin: 20px; background: #0fb396; color: white; padding: 15px; border-radius: 8px; text-align: center; font-weight: bold; cursor: pointer; border: none; font-size: 15px; text-transform: uppercase; letter-spacing: 1px; }
         .btn-restart:hover { background: #0d967e; }
     </style>
 </head>
 <body>
 
-<div class="game-container">
+<div class="chat-container">
     <div class="header">
-        <h1>Memoria Bíblica</h1>
-        <p>Encuentra las 12 parejas de personajes</p>
+        <h1 id="titulo-visual">Cargando...</h1>
+        <p id="subtitulo-visual">Buscando juego por ID...</p>
     </div>
-
-    <div class="stats">
-        <span id="intentos">Intentos: 0</span>
-        <span id="parejas">Parejas: 0 / 12</span>
-    </div>
-
-    <div class="grid" id="game-grid">
+    
+    <div class="game-area">
+        <div class="stats">
+            <span id="intentos">Intentos: 0</span>
+            <span id="parejas">Parejas: 0 / 6</span>
         </div>
+        <div class="grid" id="game-grid"></div>
+    </div>
 
-    <button class="btn-restart" onclick="reiniciarJuego()">Reiniciar Juego</button>
+    <button class="btn-restart" onclick="iniciarJuego()">Reiniciar Juego</button>
 </div>
 
 <script>
-    // Lista de 12 personajes bíblicos con sus imágenes (puedes cambiar los links por URLs reales de imágenes)
-    const personajesBase = [
-        { nombre: "Moisés", img: "https://images.unsplash.com/photo-1544717305-2782549b5136?w=150" }, // Ejemplo de imagen
-        { nombre: "David", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150" },
-        { nombre: "Abraham", img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150" },
-        { nombre: "Noé", img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150" },
-        { nombre: "Daniel", img: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150" },
-        { nombre: "José", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" },
-        { nombre: "Ester", img: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150" },
-        { nombre: "Rut", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" },
-        { nombre: "Jonás", img: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150" },
-        { nombre: "Samuel", img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150" },
-        { nombre: "Salomón", img: "https://images.unsplash.com/photo-1521119989659-a83eee488004?w=150" },
-        { nombre: "Pablo", img: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=150" }
-    ];
+    // Reemplaza con tu enlace CSV publicado de Google Sheets
+    const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRIUB0nwYzeRBhfb39ZYeQQPsVxhQDaRQjh744I6XysR4GVNsqB-0Wqv5uZlQzVHySPViKK4gOsSxwk/pub?gid=0&single=true&output=csv';
 
-    let cartas = [];
-    let cartaPrimero = null;
-    let cartaSegundo = null;
-    let bloqueado = false;
-    let intentos = 0;
-    let parejasEncontradas = 0;
+    let cartasArray = [];
+    let cartaPrimero = null, cartaSegundo = null, bloqueado = false;
+    let intentos = 0, parejasEncontradas = 0;
 
-    function iniciarJuego() {
-        // Duplicamos los 12 personajes para hacer las 24 cartas
-        cartas = [...personajesBase, ...personajesBase];
-        // Mezclamos aleatoriamente
-        cartas.sort(() => Math.random() - 0.5);
-
-        const grid = document.getElementById('game-grid');
-        grid.innerHTML = '';
-        intentos = 0;
-        parejasEncontradas = 0;
-        actualizarStats();
-
-        cartas.forEach((personaje, index) => {
-            const card = document.createElement('div');
-            card.classList.add('card');
-            card.dataset.index = index;
-            card.dataset.nombre = personaje.nombre;
-
-            card.innerHTML = `
-                <span>${index + 1}</span>
-                <img src="${personaje.img}" alt="${personaje.nombre}">
-            `;
-
-            card.addEventListener('click', voltearCarta);
-            grid.appendChild(card);
-        });
-    }
-
-    function voltearCarta() {
-        if (bloqueado) return;
-        if (this === cartaPrimero) return;
-        if (this.classList.contains('matched')) return;
-
-        this.classList.add('flipped');
-
-        if (!cartaPrimero) {
-            cartaPrimero = this;
+    async function init() {
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+        if (!id) {
+            document.getElementById('titulo-visual').innerText = "ID Requerido";
+            document.getElementById('subtitulo-visual').innerText = "Agrega ?id=memoriabiblica en el link";
             return;
         }
 
-        cartaSegundo = this;
-        intentos++;
-        actualizarStats();
-        verificarPareja();
+        try {
+            const res = await fetch(SHEET_URL);
+            const data = await res.text();
+            const rows = data.split('\n').map(row => {
+                const result = []; let cell = '', inQuotes = false;
+                for (let char of row) {
+                    if (char === '"') inQuotes = !inQuotes;
+                    else if (char === ',' && !inQuotes) { result.push(cell); cell = ''; }
+                    else cell += char;
+                }
+                result.push(cell); return result;
+            });
+
+            const rowData = rows.find(r => r[0] && r[0].trim().toLowerCase() === id.trim().toLowerCase());
+            if (rowData) {
+                document.getElementById('titulo-visual').innerText = rowData[1] ? rowData[1].trim() : "Memoria Bíblica";
+                document.getElementById('subtitulo-visual').innerText = rowData[2] ? rowData[2].trim() : "Encuentra las 6 parejas";
+
+                // Columnas D hasta O (índices 3 a 14) corresponden a p1 hasta p12
+                let imagenes = [];
+                for (let i = 3; i <= 14; i++) {
+                    if (rowData[i] && rowData[i].trim() !== "") {
+                        imagenes.push(rowData[i].trim());
+                    }
+                }
+
+                if (imagenes.length < 6) {
+                    document.getElementById('subtitulo-visual').innerText = "Faltan imágenes en la planilla (mínimo 6)";
+                    return;
+                }
+
+                // Tomamos las primeras 6 imágenes únicas de la planilla y las duplicamos para formar las 6 parejas (12 cartas)
+                let unicas = imagenes.slice(0, 6);
+                cartasArray = [];
+                unicas.forEach((img, idx) => {
+                    cartasArray.push({ id: idx, img: img });
+                    cartasArray.push({ id: idx, img: img });
+                });
+
+                iniciarJuego();
+            } else {
+                document.getElementById('titulo-visual').innerText = "ID no encontrado";
+                document.getElementById('subtitulo-visual').innerText = "Verifica el parámetro en el enlace";
+            }
+        } catch (e) {
+            console.error(e);
+            document.getElementById('titulo-visual').innerText = "Error de conexión";
+            document.getElementById('subtitulo-visual').innerText = "No se pudo leer el Google Sheet";
+        }
+    }
+
+    function iniciarJuego() {
+        if (cartasArray.length === 0) return;
+
+        const grid = document.getElementById('game-grid');
+        grid.innerHTML = '';
+        intentos = 0; parejasEncontradas = 0;
+        document.getElementById('intentos').innerText = `Intentos: 0`;
+        document.getElementById('parejas').innerText = `Parejas: 0 / 6`;
+        
+        // Mezclar aleatoriamente las 12 cartas
+        let cartasMezcladas = [...cartasArray].sort(() => Math.random() - 0.5);
+
+        cartasMezcladas.forEach((carta, i) => {
+            const cardEl = document.createElement('div');
+            cardEl.className = 'card';
+            cardEl.dataset.id = carta.id;
+            cardEl.innerHTML = `<span>${i+1}</span><img src="${carta.img}" alt="Personaje">`;
+            
+            cardEl.onclick = function() {
+                if (bloqueado || this === cartaPrimero || this.classList.contains('matched')) return;
+                this.classList.add('flipped');
+                if (!cartaPrimero) { cartaPrimero = this; return; }
+                
+                cartaSegundo = this; 
+                intentos++;
+                document.getElementById('intentos').innerText = `Intentos: ${intentos}`;
+                verificarPareja();
+            };
+            grid.appendChild(cardEl);
+        });
     }
 
     function verificarPareja() {
-        const esIgual = cartaPrimero.dataset.nombre === cartaSegundo.dataset.nombre;
-
-        if (esIgual) {
-            cartaPrimero.classList.add('matched');
+        if (cartaPrimero.dataset.id === cartaSegundo.dataset.id) {
+            cartaPrimero.classList.add('matched'); 
             cartaSegundo.classList.add('matched');
             parejasEncontradas++;
-            actualizarStats();
-            resetearTurno();
-
-            if (parejasEncontradas === personajesBase.length) {
+            document.getElementById('parejas').innerText = `Parejas: ${parejasEncontradas} / 6`;
+            cartaPrimero = null; cartaSegundo = null;
+            
+            if (parejasEncontradas === 6) {
                 setTimeout(() => {
                     alert(`¡Felicitaciones! Completaste el juego en ${intentos} intentos.`);
                 }, 300);
@@ -222,31 +161,14 @@
         } else {
             bloqueado = true;
             setTimeout(() => {
-                cartaPrimero.classList.remove('flipped');
+                cartaPrimero.classList.remove('flipped'); 
                 cartaSegundo.classList.remove('flipped');
-                resetearTurno();
-            }, 1000); // Tiempo que se muestra la carta antes de cerrarse
+                cartaPrimero = null; cartaSegundo = null; bloqueado = false;
+            }, 1000);
         }
     }
 
-    function resetearTurno() {
-        cartaPrimero = null;
-        cartaSegundo = null;
-        bloqueado = false;
-    }
-
-    function actualizarStats() {
-        document.getElementById('intentos').innerText = `Intentos: ${intentos}`;
-        document.getElementById('parejas').innerText = `Parejas: ${parejasEncontradas} / 12`;
-    }
-
-    function reiniciarJuego() {
-        iniciarJuego();
-    }
-
-    // Iniciar al cargar
-    iniciarJuego();
+    init();
 </script>
-
 </body>
 </html>
