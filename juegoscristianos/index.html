@@ -52,11 +52,11 @@
     // Lista fija de las 6 parejas de imágenes
     const personajesBase = [
         { id: 0, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/04-megapack/image1.webp" }, // Moisés
-        { id: 1, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/04-megapack/image2.webp" }, // David (reemplazar por tu enlace)
-        { id: 2, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/04-megapack/image3.webp" }, // Abraham (reemplazar por tu enlace)
-        { id: 3, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/04-megapack/image4.webp" }, // Noé (reemplazar por tu enlace)
-        { id: 4, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/04-megapack/image5.webp" }, // Daniel (reemplazar por tu enlace)
-        { id: 5, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/04-megapack/image6.webp" }  // Ester (reemplazar por tu enlace)
+        { id: 1, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/04-megapack/image2.webp" }, // David
+        { id: 2, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/04-megapack/image3.webp" }, // Abraham
+        { id: 3, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/04-megapack/image4.webp" }, // Noé
+        { id: 4, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/04-megapack/image5.webp" }, // Daniel
+        { id: 5, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/04-megapack/image6.webp" }  // Ester
     ];
 
     let cartasArray = [];
@@ -157,3 +157,18 @@
                     alert(`¡Felicitaciones! Completaste el juego en ${intentos} intentos.`);
                 }, 300);
             }
+        } else {
+            bloqueado = true;
+            setTimeout(() => {
+                cartaPrimero.classList.remove('flipped'); 
+                cartaSegundo.classList.remove('flipped');
+                cartaPrimero = null; cartaSegundo = null; bloqueado = false;
+            }, 1000);
+        }
+    }
+
+    // Inicializar app
+    init();
+</script>
+</body>
+</html>
