@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memoria Bíblica</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         /* Bloqueamos el scroll del body */
         body { margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
@@ -16,8 +17,8 @@
         #welcome-screen img { max-width: 50%; height: auto; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         #welcome-screen h1 { font-size: 20px; color: #0f172a; margin-bottom: 6px; }
         #welcome-screen p { font-size: 13px; color: #334155; margin-bottom: 16px; max-width: 280px; }
-        .btn-start { background: #0fb396; color: white; padding: 12px 28px; border-radius: 8px; text-align: center; font-weight: bold; cursor: pointer; border: none; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .btn-start:hover { background: #0d967e; }
+        .btn-start { background: #0fb396; color: white; padding: 12px 28px; border-radius: 8px; text-align: center; font-weight: bold; cursor: pointer; border: none; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: 0.2s; }
+        .btn-start:hover { background: #0d967e; transform: scale(1.03); }
 
         /* Encabezado con barra ancha y elegante */
         .header { background: #0f172a; color: #ffffff; padding: 14px 20px; text-align: center; border-bottom: 4px solid #d4af37; flex-shrink: 0; }
@@ -29,25 +30,44 @@
         
         /* Estadísticas y Botón de Reinicio Rápido Arriba */
         .stats { display: flex; justify-content: space-between; align-items: center; color: #334155; font-size: 12px; font-weight: bold; flex-shrink: 0; margin-bottom: 4px; }
-        .btn-mini-restart { background: #64748b; color: white; padding: 5px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; border: none; text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn-mini-restart { background: #64748b; color: white; padding: 5px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; border: none; text-transform: uppercase; letter-spacing: 0.5px; transition: 0.2s; }
         .btn-mini-restart:hover { background: #475569; }
 
         /* Cuadrícula optimizada */
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; flex-grow: 1; align-content: center; box-sizing: border-box; }
-        .card { width: 100%; aspect-ratio: 1; background: #334155; border-radius: 6px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 18px; color: white; position: relative; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-height: 100%; }
+        .card { width: 100%; aspect-ratio: 1; background: #334155; border-radius: 6px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 18px; color: white; position: relative; transition: transform 0.2s, background 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-height: 100%; }
+        .card:hover { transform: scale(1.02); }
         
         /* Control visual de cartas */
         .card .card-text { display: block; font-weight: bold; color: #94a3b8; font-size: 16px; }
         .card img { width: 100%; height: 100%; object-fit: cover; display: none; border-radius: 5px; position: absolute; top: 0; left: 0; }
         
         .card.flipped, .card.matched { background: white; border: 2px solid #d4af37; cursor: default; }
-        .card.matched { border-color: #22c55e; }
+        .card.matched { border-color: #22c55e; animation: pulseMatch 0.4s ease; }
         
         .card.flipped .card-text, .card.matched .card-text { display: none; }
         .card.flipped img, .card.matched img { display: block; }
+
+        /* Animación especial de sacudida (Shake) al fallar */
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            50% { transform: translateX(4px); }
+            75% { transform: translateX(-4px); }
+            100% { transform: translateX(0); }
+        }
+        .card.shake { animation: shake 0.3s ease-in-out; border: 2px solid #ef4444; }
+
+        /* Animación de acierto */
+        @keyframes pulseMatch {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
         
-        /* Ventana Modal de Victoria */
-        #win-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 200; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 30px; text-align: center; box-sizing: border-box; }
+        /* Ventana Modal de Victoria con efecto de aparición */
+        #win-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 200; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 30px; text-align: center; box-sizing: border-box; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         #win-modal img { max-width: 110px; height: auto; margin-bottom: 10px; border-radius: 10px; }
         #win-modal h2 { font-size: 22px; color: #fbbf24; margin-bottom: 6px; text-transform: uppercase; }
         #win-modal p { font-size: 14px; color: white; margin-bottom: 16px; }
@@ -172,7 +192,6 @@
             const cardEl = document.createElement('div');
             cardEl.className = 'card';
             cardEl.dataset.id = carta.id;
-            // Asignamos el número secuencial exacto (index + 1) para que cada carta muestre su número único al cerrarse
             cardEl.innerHTML = `<span class="card-text">${index + 1}</span><img src="${carta.img}" alt="Personaje Bíblico">`;
             
             cardEl.onclick = function() {
@@ -202,16 +221,33 @@
                 setTimeout(() => {
                     document.getElementById('texto-victoria').innerText = `¡Completaste el juego en ${intentos} intentos!`;
                     document.getElementById('win-modal').style.display = 'flex';
+                    
+                    // EFECTO ESPECIAL: Disparo de Confeti de celebración
+                    lanzarConfeti();
                 }, 400);
             }
         } else {
             bloqueado = true;
+            // EFECTO ESPECIAL: Añadir animación de sacudida a las dos cartas incorrectas
+            cartaPrimero.classList.add('shake');
+            cartaSegundo.classList.add('shake');
+
             setTimeout(() => {
-                cartaPrimero.classList.remove('flipped'); 
-                cartaSegundo.classList.remove('flipped');
+                cartaPrimero.classList.remove('flipped', 'shake'); 
+                cartaSegundo.classList.remove('flipped', 'shake');
                 cartaPrimero = null; cartaSegundo = null; bloqueado = false;
             }, 1000);
         }
+    }
+
+    function lanzarConfeti() {
+        // Configuración moderna y vistosa de partículas
+        confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#0fb396', '#d4af37', '#fbbf24', '#334155']
+        });
     }
 </script>
 </body>
