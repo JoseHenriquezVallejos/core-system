@@ -36,11 +36,10 @@
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; flex-grow: 1; align-content: center; box-sizing: border-box; }
         .card { width: 100%; aspect-ratio: 1; background: #334155; border-radius: 6px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 18px; color: white; position: relative; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-height: 100%; }
         
-        /* Control visual de cartas: por defecto se muestra el texto/número o reverso, y la imagen está oculta */
+        /* Control visual de cartas */
         .card .card-text { display: block; font-weight: bold; color: #94a3b8; font-size: 16px; }
         .card img { width: 100%; height: 100%; object-fit: cover; display: none; border-radius: 5px; position: absolute; top: 0; left: 0; }
         
-        /* Cuando se voltea o empareja, ocultamos el texto y mostramos la imagen */
         .card.flipped, .card.matched { background: white; border: 2px solid #d4af37; cursor: default; }
         .card.matched { border-color: #22c55e; }
         
@@ -173,8 +172,8 @@
             const cardEl = document.createElement('div');
             cardEl.className = 'card';
             cardEl.dataset.id = carta.id;
-            // Incluimos un texto o número identificador en el reverso para que siempre se vea la carta al cerrarse
-            cardEl.innerHTML = `<span class="card-text">?</span><img src="${carta.img}" alt="Personaje Bíblico">`;
+            // Asignamos el número secuencial exacto (index + 1) para que cada carta muestre su número único al cerrarse
+            cardEl.innerHTML = `<span class="card-text">${index + 1}</span><img src="${carta.img}" alt="Personaje Bíblico">`;
             
             cardEl.onclick = function() {
                 if (bloqueado || this === cartaPrimero || this.classList.contains('matched') || this.classList.contains('flipped')) return;
