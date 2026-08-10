@@ -123,6 +123,74 @@
     let cartaPrimero = null, cartaSegundo = null, bloqueado = false;
     let intentos = 0, parejasEncontradas = 0;
 
+    // SISTEMA DE EFECTOS DE SONIDO (Sintetizador Web Audio API incorporado)
+    let audioCtx = null;
+    function inicializarAudio() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    }
+
+    function reproducirSonido(tipo) {
+        try {
+            inicializarAudio();
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            let ahora = audioCtx.currentTime;
+
+            if (tipo === 'voltear') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, ahora);
+                osc.frequency.exponentialRampToValueAtTime(600, ahora + 0.08);
+                gainNode.gain.setValueAtTime(0.15, ahora);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ahora + 0.08);
+                osc.start(ahora);
+                osc.stop(ahora + 0.08);
+            } else if (tipo === 'acierto') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, ahora); // Do
+                osc.frequency.setValueAtTime(659.25, ahora + 0.1); // Mi
+                osc.frequency.setValueAtTime(783.99, ahora + 0.2); // Sol
+                gainNode.gain.setValueAtTime(0.2, ahora);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ahora + 0.35);
+                osc.start(ahora);
+                osc.stop(ahora + 0.35);
+            } else if (tipo === 'error') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, ahora);
+                osc.frequency.setValueAtTime(130, ahora + 0.12);
+                gainNode.gain.setValueAtTime(0.15, ahora);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ahora + 0.25);
+                osc.start(ahora);
+                osc.stop(ahora + 0.25);
+            } else if (tipo === 'victoria') {
+                let notas = [523.25, 659.25, 783.99, 1046.50];
+                notas.forEach((freq, idx) => {
+                    let o = audioCtx.createOscillator();
+                    let g = audioCtx.createGain();
+                    o.connect(g);
+                    g.connect(audioCtx.destination);
+                    o.type = 'sine';
+                    o.frequency.setValueAtTime(freq, ahora + (idx * 0.12));
+                    g.gain.setValueAtTime(0.2, ahora + (idx * 0.12));
+                    g.gain.exponentialRampToValueAtTime(0.01, ahora + (idx * 0.12) + 0.25);
+                    o.start(ahora + (idx * 0.12));
+                    o.stop(ahora + (idx * 0.12) + 0.25);
+                });
+            }
+        } catch (e) {
+            console.error("Audio no soportado:", e);
+        }
+    }
+
     window.onload = function() {
         cartasArray = [];
         personajesBase.forEach(p => {
@@ -167,6 +235,7 @@
     }
 
     function comenzarJuego() {
+        inicializarAudio(); // Activa el contexto de audio con la interacción del usuario
         document.getElementById('welcome-screen').style.display = 'none';
         iniciarJuego();
     }
@@ -198,6 +267,8 @@
                 if (bloqueado || this === cartaPrimero || this.classList.contains('matched') || this.classList.contains('flipped')) return;
                 
                 this.classList.add('flipped');
+                reproducirSonido('voltear'); // Sonido al voltear carta
+
                 if (!cartaPrimero) { cartaPrimero = this; return; }
                 
                 cartaSegundo = this; 
@@ -213,6 +284,7 @@
         if (cartaPrimero.dataset.id === cartaSegundo.dataset.id) {
             cartaPrimero.classList.add('matched'); 
             cartaSegundo.classList.add('matched');
+            reproducirSonido('acierto'); // Sonido de acierto
             parejasEncontradas++;
             document.getElementById('parejas').innerText = `Parejas: ${parejasEncontradas} / 6`;
             cartaPrimero = null; cartaSegundo = null;
@@ -221,14 +293,13 @@
                 setTimeout(() => {
                     document.getElementById('texto-victoria').innerText = `¡Completaste el juego en ${intentos} intentos!`;
                     document.getElementById('win-modal').style.display = 'flex';
-                    
-                    // EFECTO ESPECIAL: Disparo de Confeti de celebración
+                    reproducirSonido('victoria'); // Sonido de victoria
                     lanzarConfeti();
                 }, 400);
             }
         } else {
             bloqueado = true;
-            // EFECTO ESPECIAL: Añadir animación de sacudida a las dos cartas incorrectas
+            reproducirSonido('error'); // Sonido de error
             cartaPrimero.classList.add('shake');
             cartaSegundo.classList.add('shake');
 
@@ -241,7 +312,6 @@
     }
 
     function lanzarConfeti() {
-        // Configuración moderna y vistosa de partículas
         confetti({
             particleCount: 100,
             spread: 70,
