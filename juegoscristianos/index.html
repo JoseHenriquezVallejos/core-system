@@ -27,17 +27,16 @@
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 100%; margin: 0 auto; width: 100%; }
         .card { aspect-ratio: 1; background: #334155; border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 20px; color: white; position: relative; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         
-        /* Control visual de cartas */
-        .card span { display: block; }
+        /* Control visual de cartas para evitar que se muestren los números al iniciar */
+        .card span { display: none; }
         .card img { width: 100%; height: 100%; object-fit: cover; display: none; border-radius: 6px; position: absolute; top: 0; left: 0; }
         
         .card.flipped, .card.matched { background: white; border: 2px solid #d4af37; cursor: default; }
         .card.matched { border-color: #22c55e; }
         
         .card.flipped img, .card.matched img { display: block; }
-        .card.flipped span, .card.matched span { display: none; }
 
-        .btn-restart { margin: 10px 20px 20px 20px; background: #64748b; color: white; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; cursor: pointer; border: none; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; flex-shrink: 0;}
+        .btn-restart { margin: 15px 20px; background: #64748b; color: white; padding: 12px; border-radius: 8px; text-align: center; font-weight: bold; cursor: pointer; border: none; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; flex-shrink: 0;}
         .btn-restart:hover { background: #475569; }
         
         /* Ventana Modal de Victoria */
@@ -59,8 +58,8 @@
     </div>
 
     <div class="header">
-        <h1 id="titulo-visual">Cargando...</h1>
-        <p id="subtitulo-visual">Conectando con la base de datos...</p>
+        <h1 id="titulo-visual">Memoria Bíblica</h1>
+        <p id="subtitulo-visual">Encuentra las 6 parejas</p>
     </div>
     
     <div class="game-area">
@@ -98,9 +97,50 @@
     let cartaPrimero = null, cartaSegundo = null, bloqueado = false;
     let intentos = 0, parejasEncontradas = 0;
 
+    // Inicializar cartas base de inmediato al cargar la página
     window.onload = function() {
-        init();
+        cartasArray = [];
+        personajesBase.forEach(p => {
+            cartasArray.push({ id: p.id, img: p.img });
+            cartasArray.push({ id: p.id, img: p.img });
+        });
+        cargarConfiguracionSheet();
     };
+
+    // Función independiente para buscar los datos en el Sheet sin bloquear el juego
+    async function cargarConfiguracionSheet() {
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+        if (!id) return;
+
+        try {
+            const res = await fetch(SHEET_URL);
+            const data = await res.text();
+            const rows = data.split('\n').map(row => {
+                const result = []; let cell = '', inQuotes = false;
+                for (let char of row) {
+                    if (char === '"') inQuotes = !inQuotes;
+                    else if (char === ',' && !inQuotes) { result.push(cell); cell = ''; }
+                    else cell += char;
+                }
+                result.push(cell); return result;
+            });
+
+            const rowData = rows.find(r => r[0] && r[0].replace(/['"]+/g, '').trim().toLowerCase() === id.trim().toLowerCase());
+            
+            if (rowData) {
+                if (rowData[1]) document.getElementById('titulo-visual').innerText = rowData[1].replace(/['"]+/g, '').trim();
+                if (rowData[2]) {
+                    let sub = rowData[2].replace(/['"]+/g, '').trim();
+                    const rangoEdad = rowData[3] ? rowData[3].replace(/['"]+/g, '').trim() : "";
+                    if(rangoEdad) sub += ` | Edad: ${rangoEdad}`;
+                    document.getElementById('subtitulo-visual').innerText = sub;
+                }
+            }
+        } catch (e) {
+            console.error("Error leyendo Sheet:", e);
+        }
+    }
 
     function comenzarJuego() {
         document.getElementById('welcome-screen').style.display = 'none';
@@ -110,55 +150,6 @@
     function reiniciarDesdeModal() {
         document.getElementById('win-modal').style.display = 'none';
         iniciarJuego();
-    }
-
-    async function init() {
-        const params = new URLSearchParams(window.location.search);
-        const id = params.get('id');
-        
-        if (!id) {
-            document.getElementById('titulo-visual').innerText = "Memoria Bíblica";
-            document.getElementById('subtitulo-visual').innerText = "Modo de Prueba";
-        } else {
-            try {
-                const res = await fetch(SHEET_URL);
-                const data = await res.text();
-                const rows = data.split('\n').map(row => {
-                    const result = []; let cell = '', inQuotes = false;
-                    for (let char of row) {
-                        if (char === '"') inQuotes = !inQuotes;
-                        else if (char === ',' && !inQuotes) { result.push(cell); cell = ''; }
-                        else cell += char;
-                    }
-                    result.push(cell); return result;
-                });
-
-                const rowData = rows.find(r => r[0] && r[0].replace(/['"]+/g, '').trim().toLowerCase() === id.trim().toLowerCase());
-                
-                if (rowData) {
-                    document.getElementById('titulo-visual').innerText = rowData[1] ? rowData[1].replace(/['"]+/g, '').trim() : "Memoria Bíblica";
-                    document.getElementById('subtitulo-visual').innerText = rowData[2] ? rowData[2].replace(/['"]+/g, '').trim() : "Encuentra las 6 parejas";
-                    
-                    const rangoEdad = rowData[3] ? rowData[3].replace(/['"]+/g, '').trim() : "";
-                    if(rangoEdad) {
-                        document.getElementById('subtitulo-visual').innerText += ` | Edad: ${rangoEdad}`;
-                    }
-                } else {
-                    document.getElementById('titulo-visual').innerText = "ID no encontrado";
-                    document.getElementById('subtitulo-visual').innerText = "Usando configuración por defecto";
-                }
-            } catch (e) {
-                console.error(e);
-                document.getElementById('titulo-visual').innerText = "Memoria Bíblica";
-                document.getElementById('subtitulo-visual').innerText = "Juego listo para usar";
-            }
-        }
-
-        cartasArray = [];
-        personajesBase.forEach(p => {
-            cartasArray.push({ id: p.id, img: p.img });
-            cartasArray.push({ id: p.id, img: p.img });
-        });
     }
 
     function iniciarJuego() {
@@ -172,11 +163,11 @@
         
         let cartasMezcladas = [...cartasArray].sort(() => Math.random() - 0.5);
 
-        cartasMezcladas.forEach((carta, i) => {
+        cartasMezcladas.forEach((carta) => {
             const cardEl = document.createElement('div');
             cardEl.className = 'card';
             cardEl.dataset.id = carta.id;
-            cardEl.innerHTML = `<span>${i+1}</span><img src="${carta.img}" alt="Personaje Bíblico">`;
+            cardEl.innerHTML = `<img src="${carta.img}" alt="Personaje Bíblico">`;
             
             cardEl.onclick = function() {
                 if (bloqueado || this === cartaPrimero || this.classList.contains('matched') || this.classList.contains('flipped')) return;
