@@ -6,43 +6,45 @@
     <title>Memoria Bíblica</title>
     <style>
         body { margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #f1f5f9; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
-        .chat-container { width: 100%; max-width: 450px; background: rgba(255, 255, 255, 0.98); height: 100vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+        .chat-container { width: 100%; max-width: 450px; background: rgba(255, 255, 255, 0.98); height: 100vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.1); overflow-y: auto; }
 
         /* Pantalla de Bienvenida */
         #welcome-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; box-sizing: border-box; }
-        #welcome-screen img { max-width: 85%; height: auto; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        #welcome-screen h1 { font-size: 24px; color: #0f172a; margin-bottom: 10px; }
-        #welcome-screen p { font-size: 14px; color: #334155; margin-bottom: 25px; max-width: 300px; }
-        .btn-start { background: #0fb396; color: white; padding: 16px 30px; border-radius: 8px; text-align: center; font-weight: bold; cursor: pointer; border: none; font-size: 15px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        #welcome-screen img { max-width: 80%; height: auto; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        #welcome-screen h1 { font-size: 22px; color: #0f172a; margin-bottom: 8px; }
+        #welcome-screen p { font-size: 13px; color: #334155; margin-bottom: 20px; max-width: 280px; }
+        .btn-start { background: #0fb396; color: white; padding: 14px 28px; border-radius: 8px; text-align: center; font-weight: bold; cursor: pointer; border: none; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .btn-start:hover { background: #0d967e; }
 
         /* Encabezado del Juego */
-        .header { background: #0f172a; color: #ffffff; padding: 15px 20px; text-align: center; border-bottom: 4px solid #d4af37; flex-shrink: 0; }
-        .header h1 { margin: 0; font-size: 18px; font-weight: 300; letter-spacing: 1px; text-transform: uppercase; }
-        .header p { margin: 3px 0 0 0; font-size: 12px; color: #d4af37; letter-spacing: 1px; min-height: 14px; }
+        .header { background: #0f172a; color: #ffffff; padding: 12px 20px; text-align: center; border-bottom: 4px solid #d4af37; flex-shrink: 0; }
+        .header h1 { margin: 0; font-size: 16px; font-weight: 300; letter-spacing: 1px; text-transform: uppercase; }
+        .header p { margin: 2px 0 0 0; font-size: 11px; color: #d4af37; letter-spacing: 1px; min-height: 12px; }
         
-        .game-area { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
-        .stats { display: flex; justify-content: space-between; margin-bottom: 10px; color: #334155; font-size: 12px; font-weight: bold; }
+        .game-area { padding: 10px 15px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+        .stats { display: flex; justify-content: space-between; margin-bottom: 8px; color: #334155; font-size: 12px; font-weight: bold; }
 
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 100%; margin: 0 auto; }
-        .card { aspect-ratio: 1; background: #334155; border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 24px; color: white; position: relative; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 100%; margin: 0 auto; width: 100%; }
+        .card { aspect-ratio: 1; background: #334155; border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 20px; color: white; position: relative; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         
-        /* Cartas abiertas y aciertos */
+        /* Control visual de cartas */
+        .card span { display: block; }
+        .card img { width: 100%; height: 100%; object-fit: cover; display: none; border-radius: 6px; position: absolute; top: 0; left: 0; }
+        
         .card.flipped, .card.matched { background: white; border: 2px solid #d4af37; cursor: default; }
         .card.matched { border-color: #22c55e; }
         
-        .card img { width: 100%; height: 100%; object-fit: cover; display: none; border-radius: 6px; }
         .card.flipped img, .card.matched img { display: block; }
         .card.flipped span, .card.matched span { display: none; }
 
-        .btn-restart { margin: 15px 20px 20px 20px; background: #64748b; color: white; padding: 12px; border-radius: 8px; text-align: center; font-weight: bold; cursor: pointer; border: none; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; flex-shrink: 0;}
+        .btn-restart { margin: 10px 20px 20px 20px; background: #64748b; color: white; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; cursor: pointer; border: none; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; flex-shrink: 0;}
         .btn-restart:hover { background: #475569; }
         
         /* Ventana Modal de Victoria */
         #win-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 200; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 40px; text-align: center; box-sizing: border-box; }
-        #win-modal img { max-width: 140px; height: auto; margin-bottom: 15px; border-radius: 10px; }
-        #win-modal h2 { font-size: 28px; color: #fbbf24; margin-bottom: 10px; text-transform: uppercase; }
-        #win-modal p { font-size: 16px; color: white; margin-bottom: 25px; }
+        #win-modal img { max-width: 130px; height: auto; margin-bottom: 15px; border-radius: 10px; }
+        #win-modal h2 { font-size: 26px; color: #fbbf24; margin-bottom: 8px; text-transform: uppercase; }
+        #win-modal p { font-size: 15px; color: white; margin-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -50,7 +52,7 @@
 <div class="chat-container">
     
     <div id="welcome-screen">
-        <img src="http://googleusercontent.com/image_generation_content/88b776fd-5309-4089-a2ea-9e7ec2736b77" alt="Portada Memoria Bíblica">
+        <img src="https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/05-juegos-cristianos/Moises.webp" alt="Portada Memoria Bíblica">
         <h1>MEMORIA BÍBLICA</h1>
         <p>Pon a prueba tu memoria encontrando las parejas de los grandes héroes de la fe.</p>
         <button class="btn-start" onclick="comenzarJuego()">COMENZAR</button>
@@ -72,7 +74,7 @@
     <button class="btn-restart" onclick="iniciarJuego()">Reiniciar Juego</button>
 
     <div id="win-modal">
-        <img src="http://googleusercontent.com/image_generation_content/10f525ea-a223-4888-b13f-2e11b1c87d14" alt="¡Ganaste!">
+        <img src="https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/05-juegos-cristianos/David.webp" alt="¡Ganaste!">
         <h2>¡FELICITACIONES!</h2>
         <p id="texto-victoria">Completaste el juego.</p>
         <button class="btn-start" onclick="reiniciarDesdeModal()">JUGAR DE NUEVO</button>
@@ -83,14 +85,13 @@
 <script>
     const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRIUB0nwYzeRBhfb39ZYeQQPsVxhQDaRQjh744I6XysR4GVNsqB-0Wqv5uZlQzVHySPViKK4gOsSxwk/pub?gid=0&single=true&output=csv';
 
-    // Lista definitiva con tus 6 personajes y enlaces corregidos
     const personajesBase = [
-        { id: 0, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/05-juegos-cristianos/Moises.webp" }, // Moisés
-        { id: 1, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/05-juegos-cristianos/David.webp" },  // David
-        { id: 2, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/05-juegos-cristianos/Abraham.webp" },// Abraham
-        { id: 3, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/05-juegos-cristianos/Noe.webp" },    // Noé
-        { id: 4, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/05-juegos-cristianos/Daniel.webp" }, // Daniel
-        { id: 5, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/05-juegos-cristianos/Ester.webp" }   // Ester
+        { id: 0, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/05-juegos-cristianos/Moises.webp" },
+        { id: 1, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/05-juegos-cristianos/David.webp" },
+        { id: 2, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/05-juegos-cristianos/Abraham.webp" },
+        { id: 3, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/05-juegos-cristianos/Noe.webp" },
+        { id: 4, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/05-juegos-cristianos/Daniel.webp" },
+        { id: 5, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/05-juegos-cristianos/Ester.webp" }
     ];
 
     let cartasArray = [];
@@ -102,8 +103,7 @@
     };
 
     function comenzarJuego() {
-        const welcomeScreen = document.getElementById('welcome-screen');
-        welcomeScreen.style.display = 'none';
+        document.getElementById('welcome-screen').style.display = 'none';
         iniciarJuego();
     }
 
@@ -118,7 +118,7 @@
         
         if (!id) {
             document.getElementById('titulo-visual').innerText = "Memoria Bíblica";
-            document.getElementById('subtitulo-visual').innerText = "Modo de Prueba (Agrega ?id=... en el link)";
+            document.getElementById('subtitulo-visual').innerText = "Modo de Prueba";
         } else {
             try {
                 const res = await fetch(SHEET_URL);
