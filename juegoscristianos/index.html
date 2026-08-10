@@ -5,35 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memoria Bíblica</title>
     <style>
-        /* Bloqueamos el scroll del body por completo */
+        /* Bloqueamos el scroll del body */
         body { margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
         
-        /* Contenedor principal adaptable sin desbordar */
-        .chat-container { width: 100%; max-width: 430px; height: 100vh; max-height: 800px; background: rgba(255, 255, 255, 0.98); display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.15); overflow: hidden; box-sizing: border-box; }
+        /* Contenedor principal que se ajusta de forma fluida a la altura de la pantalla */
+        .chat-container { width: 100%; max-width: 420px; height: 100vh; max-height: 750px; background: rgba(255, 255, 255, 0.98); display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.15); overflow: hidden; box-sizing: border-box; }
 
         /* Pantalla de Bienvenida */
         #welcome-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; box-sizing: border-box; }
-        #welcome-screen img { max-width: 70%; height: auto; border-radius: 10px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        #welcome-screen h1 { font-size: 22px; color: #0f172a; margin-bottom: 6px; }
-        #welcome-screen p { font-size: 13px; color: #334155; margin-bottom: 18px; max-width: 280px; }
+        #welcome-screen img { max-width: 65%; height: auto; border-radius: 10px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        #welcome-screen h1 { font-size: 20px; color: #0f172a; margin-bottom: 6px; }
+        #welcome-screen p { font-size: 13px; color: #334155; margin-bottom: 16px; max-width: 280px; }
         .btn-start { background: #0fb396; color: white; padding: 12px 24px; border-radius: 8px; text-align: center; font-weight: bold; cursor: pointer; border: none; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .btn-start:hover { background: #0d967e; }
 
-        /* Encabezado del Juego */
-        .header { background: #0f172a; color: #ffffff; padding: 10px 15px; text-align: center; border-bottom: 4px solid #d4af37; flex-shrink: 0; }
-        .header h1 { margin: 0; font-size: 15px; font-weight: 300; letter-spacing: 1px; text-transform: uppercase; }
-        .header p { margin: 2px 0 0 0; font-size: 11px; color: #d4af37; letter-spacing: 1px; min-height: 12px; }
+        /* Encabezado del Juego compacto */
+        .header { background: #0f172a; color: #ffffff; padding: 8px 15px; text-align: center; border-bottom: 3px solid #d4af37; flex-shrink: 0; }
+        .header h1 { margin: 0; font-size: 14px; font-weight: 300; letter-spacing: 1px; text-transform: uppercase; }
+        .header p { margin: 2px 0 0 0; font-size: 10px; color: #d4af37; letter-spacing: 1px; min-height: 10px; }
         
-        .game-area { padding: 8px 12px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; }
+        .game-area { padding: 6px 12px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; }
         
         /* Estadísticas y Botón de Reinicio Rápido Arriba */
-        .stats { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; color: #334155; font-size: 12px; font-weight: bold; }
-        .btn-mini-restart { background: #64748b; color: white; padding: 5px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; border: none; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stats { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; color: #334155; font-size: 12px; font-weight: bold; }
+        .btn-mini-restart { background: #64748b; color: white; padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; border: none; text-transform: uppercase; letter-spacing: 0.5px; }
         .btn-mini-restart:hover { background: #475569; }
 
-        /* Cuadrícula optimizada para que entren las 6 filas perfectamente */
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; max-width: 100%; margin: 0 auto; width: 100%; }
-        .card { aspect-ratio: 1; background: #334155; border-radius: 6px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 18px; color: white; position: relative; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        /* Cuadrícula optimizada con altura dinámica para que quepan exactas las 6 filas */
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; max-width: 100%; margin: 0 auto; width: 100%; max-height: 100%; }
+        .card { width: 100%; aspect-ratio: 1; background: #334155; border-radius: 6px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 18px; color: white; position: relative; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         
         /* Control visual de cartas */
         .card span { display: none; }
@@ -46,9 +46,9 @@
         
         /* Ventana Modal de Victoria */
         #win-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 200; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 30px; text-align: center; box-sizing: border-box; }
-        #win-modal img { max-width: 120px; height: auto; margin-bottom: 12px; border-radius: 10px; }
-        #win-modal h2 { font-size: 24px; color: #fbbf24; margin-bottom: 6px; text-transform: uppercase; }
-        #win-modal p { font-size: 14px; color: white; margin-bottom: 18px; }
+        #win-modal img { max-width: 110px; height: auto; margin-bottom: 10px; border-radius: 10px; }
+        #win-modal h2 { font-size: 22px; color: #fbbf24; margin-bottom: 6px; text-transform: uppercase; }
+        #win-modal p { font-size: 14px; color: white; margin-bottom: 16px; }
     </style>
 </head>
 <body>
@@ -193,23 +193,4 @@
             cartaSegundo.classList.add('matched');
             parejasEncontradas++;
             document.getElementById('parejas').innerText = `Parejas: ${parejasEncontradas} / 6`;
-            cartaPrimero = null; cartaSegundo = null;
-            
-            if (parejasEncontradas === 6) {
-                setTimeout(() => {
-                    document.getElementById('texto-victoria').innerText = `¡Completaste el juego en ${intentos} intentos!`;
-                    document.getElementById('win-modal').style.display = 'flex';
-                }, 400);
-            }
-        } else {
-            bloqueado = true;
-            setTimeout(() => {
-                cartaPrimero.classList.remove('flipped'); 
-                cartaSegundo.classList.remove('flipped');
-                cartaPrimero = null; cartaSegundo = null; bloqueado = false;
-            }, 1000);
-        }
-    }
-</script>
-</body>
-</html>
+            carta
