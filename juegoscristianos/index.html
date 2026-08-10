@@ -65,7 +65,7 @@
             100% { transform: scale(1); }
         }
         
-        /* Ventana Modal de Victoria con efecto de aparición */
+        /* Ventana Modal de Victoria */
         #win-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 200; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 30px; text-align: center; box-sizing: border-box; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         #win-modal img { max-width: 110px; height: auto; margin-bottom: 10px; border-radius: 10px; }
@@ -123,7 +123,7 @@
     let cartaPrimero = null, cartaSegundo = null, bloqueado = false;
     let intentos = 0, parejasEncontradas = 0;
 
-    // SISTEMA DE EFECTOS DE SONIDO (Sintetizador Web Audio API incorporado)
+    // SISTEMA DE EFECTOS DE SONIDO ESTILO AGUA (Uso de ruido filtrado de baja frecuencia)
     let audioCtx = null;
     function inicializarAudio() {
         if (!audioCtx) {
@@ -131,7 +131,8 @@
         }
     }
 
-    function reproducirSonido(tipo) {
+    // Genera un búfer de sonido de agua fluyendo (arroyo suave)
+    function reproducirSonidoAgua(tipo) {
         try {
             inicializarAudio();
             if (!audioCtx) return;
@@ -139,53 +140,60 @@
                 audioCtx.resume();
             }
 
-            const osc = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            osc.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
+            let bufferSize = audioCtx.sampleRate * (tipo === 'victoria' ? 1.5 : 0.35);
+            let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            let output = buffer.getChannelData(0);
 
+            // Generar textura natural de agua (ruido rosa/blanco con variación fluida)
+            for (let i = 0; i < bufferSize; i++) {
+                output[i] = Math.random() * 2 - 1;
+            }
+
+            let whiteNoise = audioCtx.createBufferSource();
+            whiteNoise.buffer = buffer;
+
+            let filter = audioCtx.createBiquadFilter();
+            filter.type = 'bandpass';
+
+            let gainNode = audioCtx.createGain();
             let ahora = audioCtx.currentTime;
 
             if (tipo === 'voltear') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(400, ahora);
-                osc.frequency.exponentialRampToValueAtTime(600, ahora + 0.08);
-                gainNode.gain.setValueAtTime(0.15, ahora);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, ahora + 0.08);
-                osc.start(ahora);
-                osc.stop(ahora + 0.08);
-            } else if (tipo === 'acierto') {
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(523.25, ahora); // Do
-                osc.frequency.setValueAtTime(659.25, ahora + 0.1); // Mi
-                osc.frequency.setValueAtTime(783.99, ahora + 0.2); // Sol
+                // Chapoteo suave al voltear
+                filter.frequency.setValueAtTime(400, ahora);
+                filter.frequency.exponentialRampToValueAtTime(1000, ahora + 0.15);
+                filter.Q.value = 3;
                 gainNode.gain.setValueAtTime(0.2, ahora);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, ahora + 0.35);
-                osc.start(ahora);
-                osc.stop(ahora + 0.35);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, ahora + 0.25);
+            } else if (tipo === 'acierto') {
+                // Sonido de agua cristalina ascendente
+                filter.frequency.setValueAtTime(600, ahora);
+                filter.frequency.linearRampToValueAtTime(1600, ahora + 0.3);
+                filter.Q.value = 5;
+                gainNode.gain.setValueAtTime(0.25, ahora);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, ahora + 0.35);
             } else if (tipo === 'error') {
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(180, ahora);
-                osc.frequency.setValueAtTime(130, ahora + 0.12);
+                // Oleaje suave de tono bajo
+                filter.frequency.setValueAtTime(250, ahora);
+                filter.frequency.linearRampToValueAtTime(150, ahora + 0.3);
+                filter.Q.value = 2;
                 gainNode.gain.setValueAtTime(0.15, ahora);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, ahora + 0.25);
-                osc.start(ahora);
-                osc.stop(ahora + 0.25);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, ahora + 0.3);
             } else if (tipo === 'victoria') {
-                let notas = [523.25, 659.25, 783.99, 1046.50];
-                notas.forEach((freq, idx) => {
-                    let o = audioCtx.createOscillator();
-                    let g = audioCtx.createGain();
-                    o.connect(g);
-                    g.connect(audioCtx.destination);
-                    o.type = 'sine';
-                    o.frequency.setValueAtTime(freq, ahora + (idx * 0.12));
-                    g.gain.setValueAtTime(0.2, ahora + (idx * 0.12));
-                    g.gain.exponentialRampToValueAtTime(0.01, ahora + (idx * 0.12) + 0.25);
-                    o.start(ahora + (idx * 0.12));
-                    o.stop(ahora + (idx * 0.12) + 0.25);
-                });
+                // Cascada suave de celebración
+                filter.frequency.setValueAtTime(800, ahora);
+                filter.frequency.linearRampToValueAtTime(1800, ahora + 1.2);
+                filter.Q.value = 4;
+                gainNode.gain.setValueAtTime(0.3, ahora);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, ahora + 1.4);
             }
+
+            whiteNoise.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            whiteNoise.start(ahora);
+            whiteNoise.stop(ahora + (tipo === 'victoria' ? 1.4 : 0.35));
         } catch (e) {
             console.error("Audio no soportado:", e);
         }
@@ -235,7 +243,7 @@
     }
 
     function comenzarJuego() {
-        inicializarAudio(); // Activa el contexto de audio con la interacción del usuario
+        inicializarAudio();
         document.getElementById('welcome-screen').style.display = 'none';
         iniciarJuego();
     }
@@ -267,7 +275,7 @@
                 if (bloqueado || this === cartaPrimero || this.classList.contains('matched') || this.classList.contains('flipped')) return;
                 
                 this.classList.add('flipped');
-                reproducirSonido('voltear'); // Sonido al voltear carta
+                reproducirSonidoAgua('voltear'); // Sonido fluido al voltear
 
                 if (!cartaPrimero) { cartaPrimero = this; return; }
                 
@@ -284,7 +292,7 @@
         if (cartaPrimero.dataset.id === cartaSegundo.dataset.id) {
             cartaPrimero.classList.add('matched'); 
             cartaSegundo.classList.add('matched');
-            reproducirSonido('acierto'); // Sonido de acierto
+            reproducirSonidoAgua('acierto'); // Sonido de agua cristalina
             parejasEncontradas++;
             document.getElementById('parejas').innerText = `Parejas: ${parejasEncontradas} / 6`;
             cartaPrimero = null; cartaSegundo = null;
@@ -293,13 +301,13 @@
                 setTimeout(() => {
                     document.getElementById('texto-victoria').innerText = `¡Completaste el juego en ${intentos} intentos!`;
                     document.getElementById('win-modal').style.display = 'flex';
-                    reproducirSonido('victoria'); // Sonido de victoria
+                    reproducirSonidoAgua('victoria'); // Cascada de celebración
                     lanzarConfeti();
                 }, 400);
             }
         } else {
             bloqueado = true;
-            reproducirSonido('error'); // Sonido de error
+            reproducirSonidoAgua('error'); // Oleaje suave de error
             cartaPrimero.classList.add('shake');
             cartaSegundo.classList.add('shake');
 
