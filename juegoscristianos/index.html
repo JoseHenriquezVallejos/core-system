@@ -16,11 +16,11 @@
 
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .card { aspect-ratio: 1; background: #334155; border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 24px; color: white; position: relative; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .card.flipped, .card.matched { background: white; border: 2px solid #d4af37; }
+        .card.flipped { background: white; border: 2px solid #d4af37; }
+        .card.matched { background: white; border: 2px solid #22c55e; opacity: 1; cursor: default; } /* Borde verde y abiertas de forma fija */
         .card img { width: 100%; height: 100%; object-fit: cover; display: none; border-radius: 6px; }
         .card.flipped img, .card.matched img { display: block; }
         .card.flipped span, .card.matched span { display: none; }
-        .card.matched { opacity: 0.6; cursor: default; }
 
         .btn-restart { margin: 20px; background: #0fb396; color: white; padding: 15px; border-radius: 8px; text-align: center; font-weight: bold; cursor: pointer; border: none; font-size: 15px; text-transform: uppercase; letter-spacing: 1px; }
         .btn-restart:hover { background: #0d967e; }
@@ -85,15 +85,12 @@
                 result.push(cell); return result;
             });
 
-            // Buscamos la fila que coincida con el ID (Columna A), ignorando espacios y comillas
             const rowData = rows.find(r => r[0] && r[0].replace(/['"]+/g, '').trim().toLowerCase() === id.trim().toLowerCase());
             
             if (rowData) {
-                // Columna B: Nombre_Visual (Título) | Columna C: Subtitulo
                 document.getElementById('titulo-visual').innerText = rowData[1] ? rowData[1].replace(/['"]+/g, '').trim() : "Memoria Bíblica";
                 document.getElementById('subtitulo-visual').innerText = rowData[2] ? rowData[2].replace(/['"]+/g, '').trim() : "Encuentra las 6 parejas";
 
-                // Duplicamos las imágenes fijas para armar las 12 cartas del juego
                 cartasArray = [];
                 personajesBase.forEach(p => {
                     cartasArray.push({ id: p.id, img: p.img });
@@ -121,7 +118,6 @@
         document.getElementById('intentos').innerText = `Intentos: 0`;
         document.getElementById('parejas').innerText = `Parejas: 0 / 6`;
         
-        // Mezclar aleatoriamente las 12 cartas en el tablero
         let cartasMezcladas = [...cartasArray].sort(() => Math.random() - 0.5);
 
         cartasMezcladas.forEach((carta, i) => {
@@ -131,7 +127,7 @@
             cardEl.innerHTML = `<span>${i+1}</span><img src="${carta.img}" alt="Personaje">`;
             
             cardEl.onclick = function() {
-                if (bloqueado || this === cartaPrimero || this.classList.contains('matched')) return;
+                if (bloqueado || this === cartaPrimero || this.classList.contains('matched') || this.classList.contains('flipped')) return;
                 this.classList.add('flipped');
                 if (!cartaPrimero) { cartaPrimero = this; return; }
                 
@@ -167,7 +163,6 @@
         }
     }
 
-    // Inicializar app
     init();
 </script>
 </body>
