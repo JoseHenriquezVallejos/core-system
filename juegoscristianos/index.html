@@ -8,10 +8,10 @@
         /* Bloqueamos el scroll del body */
         body { margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
         
-        /* Contenedor principal que se adapta al 100% de la altura de la ventana */
-        .chat-container { width: 100%; max-width: 420px; height: 100vh; max-height: 100vh; background: rgba(255, 255, 255, 0.98); display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.15); overflow: hidden; box-sizing: border-box; }
+        /* Contenedor principal adaptable al 100% de la ventana */
+        .chat-container { width: 100%; max-width: 420px; height: 100vh; background: rgba(255, 255, 255, 0.98); display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.15); overflow: hidden; box-sizing: border-box; }
 
-        /* Pantalla de Bienvenida con scroll interno si fuera necesario */
+        /* Pantalla de Bienvenida con scroll interno */
         #welcome-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; box-sizing: border-box; overflow-y: auto; }
         #welcome-screen img { max-width: 50%; height: auto; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         #welcome-screen h1 { font-size: 20px; color: #0f172a; margin-bottom: 6px; }
@@ -24,7 +24,7 @@
         .header h1 { margin: 0; font-size: 15px; font-weight: 400; letter-spacing: 1.2px; text-transform: uppercase; }
         .header p { margin: 4px 0 0 0; font-size: 11px; color: #d4af37; letter-spacing: 1px; min-height: 12px; }
         
-        /* Área de juego fluida que distribuye el espacio disponible */
+        /* Área de juego fluida */
         .game-area { padding: 8px 12px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; overflow: hidden; }
         
         /* Estadísticas y Botón de Reinicio Rápido Arriba */
@@ -32,17 +32,19 @@
         .btn-mini-restart { background: #64748b; color: white; padding: 5px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; border: none; text-transform: uppercase; letter-spacing: 0.5px; }
         .btn-mini-restart:hover { background: #475569; }
 
-        /* Cuadrícula optimizada para asegurar que las 6 filas entren de forma exacta */
+        /* Cuadrícula optimizada */
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; flex-grow: 1; align-content: center; box-sizing: border-box; }
         .card { width: 100%; aspect-ratio: 1; background: #334155; border-radius: 6px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 18px; color: white; position: relative; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-height: 100%; }
         
-        /* Control visual de cartas */
-        .card span { display: none; }
+        /* Control visual de cartas: por defecto se muestra el texto/número o reverso, y la imagen está oculta */
+        .card .card-text { display: block; font-weight: bold; color: #94a3b8; font-size: 16px; }
         .card img { width: 100%; height: 100%; object-fit: cover; display: none; border-radius: 5px; position: absolute; top: 0; left: 0; }
         
+        /* Cuando se voltea o empareja, ocultamos el texto y mostramos la imagen */
         .card.flipped, .card.matched { background: white; border: 2px solid #d4af37; cursor: default; }
         .card.matched { border-color: #22c55e; }
         
+        .card.flipped .card-text, .card.matched .card-text { display: none; }
         .card.flipped img, .card.matched img { display: block; }
         
         /* Ventana Modal de Victoria */
@@ -167,11 +169,12 @@
         
         let cartasMezcladas = [...cartasArray].sort(() => Math.random() - 0.5);
 
-        cartasMezcladas.forEach((carta) => {
+        cartasMezcladas.forEach((carta, index) => {
             const cardEl = document.createElement('div');
             cardEl.className = 'card';
             cardEl.dataset.id = carta.id;
-            cardEl.innerHTML = `<img src="${carta.img}" alt="Personaje Bíblico">`;
+            // Incluimos un texto o número identificador en el reverso para que siempre se vea la carta al cerrarse
+            cardEl.innerHTML = `<span class="card-text">?</span><img src="${carta.img}" alt="Personaje Bíblico">`;
             
             cardEl.onclick = function() {
                 if (bloqueado || this === cartaPrimero || this.classList.contains('matched') || this.classList.contains('flipped')) return;
