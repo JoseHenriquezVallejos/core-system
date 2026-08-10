@@ -3,22 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memoria Bíblica - Cargando...</title>
-    <link rel="icon" type="image/png" href="TU_ENLACE_DEL_FAVICON.png">
+    <title>Memoria Bíblica</title>
     <style>
-        /* Fondo texturizado generado anteriormente */
-        body { margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-image: url('TU_ENLACE_DE_LA_TEXTURA_DE_FONDO.png'); background-repeat: repeat; background-color: #f1f5f9; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
-        .chat-container { width: 100%; max-width: 450px; background: rgba(255, 255, 255, 0.95); height: 100vh; display: flex; flex-direction: column; position: relative; }
+        body { margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #f1f5f9; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
+        .chat-container { width: 100%; max-width: 450px; background: rgba(255, 255, 255, 0.98); height: 100vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
 
-        /* --- Estilos de la Pantalla de Bienvenida (NUEVO) --- */
+        /* Pantalla de Bienvenida */
         #welcome-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; box-sizing: border-box; }
-        #welcome-screen img { max-width: 100%; height: auto; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        #welcome-screen h1 { font-size: 28px; color: #0f172a; margin-bottom: 10px; }
-        #welcome-screen p { font-size: 16px; color: #334155; margin-bottom: 30px; max-width: 300px; }
-        .btn-start { background: #0fb396; color: white; padding: 18px 30px; border-radius: 8px; text-align: center; font-weight: bold; cursor: pointer; border: none; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        #welcome-screen img { max-width: 85%; height: auto; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        #welcome-screen h1 { font-size: 24px; color: #0f172a; margin-bottom: 10px; }
+        #welcome-screen p { font-size: 14px; color: #334155; margin-bottom: 25px; max-width: 300px; }
+        .btn-start { background: #0fb396; color: white; padding: 16px 30px; border-radius: 8px; text-align: center; font-weight: bold; cursor: pointer; border: none; font-size: 15px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .btn-start:hover { background: #0d967e; }
 
-        /* --- Estilos del Juego (YA EXISTENTES) --- */
+        /* Encabezado del Juego */
         .header { background: #0f172a; color: #ffffff; padding: 15px 20px; text-align: center; border-bottom: 4px solid #d4af37; flex-shrink: 0; }
         .header h1 { margin: 0; font-size: 18px; font-weight: 300; letter-spacing: 1px; text-transform: uppercase; }
         .header p { margin: 3px 0 0 0; font-size: 12px; color: #d4af37; letter-spacing: 1px; min-height: 14px; }
@@ -29,9 +27,9 @@
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 100%; margin: 0 auto; }
         .card { aspect-ratio: 1; background: #334155; border-radius: 8px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 24px; color: white; position: relative; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         
-        /* Clases Flipped y Matched (CORREGIDAS PARA QUEDAR ABIERTAS) */
+        /* Cartas abiertas y aciertos */
         .card.flipped, .card.matched { background: white; border: 2px solid #d4af37; cursor: default; }
-        .card.matched { border-color: #22c55e; } /* Borde verde para indicar acierto */
+        .card.matched { border-color: #22c55e; }
         
         .card img { width: 100%; height: 100%; object-fit: cover; display: none; border-radius: 6px; }
         .card.flipped img, .card.matched img { display: block; }
@@ -40,11 +38,11 @@
         .btn-restart { margin: 15px 20px 20px 20px; background: #64748b; color: white; padding: 12px; border-radius: 8px; text-align: center; font-weight: bold; cursor: pointer; border: none; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; flex-shrink: 0;}
         .btn-restart:hover { background: #475569; }
         
-        /* Estilos para la ventana modal de ganar (NUEVO) */
+        /* Ventana Modal de Victoria */
         #win-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 200; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 40px; text-align: center; box-sizing: border-box; }
-        #win-modal img { max-width: 150px; height: auto; margin-bottom: 20px; } /* Imagen del ángel de celebración */
-        #win-modal h2 { font-size: 32px; color: #fbbf24; margin-bottom: 10px; text-transform: uppercase; }
-        #win-modal p { font-size: 18px; color: white; margin-bottom: 30px; }
+        #win-modal img { max-width: 140px; height: auto; margin-bottom: 15px; border-radius: 10px; }
+        #win-modal h2 { font-size: 28px; color: #fbbf24; margin-bottom: 10px; text-transform: uppercase; }
+        #win-modal p { font-size: 16px; color: white; margin-bottom: 25px; }
     </style>
 </head>
 <body>
@@ -52,7 +50,7 @@
 <div class="chat-container">
     
     <div id="welcome-screen">
-        <img src="TU_ENLACE_DE_LA_IMAGEN_DE_PORTADA.png" alt="Portada Memoria Bíblica">
+        <img src="http://googleusercontent.com/image_generation_content/88b776fd-5309-4089-a2ea-9e7ec2736b77" alt="Portada Memoria Bíblica">
         <h1>MEMORIA BÍBLICA</h1>
         <p>Pon a prueba tu memoria encontrando las parejas de los grandes héroes de la fe.</p>
         <button class="btn-start" onclick="comenzarJuego()">COMENZAR</button>
@@ -74,7 +72,7 @@
     <button class="btn-restart" onclick="iniciarJuego()">Reiniciar Juego</button>
 
     <div id="win-modal">
-        <img src="TU_ENLACE_DE_LA_IMAGEN_DE_CELEBRACION.png" alt="¡Ganaste!">
+        <img src="http://googleusercontent.com/image_generation_content/10f525ea-a223-4888-b13f-2e11b1c87d14" alt="¡Ganaste!">
         <h2>¡FELICITACIONES!</h2>
         <p id="texto-victoria">Completaste el juego.</p>
         <button class="btn-start" onclick="reiniciarDesdeModal()">JUGAR DE NUEVO</button>
@@ -83,44 +81,42 @@
 </div>
 
 <script>
-    // Enlace CSV publicado de tu Google Sheet
     const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRIUB0nwYzeRBhfb39ZYeQQPsVxhQDaRQjh744I6XysR4GVNsqB-0Wqv5uZlQzVHySPViKK4gOsSxwk/pub?gid=0&single=true&output=csv';
 
-    // Lista fija de las 6 parejas de imágenes (REEMPLAZA CON TUS ENLACES REALES)
+    // Lista definitiva con tus 6 personajes y enlaces corregidos
     const personajesBase = [
-        { id: 0, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/04-megapack/image1.webp" }, // Moisés
-        { id: 1, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/04-megapack/image2.webp" }, // David
-        { id: 2, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/04-megapack/image3.webp" }, // Abraham
-        { id: 3, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/04-megapack/image4.webp" }, // Noé
-        { id: 4, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/04-megapack/image5.webp" }, // Daniel
-        { id: 5, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/04-megapack/image6.webp" }  // Ester
+        { id: 0, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/05-juegos-cristianos/Moises.webp" }, // Moisés
+        { id: 1, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/05-juegos-cristianos/David.webp" },  // David
+        { id: 2, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/05-juegos-cristianos/Abraham.webp" },// Abraham
+        { id: 3, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/05-juegos-cristianos/Noe.webp" },    // Noé
+        { id: 4, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/05-juegos-cristianos/Daniel.webp" }, // Daniel
+        { id: 5, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/05-juegos-cristianos/Ester.webp" }   // Ester
     ];
 
     let cartasArray = [];
     let cartaPrimero = null, cartaSegundo = null, bloqueado = false;
     let intentos = 0, parejasEncontradas = 0;
 
-    // --- Funciones para el Flujo de Pantallas (NUEVO) ---
-
-    // Función que se ejecuta al cargar la página
     window.onload = function() {
-        init(); // Carga la configuración desde Google Sheets
+        init();
     };
 
-    // Función que se ejecuta al presionar "COMENZAR" en la pantalla de bienvenida
     function comenzarJuego() {
         const welcomeScreen = document.getElementById('welcome-screen');
-        welcomeScreen.style.display = 'none'; // Oculta la pantalla de bienvenida
-        iniciarJuego(); // Inicia el tablero
+        welcomeScreen.style.display = 'none';
+        iniciarJuego();
     }
 
-    // --- Funciones del Juego (MODIFICADAS) ---
+    function reiniciarDesdeModal() {
+        document.getElementById('win-modal').style.display = 'none';
+        iniciarJuego();
+    }
 
     async function init() {
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id');
+        
         if (!id) {
-            // Si no hay ID, mostramos un error pero permitimos jugar con los datos por defecto
             document.getElementById('titulo-visual').innerText = "Memoria Bíblica";
             document.getElementById('subtitulo-visual').innerText = "Modo de Prueba (Agrega ?id=... en el link)";
         } else {
@@ -143,7 +139,6 @@
                     document.getElementById('titulo-visual').innerText = rowData[1] ? rowData[1].replace(/['"]+/g, '').trim() : "Memoria Bíblica";
                     document.getElementById('subtitulo-visual').innerText = rowData[2] ? rowData[2].replace(/['"]+/g, '').trim() : "Encuentra las 6 parejas";
                     
-                    // (Opcional) Leer y mostrar el rango de edad si existe en la columna D
                     const rangoEdad = rowData[3] ? rowData[3].replace(/['"]+/g, '').trim() : "";
                     if(rangoEdad) {
                         document.getElementById('subtitulo-visual').innerText += ` | Edad: ${rangoEdad}`;
@@ -154,12 +149,11 @@
                 }
             } catch (e) {
                 console.error(e);
-                document.getElementById('titulo-visual').innerText = "Error de conexión";
-                document.getElementById('subtitulo-visual').innerText = "Verifica la publicación del Google Sheet";
+                document.getElementById('titulo-visual').innerText = "Memoria Bíblica";
+                document.getElementById('subtitulo-visual').innerText = "Juego listo para usar";
             }
         }
 
-        // Preparamos las cartas (esto se hace al cargar, pero el juego no inicia hasta presionar "COMENZAR")
         cartasArray = [];
         personajesBase.forEach(p => {
             cartasArray.push({ id: p.id, img: p.img });
@@ -185,7 +179,6 @@
             cardEl.innerHTML = `<span>${i+1}</span><img src="${carta.img}" alt="Personaje Bíblico">`;
             
             cardEl.onclick = function() {
-                // Prevenir clics si la carta ya está abierta o bloqueada
                 if (bloqueado || this === cartaPrimero || this.classList.contains('matched') || this.classList.contains('flipped')) return;
                 
                 this.classList.add('flipped');
@@ -202,8 +195,27 @@
 
     function verificarPareja() {
         if (cartaPrimero.dataset.id === cartaSegundo.dataset.id) {
-            // Son iguales
             cartaPrimero.classList.add('matched'); 
             cartaSegundo.classList.add('matched');
             parejasEncontradas++;
-            document
+            document.getElementById('parejas').innerText = `Parejas: ${parejasEncontradas} / 6`;
+            cartaPrimero = null; cartaSegundo = null;
+            
+            if (parejasEncontradas === 6) {
+                setTimeout(() => {
+                    document.getElementById('texto-victoria').innerText = `¡Completaste el juego en ${intentos} intentos!`;
+                    document.getElementById('win-modal').style.display = 'flex';
+                }, 400);
+            }
+        } else {
+            bloqueado = true;
+            setTimeout(() => {
+                cartaPrimero.classList.remove('flipped'); 
+                cartaSegundo.classList.remove('flipped');
+                cartaPrimero = null; cartaSegundo = null; bloqueado = false;
+            }, 1000);
+        }
+    }
+</script>
+</body>
+</html>
