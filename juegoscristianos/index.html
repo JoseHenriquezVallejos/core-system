@@ -98,7 +98,6 @@
 </div>
 
 <script>
-    // Parámetro de tiempo dinámico (?t=...) para evitar la caché vieja del navegador
     const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRIUB0nwYzeRBhfb39ZYeQQPsVxhQDaRQjh744I6XysR4GVNsqB-0Wqv5uZlQzVHySPViKK4gOsSxwk/pub?gid=0&single=true&output=csv&t=' + new Date().getTime();
 
     const personajesBase = [
@@ -212,17 +211,14 @@
                 result.push(cell); return result;
             });
 
-            // Busca el ID exacto que viene en la URL (Columna A -> índice 0)
             const rowData = rows.find(r => r[0] && r[0].replace(/['"]+/g, '').trim().toLowerCase() === idBusqueda.trim().toLowerCase());
             
             if (rowData) {
-                // Columna B (índice 1): Nombre_Visual
                 if (rowData[1]) {
                     let nombreVisual = rowData[1].replace(/['"]+/g, '').trim();
                     document.getElementById('titulo-visual').innerText = nombreVisual;
                     document.getElementById('welcome-titulo').innerText = nombreVisual;
                 }
-                // Columna C (índice 2): Subtitulo
                 if (rowData[2]) {
                     let subtituloVisual = rowData[2].replace(/['"]+/g, '').trim();
                     document.getElementById('subtitulo-visual').innerText = subtituloVisual;
