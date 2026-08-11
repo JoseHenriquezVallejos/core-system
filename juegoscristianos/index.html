@@ -107,7 +107,8 @@
 </div>
 
 <script>
-    const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRIUB0nwYzeRBhfb39ZYeQQPsVxhQDaRQjh744I6XysR4GVNsqB-0Wqv5uZlQzVHySPViKK4gOsSxwk/pub?gid=0&single=true&output=csv';
+    // Agregamos un parámetro de tiempo dinámico para evitar la caché vieja del navegador
+    const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRIUB0nwYzeRBhfb39ZYeQQPsVxhQDaRQjh744I6XysR4GVNsqB-0Wqv5uZlQzVHySPViKK4gOsSxwk/pub?gid=0&single=true&output=csv&t=' + new Date().getTime();
 
     const personajesBase = [
         { id: 0, img: "https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/05-juegos-cristianos/Moises.webp" },
@@ -146,7 +147,6 @@
             gain.connect(audioCtx.destination);
 
             if (tipo === 'voltear') {
-                // Tono acuoso breve y ascendente
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(320, ahora);
                 osc.frequency.exponentialRampToValueAtTime(540, ahora + 0.12);
@@ -155,7 +155,6 @@
                 osc.start(ahora);
                 osc.stop(ahora + 0.15);
             } else if (tipo === 'acierto') {
-                // Acorde suave tipo gota de agua cristalina
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(440, ahora);
                 osc.frequency.setValueAtTime(660, ahora + 0.1);
@@ -164,7 +163,6 @@
                 osc.start(ahora);
                 osc.stop(ahora + 0.3);
             } else if (tipo === 'error') {
-                // Tono bajo y cálido sin golpe
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(220, ahora);
                 osc.frequency.exponentialRampToValueAtTime(160, ahora + 0.2);
@@ -173,7 +171,6 @@
                 osc.start(ahora);
                 osc.stop(ahora + 0.22);
             } else if (tipo === 'victoria') {
-                // Secuencia fluida de celebración
                 let notas = [392, 523, 659, 784];
                 notas.forEach((freq, idx) => {
                     let o = audioCtx.createOscillator();
@@ -204,12 +201,13 @@
 
     async function cargarConfiguracionSheet() {
         const params = new URLSearchParams(window.location.search);
-        const id = params.get('id');
-        if (!id) return;
+        const idBusqueda = params.get('id');
+        if (!idBusqueda) return;
 
         try {
             const res = await fetch(SHEET_URL);
             const data = await res.text();
+            
             const rows = data.split('\n').map(row => {
                 const result = []; let cell = '', inQuotes = false;
                 for (let char of row) {
@@ -220,16 +218,22 @@
                 result.push(cell); return result;
             });
 
-            const rowData = rows.find(r => r[0] && r[0].replace(/['"]+/g, '').trim().toLowerCase() === id.trim().toLowerCase());
+            // Buscamos la fila exacta que coincida con el ID (Columna A -> índice 0)
+            const rowData = rows.find(r => r[0] && r[0].replace(/['"]+/g, '').trim().toLowerCase() === idBusqueda.trim().toLowerCase());
             
             if (rowData) {
-                if (rowData[1]) document.getElementById('titulo-visual').innerText = rowData[1].replace(/['"]+/g, '').trim();
-                if (rowData[2]) {
-                    let sub = rowData[2].replace(/['"]+/g, '').trim();
-                    const rangoEdad = rowData[3] ? rowData[3].replace(/['"]+/g, '').trim() : "";
-                    if(rangoEdad) sub += ` | Edad: ${rangoEdad}`;
-                    document.getElementById('subtitulo-visual').innerText = sub;
+                // Columna B (índice 1): Nombre_Visual
+                if (rowData[1]) {
+                    let tituloVisual = rowData[1].replace(/['"]+/g, '').trim();
+                    document.getElementById('titulo-visual').innerText = tituloVisual;
                 }
+                // Columna C (índice 2): Subtitulo
+                if (rowData[2]) {
+                    let subtituloVisual = rowData[2].replace(/['"]+/g, '').trim();
+                    document.getElementById('subtitulo-visual').innerText = subtituloVisual;
+                }
+            } else {
+                console.warn("No se encontró el ID en la planilla:", idBusqueda);
             }
         } catch (e) {
             console.error("Error leyendo Sheet:", e);
