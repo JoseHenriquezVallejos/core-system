@@ -10,13 +10,28 @@
         
         .chat-container { width: 100%; max-width: 420px; height: 100vh; background: rgba(255, 255, 255, 0.98); display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.15); overflow: hidden; box-sizing: border-box; }
 
-        /* Pantalla de Bienvenida Dinámica */
+        /* Pantalla de Bienvenida / Carga Dinámica */
         #welcome-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; box-sizing: border-box; overflow-y: auto; }
         #welcome-screen img { max-width: 50%; height: auto; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         #welcome-screen h1 { font-size: 20px; color: #0f172a; margin-bottom: 6px; }
         #welcome-screen p { font-size: 13px; color: #334155; margin-bottom: 16px; max-width: 280px; }
         .btn-start { background: #0fb396; color: white; padding: 12px 28px; border-radius: 8px; text-align: center; font-weight: bold; cursor: pointer; border: none; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: 0.2s; display: inline-block; }
         .btn-start:hover { background: #0d967e; transform: scale(1.03); }
+
+        /* Estilo exclusivo para cuando hay Error de ID (oculta imagen y botón) */
+        #welcome-screen.error-mode img,
+        #welcome-screen.error-mode .btn-start {
+            display: none !important;
+        }
+        #welcome-screen.error-mode h1 {
+            color: #ef4444;
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+        #welcome-screen.error-mode p {
+            color: #64748b;
+            font-size: 14px;
+        }
 
         /* Encabezado del juego */
         .header { background: #0f172a; color: #ffffff; padding: 14px 20px; text-align: center; border-bottom: 4px solid #d4af37; flex-shrink: 0; }
@@ -69,8 +84,8 @@
     
     <div id="welcome-screen">
         <img id="welcome-img" src="https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/05-juegos-cristianos/Ester.webp" alt="Portada Juego">
-        <h1 id="welcome-titulo">Conectando...</h1>
-        <p id="welcome-desc">Leyendo ID desde la URL...</p>
+        <h1 id="welcome-titulo">Cargando...</h1>
+        <p id="welcome-desc">Obteniendo datos desde la planilla...</p>
         <button id="btn-comenzar" class="btn-start" style="display: none;" onclick="comenzarJuego()">COMENZAR</button>
     </div>
 
@@ -112,7 +127,7 @@
     let cartasArray = [];
     let cartaPrimero = null, cartaSegundo = null, bloqueado = false;
     let intentos = 0, parejasEncontradas = 0;
-    let juegoHabilitado = false; // Bandera de seguridad
+    let juegoHabilitado = false;
 
     let audioCtx = null;
     function inicializarAudio() {
@@ -194,10 +209,7 @@
         const idBusqueda = params.get('id');
         
         if (!idBusqueda) {
-            console.warn("⚠️ Falta el parámetro ?id= en la URL.");
-            document.getElementById('welcome-titulo').innerText = "Enlace incompleto";
-            document.getElementById('welcome-desc').innerText = "Falta indicar el ID del juego en la URL (ej: ?id=memoria).";
-            document.getElementById('btn-comenzar').style.display = 'none'; // Mantiene oculto el botón
+            mostrarError("Enlace incompleto", "Falta indicar el ID del juego en la URL (ej: ?id=memoria).");
             return;
         }
 
@@ -207,7 +219,6 @@
             const res = await fetch(SHEET_URL);
             const data = await res.text();
             
-            // Procesamiento de CSV respetando saltos de línea y celdas con comillas
             const rows = [];
             let currentRow = [];
             let currentCell = '';
@@ -242,7 +253,6 @@
                 rows.push(currentRow);
             }
 
-            // Buscar la coincidencia exacta del ID en la Columna A (índice 0)
             let rowData = null;
             for (let i = 0; i < rows.length; i++) {
                 if (rows[i] && rows[i][0]) {
@@ -255,43 +265,44 @@
             }
             
             if (rowData) {
-                // ¡ID ENCONTRADO! Configuramos y habilitamos el juego
                 juegoHabilitado = true;
 
-                // Columna B (índice 1): Nombre_Visual
                 if (rowData[1]) {
                     let nombreVisual = rowData[1].replace(/['"]+/g, '').trim();
                     document.getElementById('titulo-visual').innerText = nombreVisual;
                     document.getElementById('welcome-titulo').innerText = nombreVisual;
                 }
                 
-                // Columna C (índice 2): Subtítulo
                 if (rowData[2]) {
                     let textoSub = rowData[2].replace(/['"]+/g, '').trim();
                     document.getElementById('subtitulo-visual').innerText = textoSub;
                     document.getElementById('welcome-desc').innerText = textoSub;
                 }
 
-                // MOSTRAR BOTÓN DE COMENZAR SÓLO SI SE ENCONTRÓ EL ID
+                // Mostrar botón de comenzar limpio
                 document.getElementById('btn-comenzar').style.display = 'inline-block';
 
             } else {
-                // ID NO ENCONTRADO: Bloqueamos todo y no permitimos levantar nada
-                console.warn("❌ ID no encontrado en la planilla:", idLimpioBusqueda);
-                document.getElementById('welcome-titulo').innerText = "ID no encontrado";
-                document.getElementById('welcome-desc').innerText = `El identificador "${idBusqueda}" no existe en la planilla.`;
-                document.getElementById('btn-comenzar').style.display = 'none'; // ¡Bloqueado!
+                mostrarError("ID no encontrado", `El identificador "${idBusqueda}" no existe en la planilla.`);
             }
         } catch (e) {
             console.error("Error al conectar con Google Sheets:", e);
-            document.getElementById('welcome-titulo').innerText = "Error de conexión";
-            document.getElementById('welcome-desc').innerText = "No se pudo leer la planilla de Google Sheets.";
-            document.getElementById('btn-comenzar').style.display = 'none';
+            mostrarError("Error de conexión", "No se pudo leer la planilla de Google Sheets.");
         }
     }
 
+    // Función auxiliar para activar el modo de error estricto (oculta imagen y botón)
+    function mostrarError(titulo, descripcion) {
+        juegoHabilitado = false;
+        const welcomeScreen = document.getElementById('welcome-screen');
+        welcomeScreen.classList.add('error-mode');
+        document.getElementById('welcome-titulo').innerText = titulo;
+        document.getElementById('welcome-desc').innerText = descripcion;
+        document.getElementById('btn-comenzar').style.display = 'none';
+    }
+
     function comenzarJuego() {
-        if (!juegoHabilitado) return; // Seguridad extra
+        if (!juegoHabilitado) return;
         inicializarAudio();
         document.getElementById('welcome-screen').style.display = 'none';
         iniciarJuego();
