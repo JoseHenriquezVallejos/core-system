@@ -3,15 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Funnel Riman Academy</title>
+    <title>Funnel para afiliados - Llave en Mano</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
     <style>
         body { margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #f1f5f9; display: flex; justify-content: center; }
-        .chat-container { width: 100%; max-width: 700px; background: white; padding-bottom: 20px; }
+        .chat-container { width: 100%; max-width: 700px; background: white; padding-bottom: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); min-height: 100vh; position: relative; box-sizing: border-box; }
         .header { background: #0f172a; color: #ffffff; padding: 30px 20px; text-align: center; border-bottom: 4px solid #d4af37; }
         .header h1 { margin: 0; font-size: 28px; font-weight: 300; letter-spacing: 1px; text-transform: uppercase; }
         .header p { margin: 5px 0 0 0; font-size: 14px; color: #d4af37; letter-spacing: 2px; }
         
+        /* Contenedor principal protegido que se oculta si hay error */
+        #contenido-principal { display: none; }
+
         .swiper { width: 100%; height: auto !important; background: #ffffff; padding: 10px 10px 30px 10px; box-sizing: border-box; }
         .swiper-slide { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 320px; }
         .swiper-slide img { width: 100%; max-height: 250px; object-fit: contain; display: block; }
@@ -31,7 +34,6 @@
         .accordion { background: #0f172a; color: white; cursor: pointer; padding: 15px; width: 100%; border: none; text-align: left; border-radius: 8px; margin-bottom: 8px; font-weight: bold; }
         .panel { padding: 0 15px; background-color: #f8fafc; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; border-left: 3px solid #d4af37; margin-bottom: 8px; text-align: justify; }
         
-        /* Contenedor de botones en columna para que ambos ocupen todo el ancho uniformemente */
         .button-grid { display: flex; flex-direction: column; gap: 10px; padding: 15px; }
         .btn-action { background: #334155; color: white; padding: 14px; border-radius: 8px; text-align: center; text-decoration: none; font-weight: 600; font-size: 15px; display: flex; align-items: center; justify-content: center; width: 100%; box-sizing: border-box; }
         .btn-green { background: #0fb396; }
@@ -43,84 +45,142 @@
 <div class="chat-container">
     <div class="header">
         <h1 id="nombre-visual">Cargando...</h1>
-        <p id="subtitulo-visual">Cargando...</p>
+        <p id="subtitulo-visual">Obteniendo información...</p>
     </div>
     
-    <div class="swiper main-swiper">
-        <div class="swiper-wrapper">
-            <div class="swiper-slide"><img id="f1" src=""><p id="desc1" class="slide-desc"></p></div>
-            <div class="swiper-slide"><img id="f2" src=""><p id="desc2" class="slide-desc"></p></div>
-            <div class="swiper-slide"><img id="f3" src=""><p id="desc3" class="slide-desc"></p></div>
-            <div class="swiper-slide"><img id="f4" src=""><p id="desc4" class="slide-desc"></p></div>
-            <div class="swiper-slide"><img id="f5" src=""><p id="desc5" class="slide-desc"></p></div>
-            <div class="swiper-slide"><img id="f6" src=""><p id="desc6" class="slide-desc"></p></div>
-            <div class="swiper-slide"><img id="f7" src=""><p id="desc7" class="slide-desc"></p></div>
-            <div class="swiper-slide"><img id="f8" src=""><p id="desc8" class="slide-desc"></p></div>
+    <div id="contenido-principal">
+        <div class="swiper main-swiper">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide"><img id="f1" src=""><p id="desc1" class="slide-desc"></p></div>
+                <div class="swiper-slide"><img id="f2" src=""><p id="desc2" class="slide-desc"></p></div>
+                <div class="swiper-slide"><img id="f3" src=""><p id="desc3" class="slide-desc"></p></div>
+                <div class="swiper-slide"><img id="f4" src=""><p id="desc4" class="slide-desc"></p></div>
+                <div class="swiper-slide"><img id="f5" src=""><p id="desc5" class="slide-desc"></p></div>
+                <div class="swiper-slide"><img id="f6" src=""><p id="desc6" class="slide-desc"></p></div>
+                <div class="swiper-slide"><img id="f7" src=""><p id="desc7" class="slide-desc"></p></div>
+                <div class="swiper-slide"><img id="f8" src=""><p id="desc8" class="slide-desc"></p></div>
+            </div>
+            <div class="swiper-pagination"></div>
         </div>
-        <div class="swiper-pagination"></div>
-    </div>
 
-    <div class="faq-section">
-        <button class="accordion">...</button><div class="panel"><p></p></div>
-        <button class="accordion">...</button><div class="panel"><p></p></div>
-        <button class="accordion">...</button><div class="panel"><p></p></div>
-    </div>
+        <div class="faq-section">
+            <button class="accordion">...</button><div class="panel"><p></p></div>
+            <button class="accordion">...</button><div class="panel"><p></p></div>
+            <button class="accordion">...</button><div class="panel"><p></p></div>
+        </div>
 
-    <div class="button-grid">
-        <a id="btn-wa" href="#" class="btn-action btn-green">💬 WhatsApp</a>
-        <a id="btn-hotmart" href="#" class="btn-action btn-hotmart">🔥 Comprar en Hotmart</a>
+        <div class="button-grid">
+            <a id="btn-wa" href="#" class="btn-action btn-green">💬 WhatsApp</a>
+            <a id="btn-hotmart" href="#" class="btn-action btn-hotmart">🔥 Comprar en Hotmart</a>
+        </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
-    new Swiper('.main-swiper', { loop: true, autoplay: { delay: 3500 }, pagination: { el: '.swiper-pagination' } });
-
     const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ5JVh7CU6HrRSvH1hzI_LSD61AMNNQokYez2snOaS0WgNNCLZszqaDDsRhe7yLpEtwL3PAffa4AN9T/pub?gid=0&single=true&output=csv';
 
     async function init() {
         const params = new URLSearchParams(window.location.search);
-        const id = params.get('id');
-        if (!id) return;
+        const idBusqueda = params.get('id');
+        
+        if (!idBusqueda) {
+            document.getElementById('nombre-visual').innerText = "ENLACE INCOMPLETO";
+            document.getElementById('subtitulo-visual').innerText = "FALTA EL ID EN LA URL";
+            return;
+        }
 
-        const res = await fetch(SHEET_URL);
-        const data = await res.text();
-        const rows = data.split('\n').map(row => {
-            const result = []; let cell = ''; let inQuotes = false;
-            for (let char of row) {
-                if (char === '"') inQuotes = !inQuotes;
-                else if (char === ',' && !inQuotes) { result.push(cell); cell = ''; }
-                else cell += char;
-            }
-            result.push(cell);
-            return result;
-        });
+        const idLimpioBusqueda = idBusqueda.trim().toLowerCase();
 
-        const user = rows.find(r => r[0] && r[0].trim() === id.trim());
-        if (user) {
-            document.getElementById('nombre-visual').innerText = user[1].trim();
-            document.getElementById('subtitulo-visual').innerText = user[2].trim();
-
-            document.getElementById('btn-wa').href = user[3].trim();
-            document.getElementById('btn-hotmart').href = user[4].trim();
+        try {
+            const res = await fetch(SHEET_URL);
+            const data = await res.text();
             
-            for(let i=0; i<8; i++) {
-                let fotoCol = 5 + (i * 2);
-                let descCol = 6 + (i * 2);
-                if(document.getElementById('f'+(i+1))) document.getElementById('f'+(i+1)).src = user[fotoCol] ? user[fotoCol].trim() : "";
-                if(document.getElementById('desc'+(i+1))) document.getElementById('desc'+(i+1)).innerText = user[descCol] ? user[descCol].trim() : "";
+            // Procesamiento seguro de celdas CSV con soporte para comillas y saltos de línea
+            const rows = [];
+            let currentRow = [];
+            let currentCell = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < data.length; i++) {
+                let char = data[i];
+                let nextChar = data[i + 1];
+
+                if (char === '"') {
+                    if (inQuotes && nextChar === '"') {
+                        currentCell += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    currentRow.push(currentCell.trim());
+                    currentCell = '';
+                } else if ((char === '\r' || char === '\n') && !inQuotes) {
+                    if (char === '\r' && nextChar === '\n') { i++; }
+                    currentRow.push(currentCell.trim());
+                    rows.push(currentRow);
+                    currentRow = [];
+                    currentCell = '';
+                } else {
+                    currentCell += char;
+                }
+            }
+            if (currentCell !== '' || currentRow.length > 0) {
+                currentRow.push(currentCell.trim());
+                rows.push(currentRow);
             }
 
-            document.querySelectorAll('.accordion').forEach((acc, index) => {
-                let tCol = 21 + (index * 2); let cCol = 22 + (index * 2);
-                if (user[tCol]) acc.innerHTML = user[tCol].trim();
-                let panel = acc.nextElementSibling;
-                if (panel && user[cCol]) panel.querySelector('p').innerText = user[cCol].trim();
-            });
+            // Buscar coincidencia exacta en la Columna A (índice 0)
+            const user = rows.find(r => r[0] && r[0].replace(/['"]+/g, '').trim().toLowerCase() === idLimpioBusqueda);
+            
+            if (user) {
+                // ¡ID ENCONTRADO! Asignamos datos y revelamos el contenido principal
+                document.getElementById('nombre-visual').innerText = user[1] ? user[1].replace(/['"]+/g, '').trim() : "RIMAN ACADEMY";
+                document.getElementById('subtitulo-visual').innerText = user[2] ? user[2].replace(/['"]+/g, '').trim() : "AFILIADOS";
+
+                if(user[3] && user[3].trim() !== "") document.getElementById('btn-wa').href = user[3].replace(/['"]+/g, '').trim();
+                if(user[4] && user[4].trim() !== "") document.getElementById('btn-hotmart').href = user[4].replace(/['"]+/g, '').trim();
+                
+                for(let i=0; i<8; i++) {
+                    let fotoCol = 5 + (i * 2);
+                    let descCol = 6 + (i * 2);
+                    
+                    let imgUrl = user[fotoCol] ? user[fotoCol].replace(/['"]+/g, '').trim() : "";
+                    let descText = user[descCol] ? user[descCol].replace(/['"]+/g, '').trim() : "";
+
+                    if(document.getElementById('f'+(i+1))) document.getElementById('f'+(i+1)).src = imgUrl;
+                    if(document.getElementById('desc'+(i+1))) document.getElementById('desc'+(i+1)).innerText = descText;
+                }
+
+                document.querySelectorAll('.accordion').forEach((acc, index) => {
+                    let tCol = 21 + (index * 2); 
+                    let cCol = 22 + (index * 2);
+                    if (user[tCol]) acc.innerHTML = user[tCol].replace(/['"]+/g, '').trim();
+                    let panel = acc.nextElementSibling;
+                    if (panel && user[cCol]) panel.querySelector('p').innerText = user[cCol].replace(/['"]+/g, '').trim();
+                });
+
+                // Mostrar la página de afiliados completa
+                document.getElementById('contenido-principal').style.display = 'block';
+
+                // Inicializar Swiper de forma segura una vez revelado el contenido
+                new Swiper('.main-swiper', { loop: true, autoplay: { delay: 3500 }, pagination: { el: '.swiper-pagination' } });
+
+            } else {
+                // ID NO ENCONTRADO: Se bloquea y muestra mensaje limpio
+                document.getElementById('nombre-visual').innerText = "ID NO ENCONTRADO";
+                document.getElementById('subtitulo-visual').innerText = "VERIFICA TU ENLACE";
+            }
+        } catch (e) {
+            console.error("Error al cargar configuración:", e);
+            document.getElementById('nombre-visual').innerText = "ERROR DE CONEXIÓN";
+            document.getElementById('subtitulo-visual').innerText = "INTENTA NUEVAMENTE";
         }
     }
     init();
 
+    // Comportamiento del acordeón de preguntas frecuentes
     document.querySelectorAll('.accordion').forEach(acc => {
         acc.addEventListener('click', function() {
             this.classList.toggle("active");
