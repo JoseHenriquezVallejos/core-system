@@ -6,13 +6,11 @@
     <title>Memoria Bíblica</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        /* Bloqueamos el scroll del body por completo */
         body { margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
         
-        /* Contenedor principal adaptable 100% fluido a la altura de la ventana */
         .chat-container { width: 100%; max-width: 420px; height: 100vh; background: rgba(255, 255, 255, 0.98); display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.15); overflow: hidden; box-sizing: border-box; }
 
-        /* Pantalla de Bienvenida con scroll interno de seguridad */
+        /* Pantalla de Bienvenida */
         #welcome-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; box-sizing: border-box; overflow-y: auto; }
         #welcome-screen img { max-width: 50%; height: auto; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         #welcome-screen h1 { font-size: 20px; color: #0f172a; margin-bottom: 6px; }
@@ -20,25 +18,21 @@
         .btn-start { background: #0fb396; color: white; padding: 12px 28px; border-radius: 8px; text-align: center; font-weight: bold; cursor: pointer; border: none; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: 0.2s; }
         .btn-start:hover { background: #0d967e; transform: scale(1.03); }
 
-        /* Encabezado con barra ancha y elegante */
+        /* Encabezado del juego */
         .header { background: #0f172a; color: #ffffff; padding: 14px 20px; text-align: center; border-bottom: 4px solid #d4af37; flex-shrink: 0; }
         .header h1 { margin: 0; font-size: 15px; font-weight: 400; letter-spacing: 1.2px; text-transform: uppercase; }
         .header p { margin: 4px 0 0 0; font-size: 11px; color: #d4af37; letter-spacing: 1px; min-height: 12px; }
         
-        /* Área de juego fluida */
         .game-area { padding: 8px 12px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; overflow: hidden; }
         
-        /* Estadísticas y Botón de Reinicio Rápido Arriba */
         .stats { display: flex; justify-content: space-between; align-items: center; color: #334155; font-size: 12px; font-weight: bold; flex-shrink: 0; margin-bottom: 4px; }
         .btn-mini-restart { background: #64748b; color: white; padding: 5px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; border: none; text-transform: uppercase; letter-spacing: 0.5px; transition: 0.2s; }
         .btn-mini-restart:hover { background: #475569; }
 
-        /* Cuadrícula optimizada */
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; flex-grow: 1; align-content: center; box-sizing: border-box; }
         .card { width: 100%; aspect-ratio: 1; background: #334155; border-radius: 6px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 18px; color: white; position: relative; transition: transform 0.2s, background 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-height: 100%; }
         .card:hover { transform: scale(1.02); }
         
-        /* Control visual de cartas */
         .card .card-text { display: block; font-weight: bold; color: #94a3b8; font-size: 16px; }
         .card img { width: 100%; height: 100%; object-fit: cover; display: none; border-radius: 5px; position: absolute; top: 0; left: 0; }
         
@@ -48,7 +42,6 @@
         .card.flipped .card-text, .card.matched .card-text { display: none; }
         .card.flipped img, .card.matched img { display: block; }
 
-        /* Animación especial de sacudida (Shake) al fallar */
         @keyframes shake {
             0% { transform: translateX(0); }
             25% { transform: translateX(-4px); }
@@ -58,14 +51,12 @@
         }
         .card.shake { animation: shake 0.3s ease-in-out; border: 2px solid #ef4444; }
 
-        /* Animación de acierto */
         @keyframes pulseMatch {
             0% { transform: scale(1); }
             50% { transform: scale(1.08); }
             100% { transform: scale(1); }
         }
         
-        /* Ventana Modal de Victoria */
         #win-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 200; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 30px; text-align: center; box-sizing: border-box; }
         #win-modal img { max-width: 110px; height: auto; margin-bottom: 10px; border-radius: 10px; }
         #win-modal h2 { font-size: 22px; color: #fbbf24; margin-bottom: 6px; text-transform: uppercase; }
@@ -77,9 +68,9 @@
 <div class="chat-container">
     
     <div id="welcome-screen">
-        <img src="https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/05-juegos-cristianos/Ester.webp" alt="Portada Memoria Bíblica - Reina Ester">
-        <h1>MEMORIA BÍBLICA</h1>
-        <p>Pon a prueba tu memoria encontrando las parejas de los grandes héroes de la fe.</p>
+        <img id="welcome-img" src="https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/05-juegos-cristianos/Ester.webp" alt="Portada Memoria Bíblica">
+        <h1 id="welcome-titulo">MEMORIA BÍBLICA</h1>
+        <p id="welcome-desc">Pon a prueba tu memoria encontrando las parejas de los grandes héroes de la fe.</p>
         <button class="btn-start" onclick="comenzarJuego()">COMENZAR</button>
     </div>
 
@@ -107,7 +98,6 @@
 </div>
 
 <script>
-    // Agregamos un parámetro de tiempo dinámico para evitar la caché vieja del navegador
     const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRIUB0nwYzeRBhfb39ZYeQQPsVxhQDaRQjh744I6XysR4GVNsqB-0Wqv5uZlQzVHySPViKK4gOsSxwk/pub?gid=0&single=true&output=csv&t=' + new Date().getTime();
 
     const personajesBase = [
@@ -123,7 +113,6 @@
     let cartaPrimero = null, cartaSegundo = null, bloqueado = false;
     let intentos = 0, parejasEncontradas = 0;
 
-    // SISTEMA DE AUDIO ESTABLE Y REUTILIZABLE
     let audioCtx = null;
     function inicializarAudio() {
         if (!audioCtx) {
@@ -218,19 +207,24 @@
                 result.push(cell); return result;
             });
 
-            // Buscamos la fila exacta que coincida con el ID (Columna A -> índice 0)
+            // Columna A (índice 0): ID
             const rowData = rows.find(r => r[0] && r[0].replace(/['"]+/g, '').trim().toLowerCase() === idBusqueda.trim().toLowerCase());
             
             if (rowData) {
-                // Columna B (índice 1): Nombre_Visual
+                // Columna B (índice 1): Nombre Visual (actualiza tanto el inicio como la barra superior)
                 if (rowData[1]) {
-                    let tituloVisual = rowData[1].replace(/['"]+/g, '').trim();
-                    document.getElementById('titulo-visual').innerText = tituloVisual;
+                    let nombreVisual = rowData[1].replace(/['"]+/g, '').trim();
+                    document.getElementById('titulo-visual').innerText = nombreVisual;
+                    document.getElementById('welcome-titulo').innerText = nombreVisual;
                 }
-                // Columna C (índice 2): Subtitulo
+                // Columna C (índice 2): Subtítulo / Descripción
                 if (rowData[2]) {
-                    let subtituloVisual = rowData[2].replace(/['"]+/g, '').trim();
-                    document.getElementById('subtitulo-visual').innerText = subtituloVisual;
+                    let subVal = rowData[2].replace(/['"]+/g, '').trim();
+                    const rangoEdad = rowData[3] ? rowData[3].replace(/['"]+/g, '').trim() : "";
+                    if(rangoEdad) subVal += ` | Edad: ${rangoEdad}`;
+                    
+                    document.getElementById('subtitulo-visual').innerText = subVal;
+                    document.getElementById('welcome-desc').innerText = subVal;
                 }
             } else {
                 console.warn("No se encontró el ID en la planilla:", idBusqueda);
