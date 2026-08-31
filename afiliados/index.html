@@ -139,11 +139,19 @@
                 document.getElementById('nombre-visual').innerText = user[1] ? user[1].replace(/['"]+/g, '').trim() : "RIMAN ACADEMY";
                 document.getElementById('subtitulo-visual').innerText = user[2] ? user[2].replace(/['"]+/g, '').trim() : "AFILIADOS";
 
-                // Asignar WhatsApp con inyección dinámica del parámetro de afiliado
+                // Asignar WhatsApp con el mensaje precargado y la referencia corta (ref:Nombre)
                 if(user[3] && user[3].trim() !== "") {
                     let urlBot = user[3].replace(/['"]+/g, '').trim();
-                    let separador = urlBot.includes('?') ? '&' : '?';
-                    document.getElementById('btn-wa').href = urlBot + separador + 'afiliado=' + idLimpioBusqueda;
+                    let nombreAfiliado = user[1] ? user[1].replace(/['"]+/g, '').trim() : idLimpioBusqueda;
+                    let textoMensaje = `Hola, quiero más información ref:${nombreAfiliado}`;
+                    
+                    if (urlBot.includes('wa.me/')) {
+                        // Extraemos el número base si viene limpio tipo https://wa.me/56945491173
+                        document.getElementById('btn-wa').href = `https://wa.me/56945491173?text=${encodeURIComponent(textoMensaje)}`;
+                    } else {
+                        let separador = urlBot.includes('?') ? '&' : '?';
+                        document.getElementById('btn-wa').href = urlBot + separador + 'text=' + encodeURIComponent(textoMensaje);
+                    }
                 }
 
                 if(user[4] && user[4].trim() !== "") document.getElementById('btn-hotmart').href = user[4].replace(/['"]+/g, '').trim();
