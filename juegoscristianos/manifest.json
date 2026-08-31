@@ -1,7 +1,7 @@
 {
   "name": "Memoria Biblica",
   "short_name": "MemoriaBiblica",
-  "start_url": "./index.html",
+  "start_url": "./index.html?id=membiblica",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
