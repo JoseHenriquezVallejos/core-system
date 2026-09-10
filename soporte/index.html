@@ -1,1 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro de Apoyo - Asistente 24/7</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
 
+        /* Estilo del Botón Flotante */
+        .chat-toggle-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #25D366;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+            z-index: 1000;
+        }
+
+        .chat-toggle-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Ventana Pop-up del Chat (Modal) */
+        .chat-popup {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        .chat-popup.active {
+            display: flex;
+        }
+
+        /* Cabecera del Chat */
+        .chat-header {
+            background-color: #075e54;
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header span {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        /* Cuerpo del Historial de Mensajes */
+        .chat-body {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background-color: #e5ddd5;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .message.bot {
+            background-color: white;
+            align-self: flex-start;
+            border-top-left-radius: 0;
+            color: #333;
+        }
+
+        .message.user {
+            background-color: #dcf8c6;
+            align-self: flex-end;
+            border-top-right-radius: 0;
+            color: #333;
+        }
+
+        /* Contenedor de Opciones / Botones Interactivos */
+        .chat-footer {
+            padding: 10px;
+            background: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 160px;
+            overflow-y: auto;
+        }
+
+        .option-btn {
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+
+        .option-btn:hover {
+            background-color: #f1f1f1;
+            border-color: #ccc;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Botón flotante para abrir el chat -->
+    <button class="chat-toggle-btn" onclick="toggleChat()">💬 Asistente 24/7</button>
+
+    <!-- Ventana flotante (Pop-up) -->
+    <div class="chat-popup" id="chatPopup">
+        <div class="chat-header">
+            <div>
+                Soporte Afiliados <br>
+                <span>🟢 En línea</span>
+            </div>
+            <button class="close-btn" onclick="toggleChat()">✕</button>
+        </div>
+
+        <div class="chat-body" id="chatBody">
+            <!-- El historial dinámico se va cargando aquí -->
+        </div>
+
+        <div class="chat-footer" id="chatOptions">
+            <!-- Los botones interactivos cambian según el paso -->
+        </div>
+    </div>
+
+    <script>
+        // Estructura del Árbol de Decisiones del Bot
+        const chatFlow = {
+            inicio: {
+                texto: "¡Hola! Bienvenido al centro de apoyo automatizado. Selecciona una opción para comenzar:",
+                opciones: [
+                    { texto: "🔥 Paso 1 – Embudo Gratis", siguiente: "embudo" },
+                    { texto: "📱 Ver Reels Publicitarios", siguiente: "reels" },
+                    { texto: "💰 Información de Comisiones", siguiente: "comisiones" },
+                    { texto: "📞 Hablar con un asesor (WhatsApp)", siguiente: "whatsapp" }
+                ]
+            },
+            embudo: {
+                texto: "El Paso 1 consiste en configurar tu estructura base para empezar a filtrar prospectos sin complicaciones. ¿Qué deseas hacer?",
+                opciones: [
+                    { texto: "📥 Recibir mi funnel personalizado por WhatsApp", siguiente: "whatsapp" },
+                    { texto: "⬅️ Volver al menú principal", siguiente: "inicio" }
+                ]
+            },
+            reels: {
+                texto: "Los reels están diseñados para captar la atención de inmediato en redes sociales y derivar el tráfico al sistema. ¿Quieres ver cómo implementarlos?",
+                opciones: [
+                    { texto: "💬 Consultar detalles por WhatsApp", siguiente: "whatsapp" },
+                    { texto: "⬅️ Volver al menú principal", siguiente: "inicio" }
+                ]
+            },
+            comisiones: {
+                texto: "Cada cliente activo genera un rendimiento mínimo acumulable de USD $4/mes de forma recurrente.",
+                opciones: [
+                    { texto: "🚀 ¡Quiero empezar ahora!", siguiente: "whatsapp" },
+                    { texto: "⬅️ Volver al menú principal", siguiente: "inicio" }
+                ]
+            }
+        };
+
+        const chatPopup = document.getElementById("chatPopup");
+        const chatBody = document.getElementById("chatBody");
+        const chatOptions = document.getElementById("chatOptions");
+
+        let isOpen = false;
+
+        function toggleChat() {
+            isOpen = !isOpen;
+            if (isOpen) {
+                chatPopup.classList.add("active");
+                if (chatBody.children.length === 0) {
+                    cargarPaso("inicio"); // Inicia la conversación la primera vez
+                }
+            } else {
+                chatPopup.classList.remove("active");
+            }
+        }
+
+        function cargarPaso(pasoKey) {
+            if (pasoKey === "whatsapp") {
+                // Redirige directamente al WhatsApp con mensaje preconfigurado
+                window.open("https://wa.me/TUNUMERO?text=Hola,%20vengo%20desde%20el%20asistente%20web%20y%20quiero%20más%20información.", "_blank");
+                return;
+            }
+
+            const paso = chatFlow[pasoKey];
+
+            // 1. Mostrar mensaje del bot en el historial
+            const mensajeBot = document.createElement("div");
+            mensajeBot.className = "message bot";
+            mensajeBot.innerText = paso.texto;
+            chatBody.appendChild(mensajeBot);
+
+            // Auto-scroll hacia abajo en el chat
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            // 2. Actualizar botones del footer
+            chatOptions.innerHTML = "";
+            paso.opciones.forEach(op => {
+                const btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.innerText = op.texto;
+                btn.onclick = () => {
+                    // Mostrar la selección del usuario como burbuja antes de avanzar
+                    const mensajeUser = document.createElement("div");
+                    mensajeUser.className = "message user";
+                    mensajeUser.innerText = op.texto;
+                    chatBody.appendChild(mensajeUser);
+                    chatBody.scrollTop = chatBody.scrollHeight;
+
+                    // Limpiar botones temporalmente y cargar el siguiente paso tras un breve retraso realista
+                    chatOptions.innerHTML = "";
+                    setTimeout(() => {
+                        cargarPaso(op.siguiente);
+                    }, 400);
+                };
+                chatOptions.appendChild(btn);
+            });
+        }
+    </script>
+</body>
+</html>
