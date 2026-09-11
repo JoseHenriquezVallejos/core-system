@@ -11,55 +11,38 @@
             margin: 0;
             padding: 0;
             height: 100vh;
-        }
-
-        /* Botón Flotante */
-        .chat-toggle-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #25D366;
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 15px 25px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            transition: transform 0.2s;
-            z-index: 1000;
-        }
-
-        .chat-toggle-btn:hover {
-            transform: scale(1.05);
-        }
-
-        /* Ventana Pop-up del Chat (Modal) */
-        .chat-popup {
-            position: fixed;
-            bottom: 90px;
-            right: 20px;
-            width: 360px;
-            height: 520px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
-            display: none;
-            flex-direction: column;
-            overflow: hidden;
-            z-index: 1000;
-        }
-
-        .chat-popup.active {
             display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Contenedor principal estilo celular centrado */
+        .chat-container {
+            width: 100%;
+            max-width: 400px;
+            height: 100vh;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* En pantallas de PC, darle forma de dispositivo móvil elegante */
+        @media (min-width: 480px) {
+            .chat-container {
+                height: 85vh;
+                max-height: 700px;
+                border-radius: 16px;
+                border: 8px solid #222;
+            }
         }
 
         /* Cabecera del Chat */
         .chat-header {
             background-color: #075e54;
             color: white;
-            padding: 15px;
+            padding: 16px;
             font-weight: bold;
             display: flex;
             justify-content: space-between;
@@ -73,14 +56,6 @@
             font-weight: normal;
         }
 
-        .close-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 18px;
-            cursor: pointer;
-        }
-
         /* Cuerpo del Historial de Mensajes */
         .chat-body {
             flex: 1;
@@ -88,12 +63,12 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
             background-color: #e5ddd5;
         }
 
         .message {
-            max-width: 80%;
+            max-width: 85%;
             padding: 10px 14px;
             border-radius: 8px;
             font-size: 14px;
@@ -105,6 +80,7 @@
             align-self: flex-start;
             border-top-left-radius: 0;
             color: #333;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
         .message.user {
@@ -112,60 +88,57 @@
             align-self: flex-end;
             border-top-right-radius: 0;
             color: #333;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
-        /* Contenedor de Opciones / Botones Interactivos (Fijos Abajo) */
+        /* Contenedor de Opciones / Botones Interactivos Fijos Abajo */
         .chat-footer {
             padding: 12px;
             background: #f0f0f0;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
             flex-shrink: 0;
             border-top: 1px solid #ddd;
-            max-height: 210px;
+            max-height: 240px;
             overflow-y: auto;
         }
 
         .option-btn {
             background-color: white;
-            border: 1px solid #ddd;
-            padding: 10px 12px;
-            border-radius: 6px;
+            border: 1px solid #ccc;
+            padding: 10px 14px;
+            border-radius: 8px;
             text-align: left;
             cursor: pointer;
             font-size: 13px;
             font-weight: 500;
             color: #333;
-            transition: background 0.2s;
+            transition: background 0.2s, border-color 0.2s;
         }
 
         .option-btn:hover {
             background-color: #f1f1f1;
-            border-color: #ccc;
+            border-color: #075e54;
         }
     </style>
 </head>
 <body>
 
-    <!-- Botón flotante para abrir el chat -->
-    <button class="chat-toggle-btn" onclick="toggleChat()">💬 Soporte 24-7</button>
-
-    <!-- Ventana flotante (Pop-up) -->
-    <div class="chat-popup" id="chatPopup">
+    <!-- Contenedor centralizado estilo celular -->
+    <div class="chat-container">
         <div class="chat-header">
             <div>
                 <div id="business-name">Soporte 24-7</div>
                 <span>🟢 En línea</span>
             </div>
-            <button class="close-btn" onclick="toggleChat()">✕</button>
         </div>
 
         <!-- El historial de mensajes fluye en el centro -->
         <div class="chat-body" id="chatBody">
         </div>
 
-        <!-- Los botones interactivos se quedan fijos abajo -->
+        <!-- Los botones interactivos se quedan fijos abajo de forma limpia -->
         <div class="chat-footer" id="chatOptions">
         </div>
     </div>
@@ -227,33 +200,25 @@
             }
         };
 
-        const chatPopup = document.getElementById("chatPopup");
         const chatBody = document.getElementById("chatBody");
         const chatOptions = document.getElementById("chatOptions");
 
-        let isOpen = false;
-
-        function toggleChat() {
-            isOpen = !isOpen;
-            if (isOpen) {
-                chatPopup.classList.add("active");
-                if (chatBody.children.length === 0) {
-                    cargarPaso("inicio");
-                }
-            } else {
-                chatPopup.classList.remove("active");
-            }
-        }
+        // Iniciar el chat automáticamente al cargar la página
+        window.onload = () => {
+            cargarPaso("inicio");
+        };
 
         function cargarPaso(pasoKey) {
             const paso = chatFlow[pasoKey];
 
+            // 1. Mostrar mensaje del bot
             const mensajeBot = document.createElement("div");
             mensajeBot.className = "message bot";
             mensajeBot.innerText = paso.texto;
             chatBody.appendChild(mensajeBot);
             chatBody.scrollTop = chatBody.scrollHeight;
 
+            // 2. Cargar opciones abajo
             chatOptions.innerHTML = "";
             paso.opciones.forEach(op => {
                 const btn = document.createElement("button");
@@ -261,6 +226,7 @@
                 btn.innerText = op.texto;
                 
                 btn.onclick = () => {
+                    // Mostrar respuesta elegida por el usuario
                     const mensajeUser = document.createElement("div");
                     mensajeUser.className = "message user";
                     mensajeUser.innerText = op.texto;
