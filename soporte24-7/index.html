@@ -106,7 +106,14 @@
             color: #333;
         }
 
-        /* Contenedor de Opciones / Botones Interactivos (Hasta 6 Reglas) */
+        .message.user {
+            background-color: #dcf8c6;
+            align-self: flex-end;
+            border-top-right-radius: 0;
+            color: #333;
+        }
+
+        /* Contenedor de Opciones / Botones Interactivos */
         .chat-footer {
             padding: 10px;
             background: #f0f0f0;
@@ -118,28 +125,21 @@
         }
 
         .option-btn {
-            display: flex;
-            align-items: center;
-            gap: 10px;
             background-color: white;
             border: 1px solid #ddd;
             padding: 10px 12px;
             border-radius: 6px;
-            text-decoration: none;
-            color: #333;
+            text-align: left;
             cursor: pointer;
             font-size: 13px;
             font-weight: 500;
+            color: #333;
             transition: background 0.2s;
         }
 
         .option-btn:hover {
             background-color: #f1f1f1;
             border-color: #ccc;
-        }
-
-        .hidden {
-            display: none !important;
         }
     </style>
 </head>
@@ -159,64 +159,135 @@
         </div>
 
         <div class="chat-body" id="chatBody">
-            <!-- Mensaje de bienvenida inyectado por script -->
-            <div class="message bot" id="welcome-message"></div>
+            <!-- El historial dinámico se va cargando aquí -->
         </div>
 
-        <!-- Contenedor de las hasta 6 reglas dinámicas -->
-        <div class="chat-footer" id="rules-container">
-            <a href="#" class="option-btn hidden" id="rule-btn-1"><span class="emoji">🎁</span><span class="text"></span></a>
-            <a href="#" class="option-btn hidden" id="rule-btn-2"><span class="emoji">🎬</span><span class="text"></span></a>
-            <a href="#" class="option-btn hidden" id="rule-btn-3"><span class="emoji">💰</span><span class="text"></span></a>
-            <a href="#" class="option-btn hidden" id="rule-btn-4"><span class="emoji">💬</span><span class="text"></span></a>
-            <a href="#" class="option-btn hidden" id="rule-btn-5"><span class="emoji">⭐</span><span class="text"></span></a>
-            <a href="#" class="option-btn hidden" id="rule-btn-6"><span class="emoji">📅</span><span class="text"></span></a>
+        <div class="chat-footer" id="chatOptions">
+            <!-- Los botones interactivos cambian según el paso -->
         </div>
     </div>
 
     <script>
-        // DATOS DEL CLIENTE (Simulados: esto vendrá posteriormente directo de tu Google Sheet)
-        const clienteData = {
-            nombreNegocio: "Academia Afiliados Pro",
-            bienvenida: "¡Hola! Bienvenido al centro de apoyo automatizado. Selecciona una opción rápida para avanzar:",
-            reglas: [
-                { texto: "Paso 1 – Embudo Gratis", link: "https://wa.me/tuenlace1" },
-                { texto: "Ver Reels Publicitarios", link: "https://wa.me/tuenlace2" },
-                { texto: "Información de Comisiones", link: "https://wa.me/tuenlace3" },
-                { texto: "Hablar con un asesor (WhatsApp)", link: "https://wa.me/tuenlace4" },
-                { texto: "", link: "" }, // Regla 5 vacía -> Se oculta automáticamente
-                { texto: "", link: "" }  // Regla 6 vacía -> Se oculta automáticamente
-            ]
+        // CONFIGURACIÓN DINÁMICA DEL NEGOCIO (Hasta 6 reglas conectadas a sus respectivos links y respuestas de chat)
+        const chatFlow = {
+            inicio: {
+                texto: "¡Hola! Bienvenido al centro de apoyo automatizado. Selecciona una opción para avanzar:",
+                opciones: [
+                    { texto: "🎁 Paso 1 – Embudo Gratis", siguiente: "regla1" },
+                    { texto: "🎬 Ver Videos y Demostración", siguiente: "regla2" },
+                    { texto: "💰 Información de Precios", siguiente: "regla3" },
+                    { texto: "💬 Hablar con un Asesor (WhatsApp)", siguiente: "whatsapp" },
+                    { texto: "⭐ Ver Testimonios", siguiente: "regla5" },
+                    { texto: "📅 Agendar Llamada", siguiente: "regla6" }
+                ]
+            },
+            regla1: {
+                texto: "El Paso 1 consiste en configurar tu estructura base para empezar a filtrar prospectos sin complicaciones.",
+                opciones: [
+                    { texto: "📥 Abrir enlace del recurso", link: "https://wa.me/tuenlace1" },
+                    { texto: "⬅️ Volver al menú principal", siguiente: "inicio" }
+                ]
+            },
+            regla2: {
+                texto: "Los videos están diseñados para mostrar paso a paso cómo funciona el sistema.",
+                opciones: [
+                    { texto: "📺 Ver video demostrativo ahora", link: "https://wa.me/tuenlace2" },
+                    { texto: "⬅️ Volver al menú principal", siguiente: "inicio" }
+                ]
+            },
+            regla3: {
+                texto: "Puedes acceder a todo el sistema operativo por solo $24 USD al año.",
+                opciones: [
+                    { texto: "🚀 ¡Quiero activar mi cuenta!", link: "https://wa.me/tuenlace3" },
+                    { texto: "⬅️ Volver al menú principal", siguiente: "inicio" }
+                ]
+            },
+            regla5: {
+                texto: "Aquí puedes ver las experiencias de otros usuarios que ya automatizaron su atención.",
+                opciones: [
+                    { texto: "⭐ Leer opiniones de clientes", link: "https://wa.me/tuenlace5" },
+                    { texto: "⬅️ Volver al menú principal", siguiente: "inicio" }
+                ]
+            },
+            regla6: {
+                texto: "Selecciona un horario disponible para que conversemos directamente.",
+                opciones: [
+                    { texto: "📅 Abrir calendario de citas", link: "https://wa.me/tuenlace6" },
+                    { texto: "⬅️ Volver al menú principal", siguiente: "inicio" }
+                ]
+            },
+            whatsapp: {
+                texto: "Te estamos derivando de inmediato con nuestro canal de atención directa en WhatsApp.",
+                opciones: [
+                    { texto: "🟢 Abrir chat en WhatsApp", link: "https://wa.me/TUNUMERO?text=Hola,%20vengo%20desde%20el%20asistente%20web%20y%20quiero%20más%20información." },
+                    { texto: "⬅️ Volver al menú principal", siguiente: "inicio" }
+                ]
+            }
         };
 
         const chatPopup = document.getElementById("chatPopup");
+        const chatBody = document.getElementById("chatBody");
+        const chatOptions = document.getElementById("chatOptions");
+
         let isOpen = false;
 
         function toggleChat() {
             isOpen = !isOpen;
             if (isOpen) {
                 chatPopup.classList.add("active");
+                if (chatBody.children.length === 0) {
+                    cargarPaso("inicio"); // Inicia la conversación la primera vez que se abre
+                }
             } else {
                 chatPopup.classList.remove("active");
             }
         }
 
-        // Inicializar datos visuales del cliente al cargar la página
-        document.getElementById('business-name').innerText = clienteData.nombreNegocio;
-        document.getElementById('welcome-message').innerText = clienteData.bienvenida;
+        function cargarPaso(pasoKey) {
+            const paso = chatFlow[pasoKey];
 
-        // Recorrer las 6 reglas predefinidas y activar solo las que tengan contenido
-        clienteData.reglas.forEach((regla, index) => {
-            const btnId = `rule-btn-${index + 1}`;
-            const btnElement = document.getElementById(btnId);
-            
-            if (regla.texto && regla.texto.trim() !== "") {
-                btnElement.querySelector('.text').innerText = regla.texto;
-                btnElement.href = regla.link;
-                btnElement.target = "_blank"; // Abre el enlace de destino de forma limpia
-                btnElement.classList.remove('hidden'); // Muestra el botón
-            }
-        });
+            // 1. Mostrar mensaje del bot en el historial
+            const mensajeBot = document.createElement("div");
+            mensajeBot.className = "message bot";
+            mensajeBot.innerText = paso.texto;
+            chatBody.appendChild(mensajeBot);
+
+            // Auto-scroll hacia abajo en el historial
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            // 2. Actualizar botones interactivos del menú inferior
+            chatOptions.innerHTML = "";
+            paso.opciones.forEach(op => {
+                const btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.innerText = op.texto;
+                
+                btn.onclick = () => {
+                    // Registrar la respuesta del usuario como una burbuja en el historial
+                    const mensajeUser = document.createElement("div");
+                    mensajeUser.className = "message user";
+                    mensajeUser.innerText = op.texto;
+                    chatBody.appendChild(mensajeUser);
+                    chatBody.scrollTop = chatBody.scrollHeight;
+
+                    // Limpiar botones y evaluar si la opción navega internamente o abre un link externo
+                    chatOptions.innerHTML = "";
+
+                    setTimeout(() => {
+                        if (op.link) {
+                            // Si tiene link asociado, abre el destino y devuelve al menú principal tras un momento
+                            window.open(op.link, "_blank");
+                            cargarPaso("inicio");
+                        } else if (op.siguiente) {
+                            // Si es navegación interna, carga el siguiente paso del chat
+                            cargarPaso(op.siguiente);
+                        }
+                    }, 400);
+                };
+                
+                chatOptions.appendChild(btn);
+            });
+        }
     </script>
 </body>
 </html>
