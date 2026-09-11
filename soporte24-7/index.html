@@ -80,37 +80,7 @@
             cursor: pointer;
         }
 
-        /* Contenedor de Opciones / Botones Interactivos (Ubicados ARRIBA) */
-        .chat-options-container {
-            padding: 10px;
-            background: #f0f0f0;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            max-height: 160px;
-            overflow-y: auto;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .option-btn {
-            background-color: white;
-            border: 1px solid #ddd;
-            padding: 10px 12px;
-            border-radius: 6px;
-            text-align: left;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            color: #333;
-            transition: background 0.2s;
-        }
-
-        .option-btn:hover {
-            background-color: #f1f1f1;
-            border-color: #ccc;
-        }
-
-        /* Cuerpo del Historial de Mensajes (Ubicado ABAJO de los botones) */
+        /* Cuerpo del Historial de Mensajes (Ocupa el espacio central) */
         .chat-body {
             flex: 1;
             padding: 15px;
@@ -142,6 +112,36 @@
             border-top-right-radius: 0;
             color: #333;
         }
+
+        /* Contenedor de Opciones / Botones Interactivos (Fijos Abajo) */
+        .chat-footer {
+            padding: 10px;
+            background: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 160px;
+            overflow-y: auto;
+            border-top: 1px solid #ddd;
+        }
+
+        .option-btn {
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 10px 12px;
+            border-radius: 6px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+            transition: background 0.2s;
+        }
+
+        .option-btn:hover {
+            background-color: #f1f1f1;
+            border-color: #ccc;
+        }
     </style>
 </head>
 <body>
@@ -159,12 +159,12 @@
             <button class="close-btn" onclick="toggleChat()">✕</button>
         </div>
 
-        <!-- Los botones interactivos están ahora ARRIBA para acceso inmediato -->
-        <div class="chat-options-container" id="chatOptions">
+        <!-- El historial de mensajes fluye en el centro -->
+        <div class="chat-body" id="chatBody">
         </div>
 
-        <!-- El historial de mensajes queda ABAJO acumulándose -->
-        <div class="chat-body" id="chatBody">
+        <!-- Los botones interactivos se quedan fijos en la parte inferior -->
+        <div class="chat-footer" id="chatOptions">
         </div>
     </div>
 
@@ -246,14 +246,14 @@
         function cargarPaso(pasoKey) {
             const paso = chatFlow[pasoKey];
 
-            // 1. Mostrar mensaje del bot en el historial (abajo)
+            // 1. Mostrar mensaje del bot en el historial
             const mensajeBot = document.createElement("div");
             mensajeBot.className = "message bot";
             mensajeBot.innerText = paso.texto;
             chatBody.appendChild(mensajeBot);
             chatBody.scrollTop = chatBody.scrollHeight;
 
-            // 2. Actualizar botones interactivos (fijos arriba)
+            // 2. Actualizar botones interactivos abajo
             chatOptions.innerHTML = "";
             paso.opciones.forEach(op => {
                 const btn = document.createElement("button");
