@@ -1,1 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente 24/7</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .chat-container {
+            width: 100%;
+            max-width: 400px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            background: #075e54;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .chat-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .welcome-bubble {
+            background: #e1f5fe;
+            color: #0d47a1;
+            padding: 14px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+        .rule-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #25d366;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 14px 16px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: opacity 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .rule-btn:hover {
+            opacity: 0.9;
+        }
+        .emoji {
+            font-size: 18px;
+        }
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
 
+    <div class="chat-container">
+        <div class="chat-header" id="business-name">Tu Negocio</div>
+        <div class="chat-body">
+            <div class="welcome-bubble" id="welcome-message">
+                ¡Hola! Bienvenido. ¿En qué podemos ayudarte hoy? Selecciona una opción:
+            </div>
+            
+            <!-- Contenedor de las 6 reglas con emojis fijos asociados -->
+            <div id="rules-container">
+                <a href="#" class="rule-btn hidden" id="btn-1"><span class="emoji">🎁</span><span class="text"></span></a>
+                <a href="#" class="rule-btn hidden" id="btn-2"><span class="emoji">🎬</span><span class="text"></span></a>
+                <a href="#" class="rule-btn hidden" id="btn-3"><span class="emoji">💰</span><span class="text"></span></a>
+                <a href="#" class="rule-btn hidden" id="btn-4"><span class="emoji">💬</span><span class="text"></span></a>
+                <a href="#" class="rule-btn hidden" id="btn-5"><span class="emoji">⭐</span><span class="text"></span></a>
+                <a href="#" class="rule-btn hidden" id="btn-6"><span class="emoji">📅</span><span class="text"></span></a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // SIMULACIÓN DE DATOS (Esto luego se conectará para leer tu Google Sheet o JSON)
+        const clienteData = {
+            nombreNegocio: "Academia Pro",
+            bienvenida: "¡Hola! Qué gusto saludarte. Elige una opción rápida para avanzar:",
+            reglas: [
+                { texto: "Reclamar Regalo Gratis", link: "https://wa.me/tuenlace1" },
+                { texto: "Ver Video Demostración", link: "https://wa.me/tuenlace2" },
+                { texto: "Precios y Planes", link: "https://wa.me/tuenlace3" },
+                { texto: "Hablar con un Asesor", link: "https://wa.me/tuenlace4" },
+                { texto: "", link: "" }, // Vacía (se ocultará automáticamente)
+                { texto: "", link: "" }  // Vacía (se ocultará automáticamente)
+            ]
+        };
+
+        // Inyectar datos en la interfaz
+        document.getElementById('business-name').innerText = clienteData.nombreNegocio;
+        document.getElementById('welcome-message').innerText = clienteData.bienvenida;
+
+        // Recorrer las 6 reglas y activar solo las que tengan texto
+        clienteData.reglas.forEach((regla, index) => {
+            const btnId = `btn-${index + 1}`;
+            const btnElement = document.getElementById(btnId);
+            
+            if (regla.texto && regla.texto.trim() !== "") {
+                btnElement.querySelector('.text').innerText = regla.texto;
+                btnElement.href = regla.link;
+                btnElement.classList.remove('hidden'); // Muestra el botón
+            }
+        });
+    </script>
+
+</body>
+</html>
