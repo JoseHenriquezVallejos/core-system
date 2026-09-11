@@ -81,7 +81,7 @@
             cursor: pointer;
         }
 
-        /* Cuerpo del Historial de Mensajes (Ocupa el espacio superior flexible) */
+        /* Cuerpo del Historial de Mensajes */
         .chat-body {
             flex: 1;
             padding: 15px;
@@ -114,7 +114,7 @@
             color: #333;
         }
 
-        /* Contenedor de Opciones / Botones Interactivos (Fijos Abajo sin cortarse) */
+        /* Contenedor de Opciones / Botones Interactivos (Fijos Abajo) */
         .chat-footer {
             padding: 12px;
             background: #f0f0f0;
@@ -165,7 +165,7 @@
         <div class="chat-body" id="chatBody">
         </div>
 
-        <!-- Los botones interactivos se quedan fijos abajo con espacio óptimo -->
+        <!-- Los botones interactivos se quedan fijos abajo -->
         <div class="chat-footer" id="chatOptions">
         </div>
     </div>
@@ -248,14 +248,12 @@
         function cargarPaso(pasoKey) {
             const paso = chatFlow[pasoKey];
 
-            // 1. Mostrar mensaje del bot en el historial
             const mensajeBot = document.createElement("div");
             mensajeBot.className = "message bot";
             mensajeBot.innerText = paso.texto;
             chatBody.appendChild(mensajeBot);
             chatBody.scrollTop = chatBody.scrollHeight;
 
-            // 2. Actualizar botones interactivos abajo
             chatOptions.innerHTML = "";
             paso.opciones.forEach(op => {
                 const btn = document.createElement("button");
@@ -263,7 +261,6 @@
                 btn.innerText = op.texto;
                 
                 btn.onclick = () => {
-                    // Registrar la respuesta del usuario en el historial
                     const mensajeUser = document.createElement("div");
                     mensajeUser.className = "message user";
                     mensajeUser.innerText = op.texto;
