@@ -144,8 +144,10 @@
 
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQY4PiDZRnZMXs9N8sZNyLzlr3kFZ3vQ-qaWHmTdvRO7U5eTyfOLcEMQLwMtrwELgfy3OWCj4z9GeJM/pub?gid=0&single=true&output=csv";
         
-        const urlParams = new URLSearchParams(window.location.search);
-        const TARGET_ID = urlParams.get('id') || 'negocio1';
+        // Asume que el ID va al final de la ruta del link (ej: .../soporte24-7/negocio1 -> extrae 'negocio1')
+        // Si no hay nada al final o está en la raíz, por defecto usará 'negocio1'
+        const pathSegments = window.location.pathname.split("/").filter(Boolean);
+        const TARGET_ID = pathSegments.length > 0 ? pathSegments[pathSegments.length - 1] : 'negocio1';
 
         function parseCSVLine(text) {
             let result = [], cell = '', inQuotes = false;
@@ -174,7 +176,8 @@
 
                 let negocioRow = null;
                 for (let i = 1; i < rows.length; i++) {
-                    if (rows[i][0] === TARGET_ID) {
+                    // Comparamos ignorando mayúsculas/minúsculas para mayor seguridad
+                    if (rows[i][0] && rows[i][0].toLowerCase() === TARGET_ID.toLowerCase()) {
                         negocioRow = rows[i];
                         break;
                     }
@@ -282,7 +285,7 @@
             chatOptions.innerHTML = "";
             chatFlow.inicio.opciones.forEach(op => {
                 const btn = document.createElement("button");
-                btn.className = "option-btn"; // Se asegura de usar la misma clase compacta
+                btn.className = "option-btn";
                 btn.innerText = op.texto;
                 
                 btn.onclick = () => {
