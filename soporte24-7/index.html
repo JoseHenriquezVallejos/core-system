@@ -87,7 +87,6 @@
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
-        /* Contenedor inferior optimizado y más compacto */
         .chat-footer {
             padding: 8px 12px;
             background: #e2e8f0;
@@ -100,7 +99,6 @@
             overflow-y: auto;
         }
 
-        /* Botones más estrechos para ganar espacio en el chat */
         .option-btn {
             background-color: #ffffff;
             border: 1px solid #94a3b8;
@@ -146,7 +144,6 @@
 
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQY4PiDZRnZMXs9N8sZNyLzlr3kFZ3vQ-qaWHmTdvRO7U5eTyfOLcEMQLwMtrwELgfy3OWCj4z9GeJM/pub?gid=0&single=true&output=csv";
         
-        // Soporte dinámico para leer el ID desde la URL (ej: ?id=negocio1) o usar 'negocio1' por defecto
         const urlParams = new URLSearchParams(window.location.search);
         const TARGET_ID = urlParams.get('id') || 'negocio1';
 
@@ -285,7 +282,7 @@
             chatOptions.innerHTML = "";
             chatFlow.inicio.opciones.forEach(op => {
                 const btn = document.createElement("button");
-                btn.className = "option-btn";
+                btn.className = "option-btn"; // Se asegura de usar la misma clase compacta
                 btn.innerText = op.texto;
                 
                 btn.onclick = () => {
