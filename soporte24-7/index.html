@@ -123,10 +123,9 @@
 <body>
 
     <div class="chat-container">
-
         <div class="chat-header">
             <div>
-                <div id="business-name" style="font-size: 16px; font-weight: bold;">Negocio 1</div>
+                <div id="business-name" style="font-size: 16px; font-weight: bold;">Cargando...</div>
                 <span id="business-subtitle" style="font-size: 12px; opacity: 0.8; font-weight: normal;">🟢 Soporte 24-7</span>
             </div>
         </div>
@@ -136,7 +135,6 @@
     </div>
 
     <script>
-        // Estructura base que se llenará con los datos de la planilla CSV
         let chatFlow = {
             inicio: {
                 texto: "¡Hola! Bienvenido al centro de apoyo automatizado. Selecciona una opción para avanzar:",
@@ -145,9 +143,11 @@
         };
 
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQY4PiDZRnZMXs9N8sZNyLzlr3kFZ3vQ-qaWHmTdvRO7U5eTyfOLcEMQLwMtrwELgfy3OWCj4z9GeJM/pub?gid=0&single=true&output=csv";
-        const TARGET_ID = "negocio1"; // ID del negocio a buscar en la planilla
+        
+        // Soporte dinámico para leer el ID desde la URL (ej: ?id=negocio1) o usar 'negocio1' por defecto
+        const urlParams = new URLSearchParams(window.location.search);
+        const TARGET_ID = urlParams.get('id') || 'negocio1';
 
-        // Función auxiliar para parsear CSV respetando comillas
         function parseCSVLine(text) {
             let result = [], cell = '', inQuotes = false;
             for (let i = 0; i < text.length; i++) {
@@ -173,10 +173,7 @@
                 
                 if (rows.length < 2) return;
 
-                const headers = rows[0];
                 let negocioRow = null;
-
-                // Buscar la fila correspondiente al ID del negocio
                 for (let i = 1; i < rows.length; i++) {
                     if (rows[i][0] === TARGET_ID) {
                         negocioRow = rows[i];
@@ -186,18 +183,15 @@
 
                 if (!negocioRow) return;
 
-                // Actualizar Nombre Visual si existe en la columna B
                 const nombreVisual = negocioRow[1];
                 if (nombreVisual) {
                     document.getElementById("business-name").innerText = nombreVisual;
+                    document.getElementById("business-subtitle").innerText = "🟢 Soporte 24-7";
                 }
 
                 let opcionesInicio = [];
 
-                // Recorrer los 6 botones configurados en la planilla
                 for (let b = 1; b <= 6; b++) {
-                    // Índices según tu estructura horizontal: ID(0), Nombre_Visual(1), [botonX, descX, linkX]
-                    // Cada bloque ocupa 3 columnas: el botón empieza en índice 2 + (b-1)*3
                     let idxBoton = 2 + (b - 1) * 3;
                     let idxDesc = idxBoton + 1;
                     let idxLink = idxBoton + 2;
@@ -209,16 +203,14 @@
                     if (textoBoton) {
                         let pasoKey = "btn_" + b;
                         
-                        // Configurar el paso individual para este botón
                         chatFlow[pasoKey] = {
                             texto: descBoton || "Información disponible en este apartado.",
                             opciones: [
                                 ...(linkBoton ? [{ texto: "🔗 Abrir enlace externo", link: linkBoton }] : []),
-                                { texto: "⬅️ Volver al menú principal", siguiente: "inicio" }
+                                { texto: "⬅️ Volver al menú principal", accion: "menu" }
                             ]
                         };
 
-                        // Agregar al menú de inicio
                         opcionesInicio.push({
                             texto: textoBoton,
                             siguiente: pasoKey
@@ -227,12 +219,13 @@
                 }
 
                 chatFlow.inicio.opciones = opcionesInicio;
-                cargarPaso("inicio");
+                cargarPaso("inicio", true);
 
             } catch (error) {
                 console.error("Error al cargar la planilla:", error);
-                document.getElementById("business-name").innerText = "Soporte 24-7 (Modo Offline)";
-                cargarPaso("inicio");
+                document.getElementById("business-name").innerText = "Soporte 24-7";
+                document.getElementById("business-subtitle").innerText = "🟢 Modo Offline";
+                cargarPaso("inicio", true);
             }
         }
 
@@ -243,15 +236,17 @@
             cargarDatosPlanilla();
         };
 
-        function cargarPaso(pasoKey) {
+        function cargarPaso(pasoKey, mostrarTexto = true) {
             const paso = chatFlow[pasoKey];
             if (!paso) return;
 
-            const mensajeBot = document.createElement("div");
-            mensajeBot.className = "message bot";
-            mensajeBot.innerText = paso.texto;
-            chatBody.appendChild(mensajeBot);
-            chatBody.scrollTop = chatBody.scrollHeight;
+            if (mostrarTexto) {
+                const mensajeBot = document.createElement("div");
+                mensajeBot.className = "message bot";
+                mensajeBot.innerText = paso.texto;
+                chatBody.appendChild(mensajeBot);
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
 
             chatOptions.innerHTML = "";
             paso.opciones.forEach(op => {
@@ -271,10 +266,37 @@
                     setTimeout(() => {
                         if (op.link) {
                             window.open(op.link, "_blank");
-                            cargarPaso("inicio");
+                            mostrarMenuPrincipalLimpio();
+                        } else if (op.accion === "menu") {
+                            mostrarMenuPrincipalLimpio();
                         } else if (op.siguiente) {
-                            cargarPaso(op.siguiente);
+                            cargarPaso(op.siguiente, true);
                         }
+                    }, 400);
+                };
+                
+                chatOptions.appendChild(btn);
+            });
+        }
+
+        function mostrarMenuPrincipalLimpio() {
+            chatOptions.innerHTML = "";
+            chatFlow.inicio.opciones.forEach(op => {
+                const btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.innerText = op.texto;
+                
+                btn.onclick = () => {
+                    const mensajeUser = document.createElement("div");
+                    mensajeUser.className = "message user";
+                    mensajeUser.innerText = op.texto;
+                    chatBody.appendChild(mensajeUser);
+                    chatBody.scrollTop = chatBody.scrollHeight;
+
+                    chatOptions.innerHTML = "";
+
+                    setTimeout(() => {
+                        cargarPaso(op.siguiente, true);
                     }, 400);
                 };
                 
