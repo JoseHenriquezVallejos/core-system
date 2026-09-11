@@ -80,7 +80,37 @@
             cursor: pointer;
         }
 
-        /* Cuerpo del Historial de Mensajes */
+        /* Contenedor de Opciones / Botones Interactivos (Ubicados ARRIBA) */
+        .chat-options-container {
+            padding: 10px;
+            background: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 160px;
+            overflow-y: auto;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .option-btn {
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 10px 12px;
+            border-radius: 6px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+            transition: background 0.2s;
+        }
+
+        .option-btn:hover {
+            background-color: #f1f1f1;
+            border-color: #ccc;
+        }
+
+        /* Cuerpo del Historial de Mensajes (Ubicado ABAJO de los botones) */
         .chat-body {
             flex: 1;
             padding: 15px;
@@ -112,35 +142,6 @@
             border-top-right-radius: 0;
             color: #333;
         }
-
-        /* Contenedor de Opciones / Botones Interactivos */
-        .chat-footer {
-            padding: 10px;
-            background: #f0f0f0;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            max-height: 180px;
-            overflow-y: auto;
-        }
-
-        .option-btn {
-            background-color: white;
-            border: 1px solid #ddd;
-            padding: 10px 12px;
-            border-radius: 6px;
-            text-align: left;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            color: #333;
-            transition: background 0.2s;
-        }
-
-        .option-btn:hover {
-            background-color: #f1f1f1;
-            border-color: #ccc;
-        }
     </style>
 </head>
 <body>
@@ -158,17 +159,16 @@
             <button class="close-btn" onclick="toggleChat()">✕</button>
         </div>
 
-        <div class="chat-body" id="chatBody">
-            <!-- El historial dinámico se va cargando aquí -->
+        <!-- Los botones interactivos están ahora ARRIBA para acceso inmediato -->
+        <div class="chat-options-container" id="chatOptions">
         </div>
 
-        <div class="chat-footer" id="chatOptions">
-            <!-- Los botones interactivos cambian según el paso -->
+        <!-- El historial de mensajes queda ABAJO acumulándose -->
+        <div class="chat-body" id="chatBody">
         </div>
     </div>
 
     <script>
-        // CONFIGURACIÓN DINÁMICA DEL NEGOCIO (Hasta 6 reglas conectadas a sus respectivos links y respuestas de chat)
         const chatFlow = {
             inicio: {
                 texto: "¡Hola! Bienvenido al centro de apoyo automatizado. Selecciona una opción para avanzar:",
@@ -236,7 +236,7 @@
             if (isOpen) {
                 chatPopup.classList.add("active");
                 if (chatBody.children.length === 0) {
-                    cargarPaso("inicio"); // Inicia la conversación la primera vez que se abre
+                    cargarPaso("inicio");
                 }
             } else {
                 chatPopup.classList.remove("active");
@@ -246,16 +246,14 @@
         function cargarPaso(pasoKey) {
             const paso = chatFlow[pasoKey];
 
-            // 1. Mostrar mensaje del bot en el historial
+            // 1. Mostrar mensaje del bot en el historial (abajo)
             const mensajeBot = document.createElement("div");
             mensajeBot.className = "message bot";
             mensajeBot.innerText = paso.texto;
             chatBody.appendChild(mensajeBot);
-
-            // Auto-scroll hacia abajo en el historial
             chatBody.scrollTop = chatBody.scrollHeight;
 
-            // 2. Actualizar botones interactivos del menú inferior
+            // 2. Actualizar botones interactivos (fijos arriba)
             chatOptions.innerHTML = "";
             paso.opciones.forEach(op => {
                 const btn = document.createElement("button");
@@ -263,23 +261,20 @@
                 btn.innerText = op.texto;
                 
                 btn.onclick = () => {
-                    // Registrar la respuesta del usuario como una burbuja en el historial
+                    // Registrar la respuesta del usuario en el historial
                     const mensajeUser = document.createElement("div");
                     mensajeUser.className = "message user";
                     mensajeUser.innerText = op.texto;
                     chatBody.appendChild(mensajeUser);
                     chatBody.scrollTop = chatBody.scrollHeight;
 
-                    // Limpiar botones y evaluar si la opción navega internamente o abre un link externo
                     chatOptions.innerHTML = "";
 
                     setTimeout(() => {
                         if (op.link) {
-                            // Si tiene link asociado, abre el destino y devuelve al menú principal tras un momento
                             window.open(op.link, "_blank");
                             cargarPaso("inicio");
                         } else if (op.siguiente) {
-                            // Si es navegación interna, carga el siguiente paso del chat
                             cargarPaso(op.siguiente);
                         }
                     }, 400);
