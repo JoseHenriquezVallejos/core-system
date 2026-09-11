@@ -144,10 +144,7 @@
 
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQY4PiDZRnZMXs9N8sZNyLzlr3kFZ3vQ-qaWHmTdvRO7U5eTyfOLcEMQLwMtrwELgfy3OWCj4z9GeJM/pub?gid=0&single=true&output=csv";
         
-        // Detección robusta del ID:
-        // 1. Busca si viene por parámetro tradicional (?id=negocio1)
-        // 2. Busca el último segmento válido de la URL (ej: /negocio1)
-        // 3. Si no encuentra nada o apunta a un archivo .html, usa 'negocio1' por defecto
+        // Detección del ID en la URL (parámetro ?id= o último segmento de la ruta)
         const urlParams = new URLSearchParams(window.location.search);
         let TARGET_ID = urlParams.get('id');
 
@@ -155,14 +152,12 @@
             const pathSegments = window.location.pathname.split("/").filter(Boolean);
             if (pathSegments.length > 0) {
                 let lastSegment = pathSegments[pathSegments.length - 1];
-                // Si el último segmento no es el archivo html principal, lo tomamos como ID
                 if (!lastSegment.includes(".html") && !lastSegment.includes(".php")) {
                     TARGET_ID = lastSegment;
                 }
             }
         }
 
-        // Si sigue sin detectarse nada, usa 'negocio1' por defecto
         if (!TARGET_ID) {
             TARGET_ID = 'negocio1';
         }
@@ -194,18 +189,22 @@
 
                 let negocioRow = null;
                 for (let i = 1; i < rows.length; i++) {
-                    // Compara ignorando mayúsculas/minúsculas y espacios
                     if (rows[i][0] && rows[i][0].trim().toLowerCase() === TARGET_ID.trim().toLowerCase()) {
                         negocioRow = rows[i];
                         break;
                     }
                 }
 
+                // Si no existe el ID en la planilla
                 if (!negocioRow) {
-                    console.warn("No se encontró el ID '" + TARGET_ID + "' en la planilla. Usando valores por defecto.");
-                    document.getElementById("business-name").innerText = "Soporte 24-7";
-                    document.getElementById("business-subtitle").innerText = "🟢 Soporte 24-7";
-                    cargarPaso("inicio", true);
+                    document.getElementById("business-name").innerText = "No disponible";
+                    document.getElementById("business-subtitle").innerText = "🔴 Error";
+                    
+                    const mensajeBot = document.createElement("div");
+                    mensajeBot.className = "message bot";
+                    mensajeBot.innerText = "El negocio o código especificado no existe.";
+                    chatBody.appendChild(mensajeBot);
+                    chatBody.scrollTop = chatBody.scrollHeight;
                     return;
                 }
 
@@ -249,9 +248,14 @@
 
             } catch (error) {
                 console.error("Error al cargar la planilla:", error);
-                document.getElementById("business-name").innerText = "Soporte 24-7";
-                document.getElementById("business-subtitle").innerText = "🟢 Modo Offline";
-                cargarPaso("inicio", true);
+                document.getElementById("business-name").innerText = "Error de conexión";
+                document.getElementById("business-subtitle").innerText = "🔴 Offline";
+                
+                const mensajeBot = document.createElement("div");
+                mensajeBot.className = "message bot";
+                mensajeBot.innerText = "No se pudo cargar la información en este momento.";
+                chatBody.appendChild(mensajeBot);
+                chatBody.scrollTop = chatBody.scrollHeight;
             }
         }
 
