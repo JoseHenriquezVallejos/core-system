@@ -144,10 +144,28 @@
 
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQY4PiDZRnZMXs9N8sZNyLzlr3kFZ3vQ-qaWHmTdvRO7U5eTyfOLcEMQLwMtrwELgfy3OWCj4z9GeJM/pub?gid=0&single=true&output=csv";
         
-        // Asume que el ID va al final de la ruta del link (ej: .../soporte24-7/negocio1 -> extrae 'negocio1')
-        // Si no hay nada al final o está en la raíz, por defecto usará 'negocio1'
-        const pathSegments = window.location.pathname.split("/").filter(Boolean);
-        const TARGET_ID = pathSegments.length > 0 ? pathSegments[pathSegments.length - 1] : 'negocio1';
+        // Detección robusta del ID:
+        // 1. Busca si viene por parámetro tradicional (?id=negocio1)
+        // 2. Busca el último segmento válido de la URL (ej: /negocio1)
+        // 3. Si no encuentra nada o apunta a un archivo .html, usa 'negocio1' por defecto
+        const urlParams = new URLSearchParams(window.location.search);
+        let TARGET_ID = urlParams.get('id');
+
+        if (!TARGET_ID) {
+            const pathSegments = window.location.pathname.split("/").filter(Boolean);
+            if (pathSegments.length > 0) {
+                let lastSegment = pathSegments[pathSegments.length - 1];
+                // Si el último segmento no es el archivo html principal, lo tomamos como ID
+                if (!lastSegment.includes(".html") && !lastSegment.includes(".php")) {
+                    TARGET_ID = lastSegment;
+                }
+            }
+        }
+
+        // Si sigue sin detectarse nada, usa 'negocio1' por defecto
+        if (!TARGET_ID) {
+            TARGET_ID = 'negocio1';
+        }
 
         function parseCSVLine(text) {
             let result = [], cell = '', inQuotes = false;
@@ -176,14 +194,20 @@
 
                 let negocioRow = null;
                 for (let i = 1; i < rows.length; i++) {
-                    // Comparamos ignorando mayúsculas/minúsculas para mayor seguridad
-                    if (rows[i][0] && rows[i][0].toLowerCase() === TARGET_ID.toLowerCase()) {
+                    // Compara ignorando mayúsculas/minúsculas y espacios
+                    if (rows[i][0] && rows[i][0].trim().toLowerCase() === TARGET_ID.trim().toLowerCase()) {
                         negocioRow = rows[i];
                         break;
                     }
                 }
 
-                if (!negocioRow) return;
+                if (!negocioRow) {
+                    console.warn("No se encontró el ID '" + TARGET_ID + "' en la planilla. Usando valores por defecto.");
+                    document.getElementById("business-name").innerText = "Soporte 24-7";
+                    document.getElementById("business-subtitle").innerText = "🟢 Soporte 24-7";
+                    cargarPaso("inicio", true);
+                    return;
+                }
 
                 const nombreVisual = negocioRow[1];
                 if (nombreVisual) {
