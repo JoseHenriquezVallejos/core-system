@@ -16,7 +16,6 @@
             align-items: center;
         }
 
-        /* Contenedor principal */
         .chat-container {
             width: 100%;
             height: 100dvh;
@@ -26,7 +25,6 @@
             overflow: hidden;
         }
 
-        /* En pantallas de PC, adaptar a formato app centrada */
         @media (min-width: 480px) {
             .chat-container {
                 width: 420px;
@@ -38,7 +36,6 @@
             }
         }
 
-        /* Cabecera del Chat */
         .chat-header {
             background-color: #075e54;
             color: white;
@@ -56,7 +53,6 @@
             font-weight: normal;
         }
 
-        /* Cuerpo del Historial de Mensajes */
         .chat-body {
             flex: 1;
             padding: 12px;
@@ -91,7 +87,6 @@
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
-        /* Contenedor inferior con un fondo más oscuro para separar los botones */
         .chat-footer {
             padding: 12px;
             background: #e2e8f0;
@@ -104,7 +99,6 @@
             overflow-y: auto;
         }
 
-        /* Botones con fondo blanco, relieve y borde definido para alto contraste */
         .option-btn {
             background-color: #ffffff;
             border: 1px solid #94a3b8;
@@ -136,79 +130,121 @@
             </div>
         </div>
 
-        <div class="chat-body" id="chatBody">
-        </div>
-
-        <div class="chat-footer" id="chatOptions">
-        </div>
+        <div class="chat-body" id="chatBody"></div>
+        <div class="chat-footer" id="chatOptions"></div>
     </div>
 
     <script>
-        const chatFlow = {
+        // Estructura base que se llenará con los datos de la planilla CSV
+        let chatFlow = {
             inicio: {
                 texto: "¡Hola! Bienvenido al centro de apoyo automatizado. Selecciona una opción para avanzar:",
-                opciones: [
-                    { texto: "🎁 Paso 1 – Embudo Gratis", siguiente: "regla1" },
-                    { texto: "🎬 Ver Videos y Demostración", siguiente: "regla2" },
-                    { texto: "💰 Información de Precios", siguiente: "regla3" },
-                    { texto: "💬 Hablar con un Asesor (WhatsApp)", siguiente: "whatsapp" },
-                    { texto: "⭐ Ver Testimonios", siguiente: "regla5" },
-                    { texto: "📅 Agendar Llamada", siguiente: "regla6" }
-                ]
-            },
-            regla1: {
-                texto: "El Paso 1 consiste en configurar tu estructura base para empezar a filtrar prospectos sin complicaciones.",
-                opciones: [
-                    { texto: "📥 Abrir enlace del recurso", link: "https://wa.me/tuenlace1" },
-                    { texto: "⬅️ Volver al menú principal", siguiente: "inicio" }
-                ]
-            },
-            regla2: {
-                texto: "Los videos están diseñados para mostrar paso a paso cómo funciona el sistema.",
-                opciones: [
-                    { texto: "📺 Ver video demostrativo ahora", link: "https://wa.me/tuenlace2" },
-                    { texto: "⬅️ Volver al menú principal", siguiente: "inicio" }
-                ]
-            },
-            regla3: {
-                texto: "Puedes acceder a todo el sistema operativo por solo $24 USD al año.",
-                opciones: [
-                    { texto: "🚀 ¡Quiero activar mi cuenta!", link: "https://wa.me/tuenlace3" },
-                    { texto: "⬅️ Volver al menú principal", siguiente: "inicio" }
-                ]
-            },
-            regla5: {
-                texto: "Aquí puedes ver las experiencias de otros usuarios que ya automatizaron su atención.",
-                opciones: [
-                    { texto: "⭐ Leer opiniones de clientes", link: "https://wa.me/tuenlace5" },
-                    { texto: "⬅️ Volver al menú principal", siguiente: "inicio" }
-                ]
-            },
-            regla6: {
-                texto: "Selecciona un horario disponible para que conversemos directamente.",
-                opciones: [
-                    { texto: "📅 Abrir calendario de citas", link: "https://wa.me/tuenlace6" },
-                    { texto: "⬅️ Volver al menú principal", siguiente: "inicio" }
-                ]
-            },
-            whatsapp: {
-                texto: "Te estamos derivando de inmediato con nuestro canal de atención directa en WhatsApp.",
-                opciones: [
-                    { texto: "🟢 Abrir chat en WhatsApp", link: "https://wa.me/TUNUMERO?text=Hola,%20vengo%20desde%20el%20asistente%20web%20y%20quiero%20más%20información." },
-                    { texto: "⬅️ Volver al menú principal", siguiente: "inicio" }
-                ]
+                opciones: []
             }
         };
+
+        const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQY4PiDZRnZMXs9N8sZNyLzlr3kFZ3vQ-qaWHmTdvRO7U5eTyfOLcEMQLwMtrwELgfy3OWCj4z9GeJM/pub?gid=0&single=true&output=csv";
+        const TARGET_ID = "negocio1"; // ID del negocio a buscar en la planilla
+
+        // Función auxiliar para parsear CSV respetando comillas
+        function parseCSVLine(text) {
+            let result = [], cell = '', inQuotes = false;
+            for (let i = 0; i < text.length; i++) {
+                let c = text[i];
+                if (c === '"') {
+                    inQuotes = !inQuotes;
+                } else if (c === ',' && !inQuotes) {
+                    result.push(cell.trim());
+                    cell = '';
+                } else {
+                    cell += c;
+                }
+            }
+            result.push(cell.trim());
+            return result;
+        }
+
+        async function cargarDatosPlanilla() {
+            try {
+                const response = await fetch(CSV_URL);
+                const data = await response.text();
+                const rows = data.split("\n").map(row => parseCSVLine(row));
+                
+                if (rows.length < 2) return;
+
+                const headers = rows[0];
+                let negocioRow = null;
+
+                // Buscar la fila correspondiente al ID del negocio
+                for (let i = 1; i < rows.length; i++) {
+                    if (rows[i][0] === TARGET_ID) {
+                        negocioRow = rows[i];
+                        break;
+                    }
+                }
+
+                if (!negocioRow) return;
+
+                // Actualizar Nombre Visual si existe en la columna B
+                const nombreVisual = negocioRow[1];
+                if (nombreVisual) {
+                    document.getElementById("business-name").innerText = nombreVisual;
+                }
+
+                let opcionesInicio = [];
+
+                // Recorrer los 6 botones configurados en la planilla
+                for (let b = 1; b <= 6; b++) {
+                    // Índices según tu estructura horizontal: ID(0), Nombre_Visual(1), [botonX, descX, linkX]
+                    // Cada bloque ocupa 3 columnas: el botón empieza en índice 2 + (b-1)*3
+                    let idxBoton = 2 + (b - 1) * 3;
+                    let idxDesc = idxBoton + 1;
+                    let idxLink = idxBoton + 2;
+
+                    let textoBoton = negocioRow[idxBoton];
+                    let descBoton = negocioRow[idxDesc];
+                    let linkBoton = negocioRow[idxLink];
+
+                    if (textoBoton) {
+                        let pasoKey = "btn_" + b;
+                        
+                        // Configurar el paso individual para este botón
+                        chatFlow[pasoKey] = {
+                            texto: descBoton || "Información disponible en este apartado.",
+                            opciones: [
+                                ...(linkBoton ? [{ texto: "🔗 Abrir enlace externo", link: linkBoton }] : []),
+                                { texto: "⬅️ Volver al menú principal", siguiente: "inicio" }
+                            ]
+                        };
+
+                        // Agregar al menú de inicio
+                        opcionesInicio.push({
+                            texto: textoBoton,
+                            siguiente: pasoKey
+                        });
+                    }
+                }
+
+                chatFlow.inicio.opciones = opcionesInicio;
+                cargarPaso("inicio");
+
+            } catch (error) {
+                console.error("Error al cargar la planilla:", error);
+                document.getElementById("business-name").innerText = "Soporte 24-7 (Modo Offline)";
+                cargarPaso("inicio");
+            }
+        }
 
         const chatBody = document.getElementById("chatBody");
         const chatOptions = document.getElementById("chatOptions");
 
         window.onload = () => {
-            cargarPaso("inicio");
+            cargarDatosPlanilla();
         };
 
         function cargarPaso(pasoKey) {
             const paso = chatFlow[pasoKey];
+            if (!paso) return;
 
             const mensajeBot = document.createElement("div");
             mensajeBot.className = "message bot";
