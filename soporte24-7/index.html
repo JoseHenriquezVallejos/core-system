@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Soporte 24-7</title>
+    <!-- Enlace directo al Manifest físico -->
+    <link rel="manifest" href="manifest.json">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -178,38 +180,6 @@
             return result;
         }
 
-        function generarManifestDinamico(nombreNegocio) {
-            const manifestData = {
-                "name": nombreNegocio,
-                "short_name": nombreNegocio,
-                "start_url": "./index.html?id=" + encodeURIComponent(TARGET_ID),
-                "display": "standalone",
-                "background_color": "#075e54",
-                "theme_color": "#075e54",
-                "icons": [
-                    {
-                        "src": "icono.png",
-                        "sizes": "192x192",
-                        "type": "image/png"
-                    },
-                    {
-                        "src": "icono.png",
-                        "sizes": "512x512",
-                        "type": "image/png"
-                    }
-                ]
-            };
-
-            const stringifiedManifest = JSON.stringify(manifestData);
-            const blob = new Blob([stringifiedManifest], { type: 'application/json' });
-            const manifestURL = URL.createObjectURL(blob);
-
-            const linkTag = document.createElement('link');
-            linkTag.rel = 'manifest';
-            linkTag.href = manifestURL;
-            document.head.appendChild(linkTag);
-        }
-
         async function cargarDatosPlanilla() {
             try {
                 const response = await fetch(CSV_URL);
@@ -229,7 +199,6 @@
                 if (!negocioRow) {
                     document.getElementById("business-name").innerText = "No disponible";
                     document.getElementById("business-subtitle").innerText = "🔴 Error";
-                    generarManifestDinamico("Soporte 24-7");
                     
                     const mensajeBot = document.createElement("div");
                     mensajeBot.className = "message bot";
@@ -243,9 +212,6 @@
                 if (nombreVisual) {
                     document.getElementById("business-name").innerText = nombreVisual;
                     document.getElementById("business-subtitle").innerText = "🟢 Soporte 24-7";
-                    generarManifestDinamico(nombreVisual);
-                } else {
-                    generarManifestDinamico("Soporte 24-7");
                 }
 
                 let opcionesInicio = [];
@@ -284,7 +250,6 @@
                 console.error("Error al cargar la planilla:", error);
                 document.getElementById("business-name").innerText = "Error de conexión";
                 document.getElementById("business-subtitle").innerText = "🔴 Offline";
-                generarManifestDinamico("Soporte 24-7");
                 
                 const mensajeBot = document.createElement("div");
                 mensajeBot.className = "message bot";
