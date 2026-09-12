@@ -179,6 +179,39 @@
             return result;
         }
 
+        // Función para inyectar dinámicamente el manifest con el ícono unificado y el nombre de la planilla
+        function generarManifestDinamico(nombreNegocio) {
+            const manifestData = {
+                "name": nombreNegocio,
+                "short_name": nombreNegocio,
+                "start_url": "./index.html?id=" + encodeURIComponent(TARGET_ID),
+                "display": "standalone",
+                "background_color": "#075e54",
+                "theme_color": "#075e54",
+                "icons": [
+                    {
+                        "src": "icono.png",
+                        "sizes": "192x192",
+                        "type": "image/png"
+                    },
+                    {
+                        "src": "icono.png",
+                        "sizes": "512x512",
+                        "type": "image/png"
+                    }
+                ]
+            };
+
+            const stringifiedManifest = JSON.stringify(manifestData);
+            const blob = new Blob([stringifiedManifest], { type: 'application/json' });
+            const manifestURL = URL.createObjectURL(blob);
+
+            const linkTag = document.createElement('link');
+            linkTag.rel = 'manifest';
+            linkTag.href = manifestURL;
+            document.head.appendChild(linkTag);
+        }
+
         async function cargarDatosPlanilla() {
             try {
                 const response = await fetch(CSV_URL);
@@ -200,6 +233,8 @@
                     document.getElementById("business-name").innerText = "No disponible";
                     document.getElementById("business-subtitle").innerText = "🔴 Error";
                     
+                    generarManifestDinamico("Soporte 24-7");
+
                     const mensajeBot = document.createElement("div");
                     mensajeBot.className = "message bot";
                     mensajeBot.innerText = "El negocio o código especificado no existe.";
@@ -212,6 +247,11 @@
                 if (nombreVisual) {
                     document.getElementById("business-name").innerText = nombreVisual;
                     document.getElementById("business-subtitle").innerText = "🟢 Soporte 24-7";
+                    
+                    // Generamos el manifest en memoria con el nombre exacto de la planilla y tu ícono unificado
+                    generarManifestDinamico(nombreVisual);
+                } else {
+                    generarManifestDinamico("Soporte 24-7");
                 }
 
                 let opcionesInicio = [];
@@ -251,6 +291,8 @@
                 document.getElementById("business-name").innerText = "Error de conexión";
                 document.getElementById("business-subtitle").innerText = "🔴 Offline";
                 
+                generarManifestDinamico("Soporte 24-7");
+
                 const mensajeBot = document.createElement("div");
                 mensajeBot.className = "message bot";
                 mensajeBot.innerText = "No se pudo cargar la información en este momento.";
