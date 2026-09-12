@@ -1,1 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soporte 24-7</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
+        .chat-container {
+            width: 100%;
+            height: 100dvh;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        @media (min-width: 480px) {
+            .chat-container {
+                width: 420px;
+                height: 90vh;
+                max-height: 780px;
+                border-radius: 16px;
+                border: 8px solid #222;
+                box-shadow: 0 4px 25px rgba(0,0,0,0.15);
+            }
+        }
+
+        .chat-header {
+            background-color: #075e54;
+            color: white;
+            padding: 14px 16px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .chat-header span {
+            font-size: 12px;
+            opacity: 0.8;
+            font-weight: normal;
+        }
+
+        .chat-body {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background-color: #e5ddd5;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .message.bot {
+            background-color: white;
+            align-self: flex-start;
+            border-top-left-radius: 0;
+            color: #333;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .message.user {
+            background-color: #dcf8c6;
+            align-self: flex-end;
+            border-top-right-radius: 0;
+            color: #333;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .chat-footer {
+            padding: 8px 12px;
+            background: #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            flex-shrink: 0;
+            border-top: 1px solid #cbd5e1;
+            max-height: 52vh;
+            overflow-y: auto;
+        }
+
+        .option-btn {
+            background-color: #ffffff;
+            border: 1px solid #94a3b8;
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1e293b;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            transition: background 0.2s, border-color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .option-btn:hover {
+            background-color: #f8fafc;
+            border-color: #075e54;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <div>
+                <div id="business-name" style="font-size: 16px; font-weight: bold;">Cargando...</div>
+                <span id="business-subtitle" style="font-size: 12px; opacity: 0.8; font-weight: normal;">🟢 Soporte 24-7</span>
+            </div>
+        </div>
+
+        <div class="chat-body" id="chatBody"></div>
+        <div class="chat-footer" id="chatOptions"></div>
+    </div>
+
+    <script>
+        let chatFlow = {
+            inicio: {
+                texto: "¡Hola! Bienvenido al centro de apoyo automatizado. Selecciona una opción para avanzar:",
+                opciones: []
+            }
+        };
+
+        const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQY4PiDZRnZMXs9N8sZNyLzlr3kFZ3vQ-qaWHmTdvRO7U5eTyfOLcEMQLwMtrwELgfy3OWCj4z9GeJM/pub?gid=0&single=true&output=csv";
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        let TARGET_ID = urlParams.get('id');
+
+        if (!TARGET_ID) {
+            const pathSegments = window.location.pathname.split("/").filter(Boolean);
+            if (pathSegments.length > 0) {
+                let lastSegment = pathSegments[pathSegments.length - 1];
+                if (!lastSegment.includes(".html") && !lastSegment.includes(".php")) {
+                    TARGET_ID = lastSegment;
+                }
+            }
+        }
+
+        if (!TARGET_ID) {
+            TARGET_ID = 'negocio1';
+        }
+
+        function parseCSVLine(text) {
+            let result = [], cell = '', inQuotes = false;
+            for (let i = 0; i < text.length; i++) {
+                let c = text[i];
+                if (c === '"') {
+                    inQuotes = !inQuotes;
+                } else if (c === ',' && !inQuotes) {
+                    result.push(cell.trim());
+                    cell = '';
+                } else {
+                    cell += c;
+                }
+            }
+            result.push(cell.trim());
+            return result;
+        }
+
+        function generarManifestDinamico(nombreNegocio) {
+            const manifestData = {
+                "name": nombreNegocio,
+                "short_name": nombreNegocio,
+                "start_url": "./index.html?id=" + encodeURIComponent(TARGET_ID),
+                "display": "standalone",
+                "background_color": "#075e54",
+                "theme_color": "#075e54",
+                "icons": [
+                    {
+                        "src": "icono.png",
+                        "sizes": "192x192",
+                        "type": "image/png"
+                    },
+                    {
+                        "src": "icono.png",
+                        "sizes": "512x512",
+                        "type": "image/png"
+                    }
+                ]
+            };
+
+            const stringifiedManifest = JSON.stringify(manifestData);
+            const blob = new Blob([stringifiedManifest], { type: 'application/json' });
+            const manifestURL = URL.createObjectURL(blob);
+
+            const linkTag = document.createElement('link');
+            linkTag.rel = 'manifest';
+            linkTag.href = manifestURL;
+            document.head.appendChild(linkTag);
+        }
+
+        async function cargarDatosPlanilla() {
+            try {
+                const response = await fetch(CSV_URL);
+                const data = await response.text();
+                const rows = data.split("\n").map(row => parseCSVLine(row));
+                
+                if (rows.length < 2) return;
+
+                let negocioRow = null;
+                for (let i = 1; i < rows.length; i++) {
+                    if (rows[i][0] && rows[i][0].trim().toLowerCase() === TARGET_ID.trim().toLowerCase()) {
+                        negocioRow = rows[i];
+                        break;
+                    }
+                }
+
+                if (!negocioRow) {
+                    document.getElementById("business-name").innerText = "No disponible";
+                    document.getElementById("business-subtitle").innerText = "🔴 Error";
+                    generarManifestDinamico("Soporte 24-7");
+                    
+                    const mensajeBot = document.createElement("div");
+                    mensajeBot.className = "message bot";
+                    mensajeBot.innerText = "El negocio o código especificado no existe.";
+                    chatBody.appendChild(mensajeBot);
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                    return;
+                }
+
+                const nombreVisual = negocioRow[1];
+                if (nombreVisual) {
+                    document.getElementById("business-name").innerText = nombreVisual;
+                    document.getElementById("business-subtitle").innerText = "🟢 Soporte 24-7";
+                    generarManifestDinamico(nombreVisual);
+                } else {
+                    generarManifestDinamico("Soporte 24-7");
+                }
+
+                let opcionesInicio = [];
+
+                for (let b = 1; b <= 6; b++) {
+                    let idxBoton = 2 + (b - 1) * 3;
+                    let idxDesc = idxBoton + 1;
+                    let idxLink = idxBoton + 2;
+
+                    let textoBoton = negocioRow[idxBoton];
+                    let descBoton = negocioRow[idxDesc];
+                    let linkBoton = negocioRow[idxLink];
+
+                    if (textoBoton) {
+                        let pasoKey = "btn_" + b;
+                        
+                        chatFlow[pasoKey] = {
+                            texto: descBoton || "Información disponible en este apartado.",
+                            opciones: [
+                                ...(linkBoton ? [{ texto: "🔗 Abrir enlace externo", link: linkBoton }] : []),
+                                { texto: "⬅️ Volver al menú principal", accion: "menu" }
+                            ]
+                        };
+
+                        opcionesInicio.push({
+                            texto: textoBoton,
+                            siguiente: pasoKey
+                        });
+                    }
+                }
+
+                chatFlow.inicio.opciones = opcionesInicio;
+                cargarPaso("inicio", true);
+
+            } catch (error) {
+                console.error("Error al cargar la planilla:", error);
+                document.getElementById("business-name").innerText = "Error de conexión";
+                document.getElementById("business-subtitle").innerText = "🔴 Offline";
+                generarManifestDinamico("Soporte 24-7");
+                
+                const mensajeBot = document.createElement("div");
+                mensajeBot.className = "message bot";
+                mensajeBot.innerText = "No se pudo cargar la información en este momento.";
+                chatBody.appendChild(mensajeBot);
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
+        }
+
+        const chatBody = document.getElementById("chatBody");
+        const chatOptions = document.getElementById("chatOptions");
+
+        window.onload = () => {
+            cargarDatosPlanilla();
+        };
+
+        function cargarPaso(pasoKey, mostrarTexto = true) {
+            const paso = chatFlow[pasoKey];
+            if (!paso) return;
+
+            if (mostrarTexto) {
+                const mensajeBot = document.createElement("div");
+                mensajeBot.className = "message bot";
+                mensajeBot.innerText = paso.texto;
+                chatBody.appendChild(mensajeBot);
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
+
+            chatOptions.innerHTML = "";
+            paso.opciones.forEach(op => {
+                const btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.innerText = op.texto;
+                
+                btn.onclick = () => {
+                    const mensajeUser = document.createElement("div");
+                    mensajeUser.className = "message user";
+                    mensajeUser.innerText = op.texto;
+                    chatBody.appendChild(mensajeUser);
+                    chatBody.scrollTop = chatBody.scrollHeight;
+
+                    chatOptions.innerHTML = "";
+
+                    setTimeout(() => {
+                        if (op.link) {
+                            window.open(op.link, "_blank");
+                            mostrarMenuPrincipalLimpio();
+                        } else if (op.accion === "menu") {
+                            mostrarMenuPrincipalLimpio();
+                        } else if (op.siguiente) {
+                            cargarPaso(op.siguiente, true);
+                        }
+                    }, 400);
+                };
+                
+                chatOptions.appendChild(btn);
+            });
+        }
+
+        function mostrarMenuPrincipalLimpio() {
+            chatOptions.innerHTML = "";
+            chatFlow.inicio.opciones.forEach(op => {
+                const btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.innerText = op.texto;
+                
+                btn.onclick = () => {
+                    const mensajeUser = document.createElement("div");
+                    mensajeUser.className = "message user";
+                    mensajeUser.innerText = op.texto;
+                    chatBody.appendChild(mensajeUser);
+                    chatBody.scrollTop = chatBody.scrollHeight;
+
+                    chatOptions.innerHTML = "";
+
+                    setTimeout(() => {
+                        cargarPaso(op.siguiente, true);
+                    }, 400);
+                };
+                
+                chatOptions.appendChild(btn);
+            });
+        }
+    </script>
+</body>
+</html>
