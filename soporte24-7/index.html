@@ -144,7 +144,6 @@
 
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQY4PiDZRnZMXs9N8sZNyLzlr3kFZ3vQ-qaWHmTdvRO7U5eTyfOLcEMQLwMtrwELgfy3OWCj4z9GeJM/pub?gid=0&single=true&output=csv";
         
-        // Detección del ID en la URL (parámetro ?id= o último segmento de la ruta)
         const urlParams = new URLSearchParams(window.location.search);
         let TARGET_ID = urlParams.get('id');
 
@@ -179,7 +178,6 @@
             return result;
         }
 
-        // Función para inyectar dinámicamente el manifest con el ícono unificado y el nombre de la planilla
         function generarManifestDinamico(nombreNegocio) {
             const manifestData = {
                 "name": nombreNegocio,
@@ -228,13 +226,11 @@
                     }
                 }
 
-                // Si no existe el ID en la planilla
                 if (!negocioRow) {
                     document.getElementById("business-name").innerText = "No disponible";
                     document.getElementById("business-subtitle").innerText = "🔴 Error";
-                    
                     generarManifestDinamico("Soporte 24-7");
-
+                    
                     const mensajeBot = document.createElement("div");
                     mensajeBot.className = "message bot";
                     mensajeBot.innerText = "El negocio o código especificado no existe.";
@@ -247,8 +243,6 @@
                 if (nombreVisual) {
                     document.getElementById("business-name").innerText = nombreVisual;
                     document.getElementById("business-subtitle").innerText = "🟢 Soporte 24-7";
-                    
-                    // Generamos el manifest en memoria con el nombre exacto de la planilla y tu ícono unificado
                     generarManifestDinamico(nombreVisual);
                 } else {
                     generarManifestDinamico("Soporte 24-7");
@@ -290,9 +284,8 @@
                 console.error("Error al cargar la planilla:", error);
                 document.getElementById("business-name").innerText = "Error de conexión";
                 document.getElementById("business-subtitle").innerText = "🔴 Offline";
-                
                 generarManifestDinamico("Soporte 24-7");
-
+                
                 const mensajeBot = document.createElement("div");
                 mensajeBot.className = "message bot";
                 mensajeBot.innerText = "No se pudo cargar la información en este momento.";
