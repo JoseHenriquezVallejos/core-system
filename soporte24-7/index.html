@@ -292,12 +292,11 @@
                             texto: textoBoton
                         };
 
-                        // Regla: O tiene un Link o tiene una Descripción corta
+                        // Si tiene enlace web válido, es un botón de acción directa
                         if (linkBoton && (linkBoton.startsWith("http://") || linkBoton.startsWith("https://"))) {
-                            // Es un botón de acción con enlace directo
                             itemConfig.link = linkBoton;
                         } else {
-                            // Es un botón informativo con descripción corta interna
+                            // Si no tiene link, funciona como sección informativa con descripción corta
                             let pasoKey = "btn_" + b;
                             chatFlow[pasoKey] = {
                                 texto: descBoton || "Información disponible en este apartado.",
@@ -383,7 +382,13 @@
                 btn.innerText = op.texto;
                 
                 btn.onclick = () => {
-                    // Pintamos la burbuja del usuario indicando qué opción eligió
+                    // SI TIENE LINK: Abrir directamente sin interferir con el chat
+                    if (op.link) {
+                        window.open(op.link, "_blank");
+                        return;
+                    }
+
+                    // SI ES UNA OPCIÓN INTERNA (como texto o volver al menú): Flujo normal de chat
                     const mensajeUser = document.createElement("div");
                     mensajeUser.className = "message user";
                     mensajeUser.innerText = op.texto;
@@ -393,24 +398,16 @@
                     chatOptions.innerHTML = "";
 
                     setTimeout(() => {
-                        if (op.link) {
-                            // Si tiene link, se abre directo y se limpia el menú
-                            window.open(op.link, "_blank");
-                            mostrarMenuPrincipalLimpio();
-                        } else if (op.accion === "menu") {
-                            mostrarMenuPrincipalLimpio();
+                        if (op.accion === "menu") {
+                            cargarPaso("inicio", true);
                         } else if (op.siguiente) {
                             cargarPaso(op.siguiente, true);
                         }
-                    }, 300);
+                    }, 200);
                 };
                 
                 chatOptions.appendChild(btn);
             });
-        }
-
-        function mostrarMenuPrincipalLimpio() {
-            renderizarOpciones(chatFlow.inicio.opciones);
         }
     </script>
 </body>
