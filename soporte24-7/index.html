@@ -288,33 +288,30 @@
                     let linkBoton = negocioRow[idxLink];
 
                     if (textoBoton) {
-                        let pasoKey = "btn_" + b;
-                        
-                        let opcionesAccion = [];
-                        
-                        // Validamos que el link realmente sea una URL externa (empiece por http o https)
-                        // Si en la celda de Google Sheets pusiste texto plano en vez de URL, lo ignoramos para evitar duplicar.
-                        if (linkBoton && (linkBoton.startsWith("http://") || linkBoton.startsWith("https://"))) {
-                            opcionesAccion.push({
-                                texto: "🔗 Abrir enlace externo",
-                                link: linkBoton
-                            });
-                        }
-                        
-                        opcionesAccion.push({
-                            texto: "⬅️ Volver al menú principal",
-                            accion: "menu"
-                        });
-
-                        chatFlow[pasoKey] = {
-                            texto: descBoton || "Información disponible en este apartado.",
-                            opciones: opcionesAccion
+                        let itemConfig = {
+                            texto: textoBoton
                         };
 
-                        opcionesInicio.push({
-                            texto: textoBoton,
-                            siguiente: pasoKey
-                        });
+                        // Regla: O tiene un Link o tiene una Descripción corta
+                        if (linkBoton && (linkBoton.startsWith("http://") || linkBoton.startsWith("https://"))) {
+                            // Es un botón de acción con enlace directo
+                            itemConfig.link = linkBoton;
+                        } else {
+                            // Es un botón informativo con descripción corta interna
+                            let pasoKey = "btn_" + b;
+                            chatFlow[pasoKey] = {
+                                texto: descBoton || "Información disponible en este apartado.",
+                                opciones: [
+                                    {
+                                        texto: "⬅️ Volver al menú principal",
+                                        accion: "menu"
+                                    }
+                                ]
+                            };
+                            itemConfig.siguiente = pasoKey;
+                        }
+
+                        opcionesInicio.push(itemConfig);
                     }
                 }
 
@@ -386,7 +383,7 @@
                 btn.innerText = op.texto;
                 
                 btn.onclick = () => {
-                    // 1. Burbuja del usuario (verde claro a la derecha)
+                    // Pintamos la burbuja del usuario indicando qué opción eligió
                     const mensajeUser = document.createElement("div");
                     mensajeUser.className = "message user";
                     mensajeUser.innerText = op.texto;
@@ -397,6 +394,7 @@
 
                     setTimeout(() => {
                         if (op.link) {
+                            // Si tiene link, se abre directo y se limpia el menú
                             window.open(op.link, "_blank");
                             mostrarMenuPrincipalLimpio();
                         } else if (op.accion === "menu") {
@@ -404,7 +402,7 @@
                         } else if (op.siguiente) {
                             cargarPaso(op.siguiente, true);
                         }
-                    }, 400);
+                    }, 300);
                 };
                 
                 chatOptions.appendChild(btn);
