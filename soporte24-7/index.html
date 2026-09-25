@@ -292,12 +292,21 @@
                     if (textoBoton) {
                         let pasoKey = "btn_" + b;
                         
+                        let opcionesAccion = [];
+                        if (linkBoton) {
+                            opcionesAccion.push({
+                                texto: "🔗 " + textoBoton,
+                                link: linkBoton
+                            });
+                        }
+                        opcionesAccion.push({
+                            texto: "⬅️ Volver al menú principal",
+                            accion: "menu"
+                        });
+
                         chatFlow[pasoKey] = {
                             texto: descBoton || "Información disponible en este apartado.",
-                            opciones: [
-                                ...(linkBoton ? [{ texto: "🔗 Abrir enlace externo", link: linkBoton }] : []),
-                                { texto: "⬅️ Volver al menú principal", accion: "menu" }
-                            ]
+                            opciones: opcionesAccion
                         };
 
                         opcionesInicio.push({
