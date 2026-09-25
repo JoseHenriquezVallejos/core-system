@@ -253,7 +253,6 @@
                     avatarImg.src = iconoUrl;
                     avatarImg.style.display = "block";
 
-                    // Configurar Manifest dinámicamente
                     const manifestData = {
                         name: nombreVisual,
                         short_name: nombreVisual,
@@ -294,7 +293,7 @@
                         let opcionesAccion = [];
                         if (linkBoton) {
                             opcionesAccion.push({
-                                texto: "Abrir " + textoBoton, // Evita duplicar emojis y aclara la acción
+                                texto: "🌐 Visitar: " + textoBoton, // Texto limpio y directo sin duplicar emojis raros
                                 link: linkBoton
                             });
                         }
@@ -383,7 +382,7 @@
                 btn.innerText = op.texto;
                 
                 btn.onclick = () => {
-                    // 1. Primero se pinta el mensaje del usuario (burbuja verde a la derecha)
+                    // 1. Burbuja del usuario (verde claro a la derecha) con lo que presionó
                     const mensajeUser = document.createElement("div");
                     mensajeUser.className = "message user";
                     mensajeUser.innerText = op.texto;
