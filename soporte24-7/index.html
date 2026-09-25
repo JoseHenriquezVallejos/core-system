@@ -291,12 +291,16 @@
                         let pasoKey = "btn_" + b;
                         
                         let opcionesAccion = [];
-                        if (linkBoton) {
+                        
+                        // Validamos que el link realmente sea una URL externa (empiece por http o https)
+                        // Si en la celda de Google Sheets pusiste texto plano en vez de URL, lo ignoramos para evitar duplicar.
+                        if (linkBoton && (linkBoton.startsWith("http://") || linkBoton.startsWith("https://"))) {
                             opcionesAccion.push({
-                                texto: "🌐 Visitar: " + textoBoton, // Texto limpio y directo sin duplicar emojis raros
+                                texto: "🔗 Abrir enlace externo",
                                 link: linkBoton
                             });
                         }
+                        
                         opcionesAccion.push({
                             texto: "⬅️ Volver al menú principal",
                             accion: "menu"
@@ -382,7 +386,7 @@
                 btn.innerText = op.texto;
                 
                 btn.onclick = () => {
-                    // 1. Burbuja del usuario (verde claro a la derecha) con lo que presionó
+                    // 1. Burbuja del usuario (verde claro a la derecha)
                     const mensajeUser = document.createElement("div");
                     mensajeUser.className = "message user";
                     mensajeUser.innerText = op.texto;
