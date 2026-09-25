@@ -103,6 +103,16 @@
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
+        /* Estilo especial para tarjetas de información estructurada (horarios, listas, etc.) */
+        .message.card {
+            background-color: #ffffff;
+            border-left: 4px solid #075e54;
+            padding: 12px 16px;
+            border-radius: 4px 8px 8px 4px;
+            white-space: pre-line; /* Respeta los saltos de línea de la planilla */
+            font-family: inherit;
+        }
+
         .chat-footer {
             padding: 8px 12px;
             background: #e2e8f0;
@@ -292,11 +302,9 @@
                             texto: textoBoton
                         };
 
-                        // Si tiene enlace web válido, es un botón de acción directa
                         if (linkBoton && (linkBoton.startsWith("http://") || linkBoton.startsWith("https://"))) {
                             itemConfig.link = linkBoton;
                         } else {
-                            // Si no tiene link, funciona como sección informativa con descripción corta
                             let pasoKey = "btn_" + b;
                             chatFlow[pasoKey] = {
                                 texto: descBoton || "Información disponible en este apartado.",
@@ -360,7 +368,15 @@
 
             if (mostrarTexto) {
                 const mensajeBot = document.createElement("div");
-                mensajeBot.className = "message bot";
+                
+                // Si el texto tiene saltos de línea (como un horario armado con enter), 
+                // le asignamos la clase 'card' para que se vea como una tarjeta limpia.
+                if (paso.texto.includes("\n") || paso.texto.length > 80) {
+                    mensajeBot.className = "message card";
+                } else {
+                    mensajeBot.className = "message bot";
+                }
+
                 mensajeBot.innerText = paso.texto;
                 chatBody.appendChild(mensajeBot);
                 chatBody.scrollTop = chatBody.scrollHeight;
@@ -382,13 +398,11 @@
                 btn.innerText = op.texto;
                 
                 btn.onclick = () => {
-                    // SI TIENE LINK: Abrir directamente sin interferir con el chat
                     if (op.link) {
                         window.open(op.link, "_blank");
                         return;
                     }
 
-                    // SI ES UNA OPCIÓN INTERNA (como texto o volver al menú): Flujo normal de chat
                     const mensajeUser = document.createElement("div");
                     mensajeUser.className = "message user";
                     mensajeUser.innerText = op.texto;
