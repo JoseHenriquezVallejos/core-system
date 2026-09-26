@@ -302,11 +302,9 @@
                             texto: textoBoton
                         };
 
-                        // Si tiene un enlace web válido, va directo al link
                         if (linkBoton && (linkBoton.startsWith("http://") || linkBoton.startsWith("https://"))) {
                             itemConfig.link = linkBoton;
                         } else {
-                            // Si NO tiene enlace, muestra la descripción como tarjeta interna en el chat
                             let pasoKey = "btn_" + b;
                             chatFlow[pasoKey] = {
                                 texto: descBoton || "Información disponible en este apartado.",
@@ -325,6 +323,7 @@
                 }
 
                 chatFlow.inicio.opciones = opcionesInicio;
+                // Al cargar por primera vez, SÍ mostramos el saludo de bienvenida
                 cargarPaso("inicio", true);
 
             } catch (error) {
@@ -373,7 +372,6 @@
                 
                 if (paso.texto.includes("\n") || paso.texto.length > 70) {
                     mensajeBot.className = "message card";
-                    // Separa automáticamente los puntos en renglones distintos
                     mensajeBot.innerText = paso.texto.replace(/•/g, '\n•');
                 } else {
                     mensajeBot.className = "message bot";
@@ -415,7 +413,8 @@
 
                     setTimeout(() => {
                         if (op.accion === "menu") {
-                            cargarPaso("inicio", true);
+                            // Al volver al menú, pasamos `false` para NO repetir el saludo de bienvenida
+                            cargarPaso("inicio", false);
                         } else if (op.siguiente) {
                             cargarPaso(op.siguiente, true);
                         }
