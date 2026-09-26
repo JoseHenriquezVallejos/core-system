@@ -302,12 +302,14 @@
                             texto: textoBoton
                         };
 
+                        // Si tiene un enlace web válido, va directo al link
                         if (linkBoton && (linkBoton.startsWith("http://") || linkBoton.startsWith("https://"))) {
                             itemConfig.link = linkBoton;
                         } else {
+                            // Si NO tiene enlace, muestra la descripción como tarjeta interna en el chat
                             let pasoKey = "btn_" + b;
                             chatFlow[pasoKey] = {
-                                texto: descBoton || "Información detallada disponible en este apartado.",
+                                texto: descBoton || "Información disponible en este apartado.",
                                 opciones: [
                                     {
                                         texto: "⬅️ Volver al menú principal",
@@ -369,14 +371,15 @@
             if (mostrarTexto) {
                 const mensajeBot = document.createElement("div");
                 
-                // Si la descripción es larga o contiene saltos de línea, la muestra como tarjeta limpia
                 if (paso.texto.includes("\n") || paso.texto.length > 70) {
                     mensajeBot.className = "message card";
+                    // Separa automáticamente los puntos en renglones distintos
+                    mensajeBot.innerText = paso.texto.replace(/•/g, '\n•');
                 } else {
                     mensajeBot.className = "message bot";
+                    mensajeBot.innerText = paso.texto;
                 }
 
-                mensajeBot.innerText = paso.texto;
                 chatBody.appendChild(mensajeBot);
                 chatBody.scrollTop = chatBody.scrollHeight;
             }
