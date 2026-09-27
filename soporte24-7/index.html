@@ -125,10 +125,40 @@
             border-left: 4px solid var(--primary-color);
             padding: 12px 14px;
             border-radius: 4px 8px 8px 4px;
-            white-space: pre-line;
             color: var(--text-main);
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
             line-height: 1.45;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .card-text {
+            white-space: pre-line;
+        }
+
+        .card-action-btn {
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            color: var(--primary-color);
+            padding: 9px 12px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 4px;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .card-action-btn:hover {
+            background-color: #f1f5f9;
+            border-color: var(--primary-color);
         }
 
         .chat-footer {
@@ -342,7 +372,7 @@
 
                 const nombreVisual = negocioRow[1] || "Soporte 24-7";
                 const iconoUrl = negocioRow[20] || ""; // Columna U
-                const fechaSuscripcion = negocioRow[21] || ""; // Columna V (Suscripción / Vigencia)
+                const fechaSuscripcion = negocioRow[21] || ""; // Columna V
 
                 document.getElementById("business-name").innerText = nombreVisual;
                 document.getElementById("business-subtitle").innerText = "🟢 Soporte 24-7";
@@ -402,7 +432,6 @@
                         } else {
                             let pasoKey = "btn_" + b;
                             
-                            // CORREGIDO: Usando saltos simples (\n) para que quede compacto y sin espacios extra
                             let textoDefecto = descBoton || "🛍️ Nuestros Productos:\n• Atención automatizada día y noche para tus clientes.\n• PWA ultrarrápida y muy liviana.\n• Incluye Código QR y acompañamiento personalizado.\n• Tus compradores nunca se quedan sin respuesta.";
 
                             chatFlow[pasoKey] = {
@@ -452,13 +481,40 @@
 
             if (mostrarTexto) {
                 const mensajeBot = document.createElement("div");
-                
-                if (paso.texto.includes("\n") || paso.texto.length > 70) {
-                    mensajeBot.className = "message card";
-                    mensajeBot.innerText = paso.texto;
-                } else {
-                    mensajeBot.className = "message bot";
-                    mensajeBot.innerText = paso.texto;
+                mensajeBot.className = "message card";
+
+                let textoFinal = paso.texto;
+                let botonExtra = null;
+
+                // Buscador universal de etiquetas de botón dentro de cualquier descripción: [Texto | URL]
+                const match = textoFinal.match(/\[([^\vert{}]+)\Vert{}\s*(https?:\/\/[^\]]+)\]/);
+
+                if (match) {
+                    let etiquetaBoton = match[1].trim();
+                    let urlBoton = match[2].trim();
+                    
+                    // Extraer los corchetes del cuerpo principal del mensaje
+                    textoFinal = textoFinal.replace(match[0], "").trim();
+
+                    botonExtra = {
+                        texto: etiquetaBoton,
+                        url: urlBoton
+                    };
+                }
+
+                const textNode = document.createElement("div");
+                textNode.className = "card-text";
+                textNode.innerText = textoFinal;
+                mensajeBot.appendChild(textNode);
+
+                if (botonExtra) {
+                    const cardBtn = document.createElement("a");
+                    cardBtn.className = "card-action-btn";
+                    cardBtn.href = botonExtra.url;
+                    cardBtn.target = "_blank";
+                    cardBtn.rel = "noopener noreferrer";
+                    cardBtn.innerHTML = `<span>🔗 ${botonExtra.texto}</span>`;
+                    mensajeBot.appendChild(cardBtn);
                 }
 
                 chatBody.appendChild(mensajeBot);
