@@ -123,11 +123,12 @@
         .message.card {
             background-color: var(--bot-bubble);
             border-left: 4px solid var(--primary-color);
-            padding: 12px 16px;
+            padding: 12px 14px;
             border-radius: 4px 8px 8px 4px;
             white-space: pre-line;
             color: var(--text-main);
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            line-height: 1.45;
         }
 
         .chat-footer {
@@ -174,6 +175,15 @@
             background-color: #128c7e;
             border-color: var(--primary-color);
         }
+
+        .chat-date-footer {
+            text-align: center;
+            font-size: 11px;
+            color: #475569;
+            padding: 4px 0 2px 0;
+            margin-top: 2px;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -192,10 +202,12 @@
         <main class="chat-body" id="chatBody"></main>
         
         <!-- Opciones / Botones inferiores -->
-        <footer class="chat-footer" id="chatOptions"></footer>
+        <footer class="chat-footer" id="chatOptions">
+            <div id="dateFooter" class="chat-date-footer" style="display: none;"></div>
+        </footer>
     </div>
 
-    <!-- Lógica segura a prueba de errores -->
+    <!-- Lógica rápida y segura -->
     <script>
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQY4PiDZRnZMXs9N8sZNyLzlr3kFZ3vQ-qaWHmTdvRO7U5eTyfOLcEMQLwMtrwELgfy3OWCj4z9GeJM/pub?gid=0&single=true&output=csv";
         
@@ -208,10 +220,10 @@
 
         const chatBody = document.getElementById("chatBody");
         const chatOptions = document.getElementById("chatOptions");
+        const dateFooter = document.getElementById("dateFooter");
         let deferredPrompt = null;
         let btnInstall = null;
 
-        // Crear dinámicamente el botón de instalación para evitar errores de elementos nulos en el DOM
         function inicializarBotonInstalacion() {
             btnInstall = document.createElement("button");
             btnInstall.className = "option-btn install-btn";
@@ -236,11 +248,11 @@
             e.preventDefault();
             deferredPrompt = e;
             if (btnInstall) {
+                chatOptions.prepend(btnInstall);
                 btnInstall.style.display = "block";
             }
         });
 
-        // Obtener ID del negocio mediante Parámetro GET (?id=...) o URL amigable por Ruta
         function obtenerTargetId() {
             try {
                 const urlParams = new URLSearchParams(window.location.search);
@@ -262,7 +274,6 @@
 
         const TARGET_ID = obtenerTargetId();
 
-        // Parser CSV ultra robusto (maneja comillas y saltos de línea internos)
         function parseCSV(text) {
             let rows = [];
             let row = [];
@@ -304,7 +315,6 @@
             return rows;
         }
 
-        // Carga y procesamiento de datos de Google Sheets
         async function cargarDatosPlanilla() {
             try {
                 const response = await fetch(CSV_URL);
@@ -332,9 +342,15 @@
 
                 const nombreVisual = negocioRow[1] || "Soporte 24-7";
                 const iconoUrl = negocioRow[20] || ""; // Columna U
+                const fechaSuscripcion = negocioRow[21] || ""; // Columna V (Suscripción / Vigencia)
 
                 document.getElementById("business-name").innerText = nombreVisual;
                 document.getElementById("business-subtitle").innerText = "🟢 Soporte 24-7";
+
+                if (fechaSuscripcion) {
+                    dateFooter.innerText = fechaSuscripcion;
+                    dateFooter.style.display = "block";
+                }
 
                 if (iconoUrl && (iconoUrl.startsWith("http://") || iconoUrl.startsWith("https://"))) {
                     const avatarImg = document.getElementById("business-avatar");
@@ -385,8 +401,12 @@
                             itemConfig.link = linkBoton;
                         } else {
                             let pasoKey = "btn_" + b;
+                            
+                            // CORREGIDO: Usando saltos simples (\n) para que quede compacto y sin espacios extra
+                            let textoDefecto = descBoton || "🛍️ Nuestros Productos:\n• Atención automatizada día y noche para tus clientes.\n• PWA ultrarrápida y muy liviana.\n• Incluye Código QR y acompañamiento personalizado.\n• Tus compradores nunca se quedan sin respuesta.";
+
                             chatFlow[pasoKey] = {
-                                texto: descBoton || "Información disponible en este apartado.",
+                                texto: textoDefecto,
                                 opciones: [
                                     {
                                         texto: "⬅️ Volver al menú principal",
@@ -421,13 +441,11 @@
             chatBody.scrollTop = chatBody.scrollHeight;
         }
 
-        // Inicializar al cargar la página de manera segura
         window.addEventListener('DOMContentLoaded', () => {
             inicializarBotonInstalacion();
             cargarDatosPlanilla();
         });
 
-        // Motor de navegación del Chat
         function cargarPaso(pasoKey, mostrarTexto = true) {
             const paso = chatFlow[pasoKey];
             if (!paso) return;
@@ -437,7 +455,7 @@
                 
                 if (paso.texto.includes("\n") || paso.texto.length > 70) {
                     mensajeBot.className = "message card";
-                    mensajeBot.innerText = paso.texto.replace(/•/g, '\n•');
+                    mensajeBot.innerText = paso.texto;
                 } else {
                     mensajeBot.className = "message bot";
                     mensajeBot.innerText = paso.texto;
@@ -451,10 +469,15 @@
         }
 
         function renderizarOpciones(opciones) {
+            const installElement = (btnInstall && btnInstall.parentNode) ? btnInstall : null;
             chatOptions.innerHTML = "";
             
-            if (btnInstall && deferredPrompt) {
+            if (installElement && deferredPrompt) {
                 chatOptions.appendChild(btnInstall);
+            }
+            
+            if (dateFooter) {
+                chatOptions.appendChild(dateFooter);
             }
 
             if (!opciones || opciones.length === 0) return;
@@ -476,7 +499,7 @@
                     chatBody.appendChild(mensajeUser);
                     chatBody.scrollTop = chatBody.scrollHeight;
 
-                    chatOptions.innerHTML = "";
+                    renderizarOpciones([]);
 
                     setTimeout(() => {
                         if (op.accion === "menu") {
