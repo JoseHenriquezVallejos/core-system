@@ -483,23 +483,31 @@
                 const mensajeBot = document.createElement("div");
                 mensajeBot.className = "message card";
 
-                let textoFinal = paso.texto;
+                let textoCompleto = paso.texto;
+                let textoFinal = textoCompleto;
                 let botonExtra = null;
 
-                // Buscador universal de etiquetas de botón dentro de cualquier descripción: [Texto | URL]
-                const match = textoFinal.match(/\[([^\vert{}]+)\Vert{}\s*(https?:\/\/[^\]]+)\]/);
+                // Detección robusta basada en corchetes [ ... ]
+                let inicioCorchete = textoCompleto.indexOf('[');
+                let finCorchete = textoCompleto.lastIndexOf(']');
 
-                if (match) {
-                    let etiquetaBoton = match[1].trim();
-                    let urlBoton = match[2].trim();
-                    
-                    // Extraer los corchetes del cuerpo principal del mensaje
-                    textoFinal = textoFinal.replace(match[0], "").trim();
+                if (inicioCorchete !== -1 && finCorchete !== -1 && finCorchete > inicioCorchete) {
+                    let contenidoCorchete = textoCompleto.substring(inicioCorchete + 1, finCorchete);
+                    let partes = contenidoCorchete.split('|');
 
-                    botonExtra = {
-                        texto: etiquetaBoton,
-                        url: urlBoton
-                    };
+                    if (partes.length === 2) {
+                        let etiquetaBoton = partes[0].trim();
+                        let urlBoton = partes[1].trim();
+
+                        if (urlBoton.startsWith("http://") || urlBoton.startsWith("https://")) {
+                            botonExtra = {
+                                texto: etiquetaBoton,
+                                url: urlBoton
+                            };
+                            // Quitamos la sección del corchete del texto principal de la tarjeta
+                            textoFinal = textoCompleto.substring(0, inicioCorchete).trim();
+                        }
+                    }
                 }
 
                 const textNode = document.createElement("div");
