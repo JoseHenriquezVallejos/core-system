@@ -168,7 +168,6 @@
             color: white;
             text-align: center;
             font-weight: bold;
-            display: none;
         }
 
         .install-btn:hover {
@@ -193,12 +192,10 @@
         <main class="chat-body" id="chatBody"></main>
         
         <!-- Opciones / Botones inferiores -->
-        <footer class="chat-footer" id="chatOptions">
-            <button id="btnInstall" class="option-btn install-btn">📲 Instalar Soporte 24-7</button>
-        </footer>
+        <footer class="chat-footer" id="chatOptions"></footer>
     </div>
 
-    <!-- Lógica segura -->
+    <!-- Lógica segura a prueba de errores -->
     <script>
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQY4PiDZRnZMXs9N8sZNyLzlr3kFZ3vQ-qaWHmTdvRO7U5eTyfOLcEMQLwMtrwELgfy3OWCj4z9GeJM/pub?gid=0&single=true&output=csv";
         
@@ -211,8 +208,37 @@
 
         const chatBody = document.getElementById("chatBody");
         const chatOptions = document.getElementById("chatOptions");
-        const btnInstall = document.getElementById("btnInstall");
         let deferredPrompt = null;
+        let btnInstall = null;
+
+        // Crear dinámicamente el botón de instalación para evitar errores de elementos nulos en el DOM
+        function inicializarBotonInstalacion() {
+            btnInstall = document.createElement("button");
+            btnInstall.className = "option-btn install-btn";
+            btnInstall.innerText = "📲 Instalar Soporte 24-7";
+            btnInstall.style.display = "none";
+
+            btnInstall.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    try {
+                        deferredPrompt.prompt();
+                        await deferredPrompt.userChoice;
+                        deferredPrompt = null;
+                        btnInstall.style.display = 'none';
+                    } catch (e) {
+                        console.warn("Fallo al invocar el prompt de instalación", e);
+                    }
+                }
+            });
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (btnInstall) {
+                btnInstall.style.display = "block";
+            }
+        });
 
         // Obtener ID del negocio mediante Parámetro GET (?id=...) o URL amigable por Ruta
         function obtenerTargetId() {
@@ -231,7 +257,7 @@
             } catch (e) {
                 console.warn("Error leyendo URL, usando por defecto.", e);
             }
-            return 'negocio1'; // Valor por defecto a prueba de fallos
+            return 'negocio1';
         }
 
         const TARGET_ID = obtenerTargetId();
@@ -250,7 +276,7 @@
                 if (c === '"') {
                     if (inQuotes && nextC === '"') {
                         col += '"';
-                        i++; // Saltar la siguiente comilla escapada
+                        i++;
                     } else {
                         inQuotes = !inQuotes;
                     }
@@ -292,7 +318,6 @@
                 }
 
                 let negocioRow = null;
-                // Buscar la fila correspondiente al ID (ignorando mayúsculas/minúsculas)
                 for (let i = 1; i < rows.length; i++) {
                     if (rows[i][0] && rows[i][0].trim().toLowerCase() === TARGET_ID.toLowerCase()) {
                         negocioRow = rows[i];
@@ -308,11 +333,9 @@
                 const nombreVisual = negocioRow[1] || "Soporte 24-7";
                 const iconoUrl = negocioRow[20] || ""; // Columna U
 
-                // Actualizar UI de la cabecera
                 document.getElementById("business-name").innerText = nombreVisual;
                 document.getElementById("business-subtitle").innerText = "🟢 Soporte 24-7";
 
-                // Configurar Avatar y Manifest PWA si existe la URL del icono
                 if (iconoUrl && (iconoUrl.startsWith("http://") || iconoUrl.startsWith("https://"))) {
                     const avatarImg = document.getElementById("business-avatar");
                     avatarImg.src = iconoUrl;
@@ -337,7 +360,6 @@
                         console.warn("No se pudo generar el manifest dinámico:", e);
                     }
 
-                    // Favicon dinámico
                     let linkIcon = document.querySelector("link[rel*='icon']") || document.createElement('link');
                     linkIcon.type = 'image/jpeg';
                     linkIcon.rel = 'shortcut icon';
@@ -345,13 +367,12 @@
                     document.getElementsByTagName('head')[0].appendChild(linkIcon);
                 }
 
-                // Generar los 6 botones de forma dinámica y segura
                 let opcionesInicio = [];
 
                 for (let b = 1; b <= 6; b++) {
-                    let idxBoton = 2 + (b - 1) * 3; // Índices: 2, 5, 8, 11, 14, 17
-                    let idxDesc = idxBoton + 1;     // Índices: 3, 6, 9, 12, 15, 18
-                    let idxLink = idxBoton + 2;     // Índices: 4, 7, 10, 13, 16, 19
+                    let idxBoton = 2 + (b - 1) * 3;
+                    let idxDesc = idxBoton + 1;
+                    let idxLink = idxBoton + 2;
 
                     let textoBoton = negocioRow[idxBoton] ? negocioRow[idxBoton].trim() : "";
                     let descBoton = negocioRow[idxDesc] ? negocioRow[idxDesc].trim() : "";
@@ -400,28 +421,9 @@
             chatBody.scrollTop = chatBody.scrollHeight;
         }
 
-        // Manejo de instalación PWA
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            btnInstall.style.display = "block";
-        });
-
-        btnInstall.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                try {
-                    deferredPrompt.prompt();
-                    await deferredPrompt.userChoice;
-                    deferredPrompt = null;
-                    btnInstall.style.display = 'none';
-                } catch (e) {
-                    console.warn("Fallo al invocar el prompt de instalación", e);
-                }
-            }
-        });
-
         // Inicializar al cargar la página de manera segura
         window.addEventListener('DOMContentLoaded', () => {
+            inicializarBotonInstalacion();
             cargarDatosPlanilla();
         });
 
@@ -451,7 +453,7 @@
         function renderizarOpciones(opciones) {
             chatOptions.innerHTML = "";
             
-            if (deferredPrompt) {
+            if (btnInstall && deferredPrompt) {
                 chatOptions.appendChild(btnInstall);
             }
 
