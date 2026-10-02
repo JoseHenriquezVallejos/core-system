@@ -173,6 +173,7 @@
             border-color: var(--primary-color);
         }
 
+        /* CONFIGURACIÓN AJUSTADA PARA PC Y MÓVIL */
         .chat-footer {
             flex: 0 0 auto;
             padding: 10px 12px;
@@ -181,7 +182,7 @@
             flex-direction: column;
             gap: 6px;
             border-top: 1px solid #e2e8f0;
-            max-height: 42vh; /* Altura optimizada para móviles y PC sin cortar el botón 6 */
+            max-height: 55vh; 
             overflow-y: auto;
             box-shadow: 0 -4px 15px rgba(0,0,0,0.08);
             z-index: 20;
@@ -190,7 +191,8 @@
 
         @media (min-width: 480px) {
             .chat-footer {
-                max-height: 340px; /* Altura segura fija máxima en PC para que el scroll actúe inmediatamente si es necesario */
+                max-height: 270px; /* Altura optimizada y estricta para PC para forzar el scroll y mostrar perfecto el botón 6 */
+                overflow-y: auto;
             }
         }
 
