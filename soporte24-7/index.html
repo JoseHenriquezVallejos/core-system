@@ -181,11 +181,17 @@
             flex-direction: column;
             gap: 6px;
             border-top: 1px solid #e2e8f0;
-            max-height: 36vh; /* Altura controlada para dejar siempre ver el chat */
+            max-height: 42vh; /* Altura optimizada para móviles y PC sin cortar el botón 6 */
             overflow-y: auto;
             box-shadow: 0 -4px 15px rgba(0,0,0,0.08);
             z-index: 20;
             scroll-behavior: smooth;
+        }
+
+        @media (min-width: 480px) {
+            .chat-footer {
+                max-height: 340px; /* Altura segura fija máxima en PC para que el scroll actúe inmediatamente si es necesario */
+            }
         }
 
         /* Barra de desplazamiento sutil */
@@ -264,7 +270,7 @@
         </footer>
     </div>
 
-    <!-- Lógica rápida y segura -->
+    <!-- Lógica segura -->
     <script>
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQY4PiDZRnZMXs9N8sZNyLzlr3kFZ3vQ-qaWHmTdvRO7U5eTyfOLcEMQLwMtrwELgfy3OWCj4z9GeJM/pub?gid=0&single=true&output=csv";
         
