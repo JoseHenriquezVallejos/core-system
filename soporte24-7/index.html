@@ -48,8 +48,8 @@
         @media (min-width: 480px) {
             .chat-container {
                 width: 420px;
-                height: 90vh;
-                max-height: 780px;
+                height: 95vh;
+                max-height: 840px; /* Ampliado para dar más holgura en pantallas de PC */
                 border-radius: 20px;
                 border: 8px solid #1e293b;
                 box-shadow: 0 10px 35px rgba(0,0,0,0.3);
@@ -59,7 +59,7 @@
         .chat-header {
             background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
             color: white;
-            padding: 12px 16px;
+            padding: 10px 16px;
             font-weight: bold;
             display: flex;
             align-items: center;
@@ -70,8 +70,8 @@
         }
 
         .chat-header img {
-            width: 40px;
-            height: 40px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid rgba(255, 255, 255, 0.6);
@@ -92,23 +92,23 @@
 
         .chat-body {
             flex: 1 1 auto;
-            padding: 14px;
+            padding: 12px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
             background: var(--chat-bg) url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png') repeat;
             background-blend-mode: overlay;
             scroll-behavior: smooth;
-            padding-bottom: 30px; 
+            padding-bottom: 20px; 
         }
 
         .message {
             max-width: 88%;
-            padding: 10px 14px;
+            padding: 9px 13px;
             border-radius: 12px;
-            font-size: 13.5px;
-            line-height: 1.45;
+            font-size: 13px;
+            line-height: 1.4;
             word-wrap: break-word;
         }
 
@@ -132,17 +132,17 @@
         .message.card {
             background-color: var(--bot-bubble);
             border-left: 5px solid var(--primary-color);
-            padding: 12px 14px;
+            padding: 10px 12px;
             border-radius: 8px 12px 12px 8px;
             color: var(--text-main);
             box-shadow: 0 3px 10px rgba(0,0,0,0.08);
             border-top: 1px solid rgba(0,0,0,0.04);
             border-right: 1px solid rgba(0,0,0,0.04);
             border-bottom: 1px solid rgba(0,0,0,0.04);
-            line-height: 1.5;
+            line-height: 1.45;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
         }
 
         .card-text {
@@ -153,10 +153,10 @@
             background-color: #f0fdf4;
             border: 1px solid #bbf7d0;
             color: var(--primary-color);
-            padding: 8px 12px;
+            padding: 7px 10px;
             border-radius: 8px;
             text-align: center;
-            font-size: 13px;
+            font-size: 12.5px;
             font-weight: 600;
             cursor: pointer;
             text-decoration: none;
@@ -173,16 +173,16 @@
             border-color: var(--primary-color);
         }
 
-        /* CONFIGURACIÓN AJUSTADA PARA PC Y MÓVIL */
+        /* CONFIGURACIÓN DE PIE DE PÁGINA OPTIMIZADA PARA PC */
         .chat-footer {
             flex: 0 0 auto;
-            padding: 10px 12px;
+            padding: 8px 10px;
             background: #f8fafc;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 5px;
             border-top: 1px solid #e2e8f0;
-            max-height: 55vh; 
+            max-height: 52vh; 
             overflow-y: auto;
             box-shadow: 0 -4px 15px rgba(0,0,0,0.08);
             z-index: 20;
@@ -191,12 +191,11 @@
 
         @media (min-width: 480px) {
             .chat-footer {
-                max-height: 270px; /* Altura optimizada y estricta para PC para forzar el scroll y mostrar perfecto el botón 6 */
+                max-height: 310px; /* Espacio generoso y seguro con scroll fluido si se requiere */
                 overflow-y: auto;
             }
         }
 
-        /* Barra de desplazamiento sutil */
         .chat-footer::-webkit-scrollbar {
             width: 5px;
         }
@@ -208,11 +207,11 @@
         .option-btn {
             background-color: #ffffff;
             border: 1px solid #cbd5e1;
-            padding: 10px 12px;
+            padding: 8px 11px; /* Ligeramente más compacto para que entren perfecto los 6 botones */
             border-radius: 8px;
             text-align: left;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 12.5px;
             font-weight: 600;
             color: var(--text-main);
             box-shadow: 0 1px 3px rgba(0,0,0,0.04);
@@ -258,7 +257,7 @@
         <header class="chat-header">
             <img id="business-avatar" src="" alt="Icono de perfil">
             <div class="header-info">
-                <div id="business-name" style="font-size: 15px; font-weight: bold;">Cargando...</div>
+                <div id="business-name" style="font-size: 14.5px; font-weight: bold;">Cargando...</div>
                 <span id="business-subtitle">🟢 Soporte 24-7</span>
             </div>
         </header>
