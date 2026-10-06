@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Llave en Mano</title>
-    <!-- Enlace al manifest para funcionamiento como PWA -->
-    <link rel="manifest" href="manifest.json">
+    <!-- Manifest dinámico (se reemplazará por Javascript) -->
+    <link id="dynamic-manifest" rel="manifest" href="manifest.json">
     <!-- Icono dinámico para la cabecera / favicon -->
     <link id="dynamic-favicon" rel="icon" href="icono.jpg" type="image/jpeg">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
@@ -16,7 +16,6 @@
         .header h1 { margin: 0; font-size: 28px; font-weight: 300; letter-spacing: 1px; }
         .header p { margin: 5px 0 0 0; font-size: 14px; color: #d4af37; letter-spacing: 2px; }
         
-        /* Contenedor principal protegido que se oculta si hay error */
         #contenido-principal { display: none; }
 
         .swiper { width: 100%; height: auto !important; background: #ffffff; padding: 10px 10px 30px 10px; box-sizing: border-box; }
@@ -100,7 +99,6 @@
             const res = await fetch(SHEET_URL);
             const data = await res.text();
             
-            // Procesamiento seguro de celdas CSV con soporte para comillas y saltos de línea
             const rows = [];
             let currentRow = [];
             let currentCell = '';
@@ -135,11 +133,9 @@
                 rows.push(currentRow);
             }
 
-            // Buscar coincidencia exacta en la Columna A (índice 0)
             const user = rows.find(r => r[0] && r[0].replace(/['"]+/g, '').trim().toLowerCase() === idLimpioBusqueda);
             
             if (user) {
-                // ¡ID ENCONTRADO! Asignamos nombre y subtítulo desde la planilla
                 let nombreAfiliado = user[1] ? user[1].replace(/['"]+/g, '').trim() : "Llave en Mano";
                 let subtituloAfiliado = user[2] ? user[2].replace(/['"]+/g, '').trim() : "Afiliados";
 
@@ -147,14 +143,41 @@
                 document.getElementById('subtitulo-visual').innerText = subtituloAfiliado;
                 document.title = nombreAfiliado + " - Llave en Mano";
 
-                // Capturar el icono personalizado desde la Columna AB (índice 27)[cite: 1]
-                if (user[27] && user[27].trim() !== "") {
-                    let iconoUrl = user[27].replace(/['"]+/g, '').trim();
-                    let faviconTag = document.getElementById('dynamic-favicon');
-                    if (faviconTag) faviconTag.href = iconoUrl;
-                }
+                // Capturar icono personalizado desde la Columna AB (índice 27)[cite: 1]
+                let iconoUrl = (user[27] && user[27].trim() !== "") ? user[27].replace(/['"]+/g, '').trim() : "icono.jpg";
 
-                // Asignar WhatsApp con el mensaje precargado y la referencia corta (ref:Nombre)
+                // Actualizar favicon visual
+                let faviconTag = document.getElementById('dynamic-favicon');
+                if (faviconTag) faviconTag.href = iconoUrl;
+
+                // Crear un Manifest dinámico en memoria con el nombre y el icono exactos de la planilla
+                const manifestData = {
+                    "name": nombreAfiliado,
+                    "short_name": nombreAfiliado,
+                    "start_url": window.location.href,
+                    "display": "standalone",
+                    "background_color": "#0f172a",
+                    "theme_color": "#0f172a",
+                    "icons": [
+                        {
+                            "src": iconoUrl,
+                            "sizes": "192x192",
+                            "type": "image/jpeg"
+                        },
+                        {
+                            "src": iconoUrl,
+                            "sizes": "512x512",
+                            "type": "image/jpeg"
+                        }
+                    ]
+                };
+
+                const stringManifest = JSON.stringify(manifestData);
+                const blob = new Blob([stringManifest], {type: 'application/json'});
+                const manifestURL = URL.createObjectURL(blob);
+                document.getElementById('dynamic-manifest').setAttribute('href', manifestURL);
+
+                // Asignar WhatsApp
                 if(user[3] && user[3].trim() !== "") {
                     let urlBot = user[3].replace(/['"]+/g, '').trim();
                     let textoMensaje = `Hola, quiero más información ref:${nombreAfiliado}`;
@@ -169,7 +192,7 @@
 
                 if(user[4] && user[4].trim() !== "") document.getElementById('btn-hotmart').href = user[4].replace(/['"]+/g, '').trim();
                 
-                // Carga dinámica de fotos (mínimo 5 obligatorias, hasta 8 opcionales)
+                // Carga dinámica de fotos
                 for(let i=0; i<8; i++) {
                     let fotoCol = 5 + (i * 2);
                     let descCol = 6 + (i * 2);
@@ -198,14 +221,10 @@
                     if (panel && user[cCol]) panel.querySelector('p').innerText = user[cCol].replace(/['"]+/g, '').trim();
                 });
 
-                // Mostrar la página completa
                 document.getElementById('contenido-principal').style.display = 'block';
-
-                // Inicializar Swiper de forma segura una vez revelado el contenido
                 new Swiper('.main-swiper', { loop: true, autoplay: { delay: 3500 }, pagination: { el: '.swiper-pagination' } });
 
             } else {
-                // ID NO ENCONTRADO
                 document.getElementById('nombre-visual').innerText = "ID NO ENCONTRADO";
                 document.getElementById('subtitulo-visual').innerText = "VERIFICA TU ENLACE";
             }
@@ -217,7 +236,6 @@
     }
     init();
 
-    // Comportamiento del acordeón de preguntas frecuentes
     document.querySelectorAll('.accordion').forEach(acc => {
         acc.addEventListener('click', function() {
             this.classList.toggle("active");
@@ -225,6 +243,15 @@
             panel.style.maxHeight = panel.style.maxHeight ? null : panel.scrollHeight + "px";
         });
     });
+</script>
+
+<!-- Registro del Service Worker para forzar la instalabilidad -->
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW error', err));
+        });
+    }
 </script>
 </body>
 </html>
