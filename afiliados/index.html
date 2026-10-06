@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Llave en Mano</title>
-    <!-- Manifest dinámico (se reemplazará por Javascript) -->
-    <link id="dynamic-manifest" rel="manifest" href="manifest.json">
-    <!-- Icono dinámico para la cabecera / favicon -->
-    <link id="dynamic-favicon" rel="icon" href="icono.jpg" type="image/jpeg">
+    <!-- Manifest dinámico con ruta relativa corregida -->
+    <link id="dynamic-manifest" rel="manifest" href="./manifest.json">
+    <!-- Icono dinámico para la cabecera / favicon con ruta relativa -->
+    <link id="dynamic-favicon" rel="icon" href="./icono.jpg" type="image/jpeg">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
     <style>
         body { margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #f1f5f9; display: flex; justify-content: center; }
@@ -143,8 +143,8 @@
                 document.getElementById('subtitulo-visual').innerText = subtituloAfiliado;
                 document.title = nombreAfiliado + " - Llave en Mano";
 
-                // Capturar icono personalizado desde la Columna AB (índice 27)[cite: 1]
-                let iconoUrl = (user[27] && user[27].trim() !== "") ? user[27].replace(/['"]+/g, '').trim() : "icono.jpg";
+                // Capturar icono personalizado desde la Columna AB (índice 27) con ruta relativa por defecto
+                let iconoUrl = (user[27] && user[27].trim() !== "") ? user[27].replace(/['"]+/g, '').trim() : "./icono.jpg";
 
                 // Actualizar favicon visual
                 let faviconTag = document.getElementById('dynamic-favicon');
@@ -245,7 +245,7 @@
     });
 </script>
 
-<!-- Registro del Service Worker para forzar la instalabilidad -->
+<!-- Registro del Service Worker con ruta relativa corregida -->
 <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
