@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Funnel para afiliados - Llave en Mano</title>
+    <title>Llave en Mano</title>
     <!-- Enlace al manifest para funcionamiento como PWA -->
     <link rel="manifest" href="manifest.json">
-    <!-- Icono dinámico de la PWA/Cabecera -->
+    <!-- Icono dinámico para la cabecera / favicon -->
     <link id="dynamic-favicon" rel="icon" href="icono.jpg" type="image/jpeg">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
     <style>
@@ -139,11 +139,15 @@
             const user = rows.find(r => r[0] && r[0].replace(/['"]+/g, '').trim().toLowerCase() === idLimpioBusqueda);
             
             if (user) {
-                // ¡ID ENCONTRADO! Asignamos datos y revelamos el contenido principal
-                document.getElementById('nombre-visual').innerText = user[1] ? user[1].replace(/['"]+/g, '').trim() : "RIMAN ACADEMY";
-                document.getElementById('subtitulo-visual').innerText = user[2] ? user[2].replace(/['"]+/g, '').trim() : "AFILIADOS";
+                // ¡ID ENCONTRADO! Asignamos nombre y subtítulo desde la planilla
+                let nombreAfiliado = user[1] ? user[1].replace(/['"]+/g, '').trim() : "Llave en Mano";
+                let subtituloAfiliado = user[2] ? user[2].replace(/['"]+/g, '').trim() : "Afiliados";
 
-                // Capturar el icono personalizado desde la Columna AB (índice 27)
+                document.getElementById('nombre-visual').innerText = nombreAfiliado;
+                document.getElementById('subtitulo-visual').innerText = subtituloAfiliado;
+                document.title = nombreAfiliado + " - Llave en Mano";
+
+                // Capturar el icono personalizado desde la Columna AB (índice 27)[cite: 1]
                 if (user[27] && user[27].trim() !== "") {
                     let iconoUrl = user[27].replace(/['"]+/g, '').trim();
                     let faviconTag = document.getElementById('dynamic-favicon');
@@ -153,7 +157,6 @@
                 // Asignar WhatsApp con el mensaje precargado y la referencia corta (ref:Nombre)
                 if(user[3] && user[3].trim() !== "") {
                     let urlBot = user[3].replace(/['"]+/g, '').trim();
-                    let nombreAfiliado = user[1] ? user[1].replace(/['"]+/g, '').trim() : idLimpioBusqueda;
                     let textoMensaje = `Hola, quiero más información ref:${nombreAfiliado}`;
                     
                     if (urlBot.includes('wa.me/')) {
@@ -177,7 +180,6 @@
                     let slideElement = document.getElementById('slide-'+(i+1));
 
                     if (slideElement) {
-                        // Las primeras 5 son fijas; de la 6 a la 8 se muestran solo si tienen contenido en la planilla
                         if (i < 5 || (imgUrl !== "" && descText !== "")) {
                             slideElement.style.display = 'flex';
                             if(document.getElementById('f'+(i+1))) document.getElementById('f'+(i+1)).src = imgUrl;
