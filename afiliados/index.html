@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Funnel para afiliados - Llave en Mano</title>
+    <!-- Enlace al manifest para funcionamiento como PWA -->
+    <link rel="manifest" href="manifest.json">
+    <!-- Icono dinámico de la PWA/Cabecera -->
+    <link id="dynamic-favicon" rel="icon" href="icono.jpg" type="image/jpeg">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
     <style>
         body { margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #f1f5f9; display: flex; justify-content: center; }
@@ -51,14 +55,14 @@
     <div id="contenido-principal">
         <div class="swiper main-swiper">
             <div class="swiper-wrapper">
-                <div class="swiper-slide"><img id="f1" src=""><p id="desc1" class="slide-desc"></p></div>
-                <div class="swiper-slide"><img id="f2" src=""><p id="desc2" class="slide-desc"></p></div>
-                <div class="swiper-slide"><img id="f3" src=""><p id="desc3" class="slide-desc"></p></div>
-                <div class="swiper-slide"><img id="f4" src=""><p id="desc4" class="slide-desc"></p></div>
-                <div class="swiper-slide"><img id="f5" src=""><p id="desc5" class="slide-desc"></p></div>
-                <div class="swiper-slide"><img id="f6" src=""><p id="desc6" class="slide-desc"></p></div>
-                <div class="swiper-slide"><img id="f7" src=""><p id="desc7" class="slide-desc"></p></div>
-                <div class="swiper-slide"><img id="f8" src=""><p id="desc8" class="slide-desc"></p></div>
+                <div class="swiper-slide" id="slide-1"><img id="f1" src=""><p id="desc1" class="slide-desc"></p></div>
+                <div class="swiper-slide" id="slide-2"><img id="f2" src=""><p id="desc2" class="slide-desc"></p></div>
+                <div class="swiper-slide" id="slide-3"><img id="f3" src=""><p id="desc3" class="slide-desc"></p></div>
+                <div class="swiper-slide" id="slide-4"><img id="f4" src=""><p id="desc4" class="slide-desc"></p></div>
+                <div class="swiper-slide" id="slide-5"><img id="f5" src=""><p id="desc5" class="slide-desc"></p></div>
+                <div class="swiper-slide" id="slide-6"><img id="f6" src=""><p id="desc6" class="slide-desc"></p></div>
+                <div class="swiper-slide" id="slide-7"><img id="f7" src=""><p id="desc7" class="slide-desc"></p></div>
+                <div class="swiper-slide" id="slide-8"><img id="f8" src=""><p id="desc8" class="slide-desc"></p></div>
             </div>
             <div class="swiper-pagination"></div>
         </div>
@@ -139,6 +143,13 @@
                 document.getElementById('nombre-visual').innerText = user[1] ? user[1].replace(/['"]+/g, '').trim() : "RIMAN ACADEMY";
                 document.getElementById('subtitulo-visual').innerText = user[2] ? user[2].replace(/['"]+/g, '').trim() : "AFILIADOS";
 
+                // Capturar el icono personalizado desde la Columna AB (índice 27)
+                if (user[27] && user[27].trim() !== "") {
+                    let iconoUrl = user[27].replace(/['"]+/g, '').trim();
+                    let faviconTag = document.getElementById('dynamic-favicon');
+                    if (faviconTag) faviconTag.href = iconoUrl;
+                }
+
                 // Asignar WhatsApp con el mensaje precargado y la referencia corta (ref:Nombre)
                 if(user[3] && user[3].trim() !== "") {
                     let urlBot = user[3].replace(/['"]+/g, '').trim();
@@ -146,7 +157,6 @@
                     let textoMensaje = `Hola, quiero más información ref:${nombreAfiliado}`;
                     
                     if (urlBot.includes('wa.me/')) {
-                        // Extraemos el número base si viene limpio tipo https://wa.me/56945491173
                         document.getElementById('btn-wa').href = `https://wa.me/56945491173?text=${encodeURIComponent(textoMensaje)}`;
                     } else {
                         let separador = urlBot.includes('?') ? '&' : '?';
@@ -156,6 +166,7 @@
 
                 if(user[4] && user[4].trim() !== "") document.getElementById('btn-hotmart').href = user[4].replace(/['"]+/g, '').trim();
                 
+                // Carga dinámica de fotos (mínimo 5 obligatorias, hasta 8 opcionales)
                 for(let i=0; i<8; i++) {
                     let fotoCol = 5 + (i * 2);
                     let descCol = 6 + (i * 2);
@@ -163,8 +174,18 @@
                     let imgUrl = user[fotoCol] ? user[fotoCol].replace(/['"]+/g, '').trim() : "";
                     let descText = user[descCol] ? user[descCol].replace(/['"]+/g, '').trim() : "";
 
-                    if(document.getElementById('f'+(i+1))) document.getElementById('f'+(i+1)).src = imgUrl;
-                    if(document.getElementById('desc'+(i+1))) document.getElementById('desc'+(i+1)).innerText = descText;
+                    let slideElement = document.getElementById('slide-'+(i+1));
+
+                    if (slideElement) {
+                        // Las primeras 5 son fijas; de la 6 a la 8 se muestran solo si tienen contenido en la planilla
+                        if (i < 5 || (imgUrl !== "" && descText !== "")) {
+                            slideElement.style.display = 'flex';
+                            if(document.getElementById('f'+(i+1))) document.getElementById('f'+(i+1)).src = imgUrl;
+                            if(document.getElementById('desc'+(i+1))) document.getElementById('desc'+(i+1)).innerText = descText;
+                        } else {
+                            slideElement.style.display = 'none';
+                        }
+                    }
                 }
 
                 document.querySelectorAll('.accordion').forEach((acc, index) => {
@@ -175,14 +196,14 @@
                     if (panel && user[cCol]) panel.querySelector('p').innerText = user[cCol].replace(/['"]+/g, '').trim();
                 });
 
-                // Mostrar la página de afiliados completa
+                // Mostrar la página completa
                 document.getElementById('contenido-principal').style.display = 'block';
 
                 // Inicializar Swiper de forma segura una vez revelado el contenido
                 new Swiper('.main-swiper', { loop: true, autoplay: { delay: 3500 }, pagination: { el: '.swiper-pagination' } });
 
             } else {
-                // ID NO ENCONTRADO: Se bloquea y muestra mensaje limpio
+                // ID NO ENCONTRADO
                 document.getElementById('nombre-visual').innerText = "ID NO ENCONTRADO";
                 document.getElementById('subtitulo-visual').innerText = "VERIFICA TU ENLACE";
             }
