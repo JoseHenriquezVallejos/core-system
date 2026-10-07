@@ -39,13 +39,10 @@
         .btn-green { background: #0fb396; }
         .btn-hotmart { background: #eb5757; }
         
-        /* SECCIÓN DE TARJETAS DINÁMICAS */
-        .cards-section { padding: 10px 15px; display: flex; flex-direction: column; gap: 12px; margin-top: 5px; }
-        .card-item { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); border-left: 4px solid #d4af37; box-sizing: border-box; }
-        .card-title { margin: 0 0 8px 0; font-size: 15px; color: #0f172a; font-weight: bold; }
-        .card-desc { margin: 0 0 12px 0; font-size: 13px; color: #475569; text-align: justify; line-height: 1.4; }
-        .card-btn { background: #0f172a; color: white; padding: 10px 15px; border-radius: 6px; text-align: center; text-decoration: none; font-weight: 600; font-size: 13px; display: block; width: 100%; box-sizing: border-box; transition: background 0.2s; }
-        .card-btn:hover { background: #334155; }
+        /* ACORDEONES ACHICADOS Y MÁS COMPACTOS ABAJO */
+        .faq-section { padding: 10px 15px; margin-top: 5px; }
+        .accordion { background: #0f172a; color: white; cursor: pointer; padding: 10px 12px; width: 100%; border: none; text-align: left; border-radius: 6px; margin-bottom: 5px; font-weight: bold; font-size: 13px; }
+        .panel { padding: 0 12px; background-color: #f8fafc; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; border-left: 3px solid #d4af37; margin-bottom: 5px; text-align: justify; font-size: 13px; }
     </style>
 </head>
 <body>
@@ -68,29 +65,17 @@
             <div class="swiper-pagination"></div>
         </div>
 
-        <!-- Botones de Acción Inmediata (Arriba) -->
+        <!-- Botones de Acción Inmediata (Arriba de los acordeones) -->
         <div class="button-grid">
             <a id="btn-wa" href="#" class="btn-action btn-green">💬 7 Días Gratis / Conversar</a>
             <a id="btn-hotmart" href="#" class="btn-action btn-hotmart">💳 Pagar Suscripción</a>
         </div>
 
-        <!-- Tarjetas Dinámicas (Reemplazo de Acordeones) -->
-        <div class="cards-section">
-            <div class="card-item">
-                <h3 class="card-title" id="card-title-0">Cargando...</h3>
-                <p class="card-desc" id="card-desc-0">...</p>
-                <a id="card-btn-0" href="#" target="_blank" class="card-btn">📁 Acceder al Kit</a>
-            </div>
-            <div class="card-item">
-                <h3 class="card-title" id="card-title-1">Cargando...</h3>
-                <p class="card-desc" id="card-desc-1">...</p>
-                <a id="card-btn-1" href="#" target="_blank" class="card-btn">💳 Ver Planes y Contratar</a>
-            </div>
-            <div class="card-item">
-                <h3 class="card-title" id="card-title-2">Cargando...</h3>
-                <p class="card-desc" id="card-desc-2">...</p>
-                <a id="card-btn-2" href="#" target="_blank" class="card-btn">💬 Soporte y Preguntas</a>
-            </div>
+        <!-- Acordeones Compactos Originales -->
+        <div class="faq-section">
+            <button class="accordion">...</button><div class="panel"><p></p></div>
+            <button class="accordion">...</button><div class="panel"><p></p></div>
+            <button class="accordion">...</button><div class="panel"><p></p></div>
         </div>
     </div>
 </div>
@@ -182,7 +167,7 @@
                 const manifestURL = URL.createObjectURL(blob);
                 document.getElementById('dynamic-manifest').setAttribute('href', manifestURL);
 
-                // Asignar WhatsApp
+                // Asignar WhatsApp con el texto enfocado en los 7 días gratis y conversar
                 if(user[3] && user[3].trim() !== "") {
                     let urlBot = user[3].replace(/['"]+/g, '').trim();
                     let textoMensaje = `Hola, vengo del enlace de ${nombreAfiliado}, quiero mis 7 días gratis o conversar sobre la app.`;
@@ -197,7 +182,6 @@
 
                 if(user[4] && user[4].trim() !== "") document.getElementById('btn-hotmart').href = user[4].replace(/['"]+/g, '').trim();
                 
-                // Cargar imágenes del carrusel
                 for(let i=0; i<5; i++) {
                     let fotoCol = 5 + (i * 2);
                     let descCol = 6 + (i * 2);
@@ -214,37 +198,13 @@
                     }
                 }
 
-                // Cargar Tarjetas dinámicamente desde la planilla (Títulos, Descripciones y Enlaces de los botones)
-                for (let index = 0; index < 3; index++) {
+                document.querySelectorAll('.accordion').forEach((acc, index) => {
                     let tCol = 21 + (index * 2); 
                     let cCol = 22 + (index * 2);
-                    
-                    let titleEl = document.getElementById('card-title-' + index);
-                    let descEl = document.getElementById('card-desc-' + index);
-                    let btnEl = document.getElementById('card-btn-' + index);
-
-                    if (titleEl && user[tCol]) {
-                        titleEl.innerText = user[tCol].replace(/['"]+/g, '').trim();
-                    }
-                    if (descEl && user[cCol]) {
-                        descEl.innerText = user[cCol].replace(/['"]+/g, '').trim();
-                    }
-
-                    // Configurar destinos específicos para cada botón de tarjeta si aplica (o usar el enlace general de Hotmart/WhatsApp/Drive según corresponda)
-                    if (index === 0) {
-                        // Tarjeta 1: Kit (Puedes enlazar tu Drive fijo o extraerlo de otra columna si lo prefieres)
-                        btnEl.href = "https://drive.google.com/"; // Reemplaza o ajusta con tu enlace del Kit
-                        btnEl.innerText = "📁 Abrir Kit en Drive";
-                    } else if (index === 1) {
-                        // Tarjeta 2: Plan / Hotmart
-                        btnEl.href = user[4] ? user[4].replace(/['"]+/g, '').trim() : "#";
-                        btnEl.innerText = "💳 Contratar Plan ($42 USD)";
-                    } else if (index === 2) {
-                        // Tarjeta 3: Soporte / WhatsApp
-                        btnEl.href = document.getElementById('btn-wa').href;
-                        btnEl.innerText = "💬 Escribir al Soporte";
-                    }
-                }
+                    if (user[tCol]) acc.innerHTML = user[tCol].replace(/['"]+/g, '').trim();
+                    let panel = acc.nextElementSibling;
+                    if (panel && user[cCol]) panel.querySelector('p').innerText = user[cCol].replace(/['"]+/g, '').trim();
+                });
 
                 document.getElementById('contenido-principal').style.display = 'block';
                 new Swiper('.main-swiper', { loop: true, autoplay: { delay: 3500 }, pagination: { el: '.swiper-pagination' } });
@@ -260,6 +220,15 @@
         }
     }
     init();
+
+    // Lógica original de apertura/cierre de acordeones
+    document.querySelectorAll('.accordion').forEach(acc => {
+        acc.addEventListener('click', function() {
+            this.classList.toggle("active");
+            var panel = this.nextElementSibling;
+            panel.style.maxHeight = panel.style.maxHeight ? null : panel.scrollHeight + "px";
+        });
+    });
 </script>
 
 <script>
