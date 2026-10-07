@@ -12,35 +12,37 @@
     <style>
         body { margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #f1f5f9; display: flex; justify-content: center; }
         .chat-container { width: 100%; max-width: 700px; background: white; padding-bottom: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); min-height: 100vh; position: relative; box-sizing: border-box; }
-        .header { background: #0f172a; color: #ffffff; padding: 30px 20px; text-align: center; border-bottom: 4px solid #d4af37; }
-        .header h1 { margin: 0; font-size: 28px; font-weight: 300; letter-spacing: 1px; }
-        .header p { margin: 5px 0 0 0; font-size: 14px; color: #d4af37; letter-spacing: 2px; }
+        .header { background: #0f172a; color: #ffffff; padding: 25px 20px; text-align: center; border-bottom: 4px solid #d4af37; }
+        .header h1 { margin: 0; font-size: 26px; font-weight: 300; letter-spacing: 1px; }
+        .header p { margin: 5px 0 0 0; font-size: 13px; color: #d4af37; letter-spacing: 2px; }
         
         #contenido-principal { display: none; }
 
-        .swiper { width: 100%; height: auto !important; background: #ffffff; padding: 10px 10px 30px 10px; box-sizing: border-box; }
-        .swiper-slide { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 320px; }
-        .swiper-slide img { width: 100%; max-height: 250px; object-fit: contain; display: block; }
+        .swiper { width: 100%; height: auto !important; background: #ffffff; padding: 10px 10px 15px 10px; box-sizing: border-box; }
+        .swiper-slide { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 280px; }
+        .swiper-slide img { width: 100%; max-height: 220px; object-fit: contain; display: block; }
         
         .slide-desc { 
-            font-size: 15px; 
+            font-size: 14px; 
             color: #d4af37; 
-            margin-top: 15px; 
+            margin-top: 10px; 
             font-weight: 600; 
             text-align: center; 
             padding: 0 15px;
-            line-height: 1.4; 
-            min-height: 3em; 
+            line-height: 1.3; 
+            min-height: 2.8em; 
         }
-        
-        .faq-section { padding: 15px; margin-top: 20px; }
-        .accordion { background: #0f172a; color: white; cursor: pointer; padding: 15px; width: 100%; border: none; text-align: left; border-radius: 8px; margin-bottom: 8px; font-weight: bold; }
-        .panel { padding: 0 15px; background-color: #f8fafc; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; border-left: 3px solid #d4af37; margin-bottom: 8px; text-align: justify; }
-        
-        .button-grid { display: flex; flex-direction: column; gap: 10px; padding: 15px; }
-        .btn-action { background: #334155; color: white; padding: 14px; border-radius: 8px; text-align: center; text-decoration: none; font-weight: 600; font-size: 15px; display: flex; align-items: center; justify-content: center; width: 100%; box-sizing: border-box; }
+
+        /* BOTONES PRINCIPALES ARRIBA DEL TODO */
+        .button-grid { display: flex; flex-direction: column; gap: 8px; padding: 10px 15px; }
+        .btn-action { background: #334155; color: white; padding: 12px; border-radius: 8px; text-align: center; text-decoration: none; font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; width: 100%; box-sizing: border-box; }
         .btn-green { background: #0fb396; }
         .btn-hotmart { background: #eb5757; }
+        
+        /* ACORDEONES ACHICADOS Y MÁS COMPACTOS ABAJO */
+        .faq-section { padding: 10px 15px; margin-top: 5px; }
+        .accordion { background: #0f172a; color: white; cursor: pointer; padding: 10px 12px; width: 100%; border: none; text-align: left; border-radius: 6px; margin-bottom: 5px; font-weight: bold; font-size: 13px; }
+        .panel { padding: 0 12px; background-color: #f8fafc; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; border-left: 3px solid #d4af37; margin-bottom: 5px; text-align: justify; font-size: 13px; }
     </style>
 </head>
 <body>
@@ -63,15 +65,17 @@
             <div class="swiper-pagination"></div>
         </div>
 
+        <!-- Botones de Acción Inmediata (Arriba de los acordeones) -->
+        <div class="button-grid">
+            <a id="btn-wa" href="#" class="btn-action btn-green">💬 7 Días Gratis / Conversar</a>
+            <a id="btn-hotmart" href="#" class="btn-action btn-hotmart">💳 Pagar Suscripción</a>
+        </div>
+
+        <!-- Acordeones Compactos -->
         <div class="faq-section">
             <button class="accordion">...</button><div class="panel"><p></p></div>
             <button class="accordion">...</button><div class="panel"><p></p></div>
             <button class="accordion">...</button><div class="panel"><p></p></div>
-        </div>
-
-        <div class="button-grid">
-            <a id="btn-wa" href="#" class="btn-action btn-green">💬 WhatsApp</a>
-            <a id="btn-hotmart" href="#" class="btn-action btn-hotmart">💳 Pagar Suscripción</a>
         </div>
     </div>
 </div>
@@ -140,14 +144,11 @@
                 document.getElementById('subtitulo-visual').innerText = subtituloAfiliado;
                 document.title = nombreAfiliado + " - Llave en Mano";
 
-                // Capturar icono personalizado desde la Columna AB (índice 27) con ruta relativa por defecto
                 let iconoUrl = (user[27] && user[27].trim() !== "") ? user[27].replace(/['"]+/g, '').trim() : "./icono.jpg";
 
-                // Actualizar favicon visual
                 let faviconTag = document.getElementById('dynamic-favicon');
                 if (faviconTag) faviconTag.href = iconoUrl;
 
-                // Crear un Manifest dinámico en memoria con el nombre y el icono exactos de la planilla
                 const manifestData = {
                     "name": nombreAfiliado,
                     "short_name": nombreAfiliado,
@@ -156,16 +157,8 @@
                     "background_color": "#0f172a",
                     "theme_color": "#0f172a",
                     "icons": [
-                        {
-                            "src": iconoUrl,
-                            "sizes": "192x192",
-                            "type": "image/jpeg"
-                        },
-                        {
-                            "src": iconoUrl,
-                            "sizes": "512x512",
-                            "type": "image/jpeg"
-                        }
+                        { "src": iconoUrl, "sizes": "192x192", "type": "image/jpeg" },
+                        { "src": iconoUrl, "sizes": "512x512", "type": "image/jpeg" }
                     ]
                 };
 
@@ -174,10 +167,10 @@
                 const manifestURL = URL.createObjectURL(blob);
                 document.getElementById('dynamic-manifest').setAttribute('href', manifestURL);
 
-                // Asignar WhatsApp
+                // Asignar WhatsApp con el texto enfocado en los 7 días gratis y conversar
                 if(user[3] && user[3].trim() !== "") {
                     let urlBot = user[3].replace(/['"]+/g, '').trim();
-                    let textoMensaje = `Hola, quiero más información ref:${nombreAfiliado}`;
+                    let textoMensaje = `Hola, vengo del enlace de ${nombreAfiliado}, quiero mis 7 días gratis o conversar sobre la app.`;
                     
                     if (urlBot.includes('wa.me/')) {
                         document.getElementById('btn-wa').href = `https://wa.me/56945491173?text=${encodeURIComponent(textoMensaje)}`;
@@ -189,7 +182,6 @@
 
                 if(user[4] && user[4].trim() !== "") document.getElementById('btn-hotmart').href = user[4].replace(/['"]+/g, '').trim();
                 
-                // Carga dinámica exclusivamente para las 5 fotos/descripciones
                 for(let i=0; i<5; i++) {
                     let fotoCol = 5 + (i * 2);
                     let descCol = 6 + (i * 2);
@@ -238,7 +230,6 @@
     });
 </script>
 
-<!-- Registro del Service Worker con ruta relativa corregida -->
 <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
