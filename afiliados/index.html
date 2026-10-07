@@ -38,7 +38,7 @@
         .btn-action { background: #334155; color: white; padding: 12px; border-radius: 8px; text-align: center; text-decoration: none; font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; width: 100%; box-sizing: border-box; }
         .btn-green { background: #0fb396; }
         .btn-hotmart { background: #eb5757; }
-        .btn-negro { background: #000000; color: #ffffff; display: none; } /* Oculto por defecto hasta validar datos */
+        .btn-negro { background: #000000; color: #ffffff; display: none; } /* Oculto por defecto mediante CSS */
         
         /* ACORDEONES ACHICADOS Y MÁS COMPACTOS ABAJO */
         .faq-section { padding: 10px 15px; margin-top: 5px; }
@@ -169,7 +169,7 @@
                 const manifestURL = URL.createObjectURL(blob);
                 document.getElementById('dynamic-manifest').setAttribute('href', manifestURL);
 
-                // Asignar WhatsApp con el texto enfocado en los 7 días gratis y conversar
+                // Asignar WhatsApp
                 if(user[3] && user[3].trim() !== "") {
                     let urlBot = user[3].replace(/['"]+/g, '').trim();
                     let textoMensaje = `Hola, vengo del enlace de ${nombreAfiliado}, quiero mis 7 días gratis o conversar sobre la app.`;
@@ -182,19 +182,22 @@
                     }
                 }
 
+                // Asignar Hotmart
                 if(user[4] && user[4].trim() !== "") {
                     document.getElementById('btn-hotmart').href = user[4].replace(/['"]+/g, '').trim();
                 }
 
-                // Configuración dinámica del botón negro adicional (Columnas AC: titulo_docum, AD: link_docum)
-                let tituloDoc = user[28] ? user[28].replace(/['"]+/g, '').trim() : ""; // Columna AC (índice 28)
-                let linkDoc = user[29] ? user[29].replace(/['"]+/g, '').trim() : "";   // Columna AD (índice 29)
+                // Configuración dinámica del botón adicional (Columnas AC: titulo_docum [28], AD: link_docum [29])
+                let tituloDoc = user[28] ? user[28].replace(/['"]+/g, '').trim() : ""; 
+                let linkDoc = user[29] ? user[29].replace(/['"]+/g, '').trim() : "";   
                 
+                let btnDocum = document.getElementById('btn-docum');
                 if (tituloDoc !== "" && linkDoc !== "") {
-                    let btnDocum = document.getElementById('btn-docum');
                     btnDocum.innerText = tituloDoc;
                     btnDocum.href = linkDoc;
-                    btnDocum.style.display = 'flex'; // Muestra el botón si hay datos
+                    btnDocum.style.display = 'flex'; // Se muestra solo si ambos tienen contenido
+                } else {
+                    btnDocum.style.display = 'none'; // Se asegura de ocultarlo si falta alguno
                 }
                 
                 for(let i=0; i<5; i++) {
