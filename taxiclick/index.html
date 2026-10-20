@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TaxiClick</title>
-    <!-- Manifest dinámico idéntico a Llave en Mano -->
+    <!-- Manifest dinámico -->
     <link id="dynamic-manifest" rel="manifest" href="./manifest.json">
     <!-- Icono dinámico -->
     <link id="dynamic-favicon" rel="icon" href="./icono.jpg" type="image/jpeg">
@@ -72,7 +72,7 @@
 
         <!-- Botón Principal WhatsApp -->
         <div class="button-grid">
-            <a id="btn-wa" href="#" class="btn-action btn-green">💬 7 Días Gratis / Conversar por WhatsApp</a>
+            <a id="btn-wa" href="#" class="btn-action btn-green">💬 Contactar Central WhatsApp</a>
         </div>
 
         <!-- Grilla de Móviles -->
@@ -88,7 +88,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
-    // URL completa con parámetros correctos de Google Sheets
     const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS6_2XQtbS122bsX-_ZKI94Ef3oNDG9I1MtxXTDbTBBoQ9JDmZ7g_HRacm90_qow7wzN8QHbA68k4Bs/pub?gid=0&single=true&output=csv';
 
     async function init() {
@@ -141,10 +140,11 @@
                 rows.push(currentRow);
             }
 
-            // Búsqueda exacta original de Llave en Mano
+            // Búsqueda del ID en Columna A (índice 0)
             const user = rows.find(r => r[0] && r[0].replace(/['"]+/g, '').trim().toLowerCase() === idLimpioBusqueda);
             
             if (user) {
+                // Columna B (índice 1) y Columna C (índice 2)
                 let nombreAfiliado = user[1] ? user[1].replace(/['"]+/g, '').trim() : "TaxiClick";
                 let subtituloAfiliado = user[2] ? user[2].replace(/['"]+/g, '').trim() : "Línea de Taxis";
 
@@ -152,12 +152,12 @@
                 document.getElementById('subtitulo-visual').innerText = subtituloAfiliado;
                 document.title = nombreAfiliado + " - TaxiClick";
 
-                let iconoUrl = (user[27] && user[27].trim() !== "") ? user[27].replace(/['"]+/g, '').trim() : "./icono.jpg";
+                // Columna O (índice 14): Ícono en R2
+                let iconoUrl = (user[14] && user[14].trim() !== "") ? user[14].replace(/['"]+/g, '').trim() : "./icono.jpg";
 
                 let faviconTag = document.getElementById('dynamic-favicon');
                 if (faviconTag) faviconTag.href = iconoUrl;
 
-                // MANIFEST EXACTO DE LLAVE EN MANO
                 const manifestData = {
                     "name": nombreAfiliado,
                     "short_name": nombreAfiliado,
@@ -176,23 +176,16 @@
                 const manifestURL = URL.createObjectURL(blob);
                 document.getElementById('dynamic-manifest').setAttribute('href', manifestURL);
 
-                // Configurar WhatsApp
+                // Columna D (índice 3): WhatsApp
                 if (user[3] && user[3].trim() !== "") {
                     let urlBot = user[3].replace(/['"]+/g, '').trim();
-                    let textoMensaje = `Hola, vengo del enlace de ${nombreAfiliado}, necesito un taxi.`;
-                    
-                    if (urlBot.includes('wa.me/')) {
-                        document.getElementById('btn-wa').href = `https://wa.me/56945491173?text=${encodeURIComponent(textoMensaje)}`;
-                    } else {
-                        let separador = urlBot.includes('?') ? '&' : '?';
-                        document.getElementById('btn-wa').href = urlBot + separador + 'text=' + encodeURIComponent(textoMensaje);
-                    }
+                    document.getElementById('btn-wa').href = urlBot;
                 }
 
-                // Cargar Carrusel
+                // Columnas E a N (índices 4 a 13): Fotos e Imágenes del Carrusel
                 for (let i = 0; i < 5; i++) {
-                    let fotoCol = 5 + (i * 2);
-                    let descCol = 6 + (i * 2);
+                    let fotoCol = 4 + (i * 2);  // 4, 6, 8, 10, 12 -> Col E, G, I, K, M
+                    let descCol = 5 + (i * 2);  // 5, 7, 9, 11, 13 -> Col F, H, J, L, N
                     
                     let imgUrl = user[fotoCol] ? user[fotoCol].replace(/['"]+/g, '').trim() : "";
                     let descText = user[descCol] ? user[descCol].replace(/['"]+/g, '').trim() : "";
@@ -206,7 +199,7 @@
                     }
                 }
 
-                // Cargar lista dinámica de taxistas
+                // Columna P en adelante (índice 15+): Choferes
                 const driversContainer = document.getElementById('drivers-container');
                 driversContainer.innerHTML = '';
                 let count = 0;
