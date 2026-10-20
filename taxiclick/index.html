@@ -100,7 +100,7 @@
             return;
         }
 
-        const idLimpioBusqueda = idBusqueda.replace(/[^a-zA-Z0-9_-]/g, '').trim().toLowerCase();
+        const idLimpioBusqueda = idBusqueda.trim().toLowerCase();
 
         try {
             const res = await fetch(SHEET_URL);
@@ -140,12 +140,8 @@
                 rows.push(currentRow);
             }
 
-            // Búsqueda limpia filtrando únicamente caracteres alfanuméricos
-            const user = rows.find(r => {
-                if (!r || !r[0]) return false;
-                let cleanId = r[0].replace(/[^a-zA-Z0-9_-]/g, '').trim().toLowerCase();
-                return cleanId === idLimpioBusqueda;
-            });
+            // BÚSQUEDA 100% IDÉNTICA A LA DE "LLAVE EN MANO"
+            const user = rows.find(r => r[0] && r[0].replace(/['"]+/g, '').trim().toLowerCase() === idLimpioBusqueda);
             
             if (user) {
                 let nombreAfiliado = user[1] ? user[1].replace(/['"]+/g, '').trim() : "TaxiClick";
