@@ -1,258 +1,459 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaxiClick</title>
-    <!-- Manifest dinámico -->
-    <link id="dynamic-manifest" rel="manifest" href="./manifest.json">
-    <!-- Icono dinámico -->
-    <link id="dynamic-favicon" rel="icon" href="./icono.jpg" type="image/jpeg">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
-    <style>
-        body { margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #f1f5f9; display: flex; justify-content: center; }
-        .chat-container { width: 100%; max-width: 700px; background: white; padding-bottom: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); min-height: 100vh; position: relative; box-sizing: border-box; }
-        .header { background: #0f172a; color: #ffffff; padding: 25px 20px; text-align: center; border-bottom: 4px solid #d4af37; }
-        .header h1 { margin: 0; font-size: 26px; font-weight: 300; letter-spacing: 1px; }
-        .header p { margin: 5px 0 0 0; font-size: 13px; color: #d4af37; letter-spacing: 2px; }
-        
-        #contenido-principal { display: none; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaxiClick - Plataforma de Taxis</title>
 
-        .swiper { width: 100%; height: auto !important; background: #ffffff; padding: 10px 10px 15px 10px; box-sizing: border-box; }
-        .swiper-slide { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 280px; }
-        .swiper-slide img { width: 100%; max-height: 220px; object-fit: contain; display: block; }
-        
-        .slide-desc { 
-            font-size: 14px; 
-            color: #d4af37; 
-            margin-top: 10px; 
-            font-weight: 600; 
-            text-align: center; 
-            padding: 0 15px;
-            line-height: 1.3; 
-            min-height: 2.8em; 
-        }
+  <!-- PWA Manifest & Favicon dinámicos -->
+  <link id="dynamic-favicon" rel="icon" type="image/webp" href="">
+  <link id="dynamic-manifest" rel="manifest" href="">
 
-        /* BOTONES PRINCIPALES ARRIBA */
-        .button-grid { display: flex; flex-direction: column; gap: 8px; padding: 10px 15px; }
-        .btn-action { background: #334155; color: white; padding: 12px; border-radius: 8px; text-align: center; text-decoration: none; font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; width: 100%; box-sizing: border-box; }
-        .btn-green { background: #0fb396; }
+  <style>
+    /* RESET Y ESTILOS BASE */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-        /* GRILLA DE TAXISTAS */
-        .drivers-section { padding: 10px 15px; margin-top: 10px; }
-        .drivers-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .drivers-title { font-size: 15px; font-weight: bold; color: #0f172a; margin: 0; }
-        .drivers-badge { font-size: 11px; background: #e2e8f0; color: #475569; padding: 3px 8px; border-radius: 12px; font-weight: 600; }
-        .driver-card { display: flex; align-items: center; justify-content: space-between; background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #0fb396; padding: 10px 12px; border-radius: 8px; margin-bottom: 8px; }
-        .driver-info { display: flex; align-items: center; gap: 10px; }
-        .driver-badge { background: #d4af37; color: #0f172a; font-size: 11px; font-weight: bold; padding: 4px 8px; border-radius: 4px; }
-        .driver-name { font-size: 14px; font-weight: bold; color: #1e293b; }
-        .btn-call { background: #0fb396; color: white; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px; }
-    </style>
+    body {
+      background-color: #121212;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 480px;
+      background-color: #1a1a1a;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+    }
+
+    /* ENCABEZADO PREMIUM CON LOGO */
+    .app-header {
+      background-color: #0b132b;
+      padding: 16px 20px;
+      border-bottom: 2px solid #d4af37; /* LÍnea Dorada */
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .header-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      object-fit: cover;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+    }
+
+    .header-titles {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+    }
+
+    .header-titles h1 {
+      font-size: 1.2rem;
+      color: #ffffff;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .header-titles p {
+      font-size: 0.85rem;
+      color: #d4af37; /* Color Dorado */
+      margin-top: 2px;
+    }
+
+    /* CONTENIDO PRINCIPAL */
+    .main-content {
+      padding: 16px;
+      flex: 1;
+    }
+
+    /* CARRUSEL DE IMÁGENES */
+    .carousel-container {
+      width: 100%;
+      overflow: hidden;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      background-color: #000;
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .carousel-track {
+      display: flex;
+      transition: transform 0.4s ease-in-out;
+    }
+
+    .carousel-slide {
+      min-width: 100%;
+      height: 220px;
+      object-fit: cover;
+    }
+
+    .carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 0;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #555;
+      transition: background-color 0.3s;
+    }
+
+    .dot.active {
+      background-color: #00d285;
+      width: 10px;
+      height: 10px;
+    }
+
+    /* BOTÓN CENTRAL WHATSAPP */
+    .btn-whatsapp {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background-color: #00b36b;
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 1rem;
+      padding: 14px 20px;
+      border-radius: 10px;
+      text-align: center;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 10px rgba(0, 179, 107, 0.3);
+      transition: background-color 0.2s;
+    }
+
+    .btn-whatsapp:active {
+      background-color: #008f55;
+    }
+
+    /* LISTA DE CHOFERES / MÓVILES */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #e0e0e0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-count {
+      background-color: #2a2a2a;
+      color: #aaa;
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 12px;
+    }
+
+    .drivers-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .driver-card {
+      background-color: #242424;
+      border: 1px solid #333;
+      border-left: 4px solid #d4af37;
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .driver-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .movil-tag {
+      background-color: #d4af37;
+      color: #000;
+      font-weight: bold;
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .driver-name {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #fff;
+    }
+
+    .btn-call {
+      background-color: #00b36b;
+      color: white;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ESTADOS DE CARGA Y ERROR */
+    .status-msg {
+      text-align: center;
+      padding: 40px 20px;
+      color: #888;
+    }
+  </style>
 </head>
 <body>
 
-<div class="chat-container">
-    <div class="header">
-        <h1 id="nombre-visual">Cargando...</h1>
-        <p id="subtitulo-visual">Obteniendo información...</p>
-    </div>
-    
-    <div id="contenido-principal">
-        <div class="swiper main-swiper">
-            <div class="swiper-wrapper">
-                <div class="swiper-slide" id="slide-1"><img id="f1" src=""><p id="desc1" class="slide-desc"></p></div>
-                <div class="swiper-slide" id="slide-2"><img id="f2" src=""><p id="desc2" class="slide-desc"></p></div>
-                <div class="swiper-slide" id="slide-3"><img id="f3" src=""><p id="desc3" class="slide-desc"></p></div>
-                <div class="swiper-slide" id="slide-4"><img id="f4" src=""><p id="desc4" class="slide-desc"></p></div>
-                <div class="swiper-slide" id="slide-5"><img id="f5" src=""><p id="desc5" class="slide-desc"></p></div>
-            </div>
-            <div class="swiper-pagination"></div>
+  <div class="app-container">
+    <!-- ENCABEZADO -->
+    <header class="app-header">
+      <div class="header-content">
+        <!-- Ícono dinámico tomado de la Columna O de la planilla -->
+        <img id="header-app-logo" src="" alt="Logo" class="header-logo" style="display: none;">
+        <div class="header-titles">
+          <h1 id="app-title">Cargando...</h1>
+          <p id="app-subtitle"></p>
         </div>
+      </div>
+    </header>
 
-        <!-- Botón Principal WhatsApp -->
-        <div class="button-grid">
-            <a id="btn-wa" href="#" class="btn-action btn-green">💬 Contactar Central WhatsApp</a>
-        </div>
+    <!-- CONTENIDO DE LA APP -->
+    <main class="main-content" id="main-content">
+      <div class="status-msg" id="loading-msg">Cargando información de la línea...</div>
+    </main>
+  </div>
 
-        <!-- Grilla de Móviles -->
-        <div class="drivers-section">
-            <div class="drivers-header">
-                <h3 class="drivers-title">🚖 Selecciona un móvil para llamar:</h3>
-                <span id="active-drivers-count" class="drivers-badge">0 Móviles Activos</span>
-            </div>
-            <div id="drivers-container"></div>
-        </div>
-    </div>
-</div>
+  <script>
+    // Configuración de la planilla Google Sheet (CSV publicado)
+    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTw0-YOUR_SHEET_ID_HERE/pub?output=csv'; // Reemplazar si fuera necesario
 
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-<script>
-    
-    const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS6_2XQtbSl22bsX-_ZKI94Ef3oNDG9I1MtxXTDbTBBoQ9JDmZ7g_HRacm90_qow7wzN8QHbA68k4Bs/pub?gid=0&single=true&output=csv';
-    
-    async function init() {
-        const params = new URLSearchParams(window.location.search);
-        const idBusqueda = params.get('id');
-        
-        if (!idBusqueda) {
-            document.getElementById('nombre-visual').innerText = "ENLACE INCOMPLETO";
-            document.getElementById('subtitulo-visual').innerText = "FALTA EL ID EN LA URL";
-            return;
+    // 1. Obtener el ID desde la URL (?id=taxiasoc1)
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetId = urlParams.get('id') || 'taxiasoc1';
+
+    // Helper para parsear CSV correctamente contemplando comillas
+    function parseCSVLine(text) {
+      let p = '', c = '', r = [];
+      let q = false;
+      for (let i = 0; i < text.length; i++) {
+        c = text[i];
+        if (c === '"') {
+          q = !q;
+        } else if (c === ',' && !q) {
+          r.push(p.trim().replace(/^"|"$/g, ''));
+          p = '';
+        } else {
+          p += c;
         }
-
-        const idLimpioBusqueda = idBusqueda.replace(/[^a-zA-Z0-9]/g, '').trim().toLowerCase();
-
-        try {
-            const res = await fetch(SHEET_URL);
-            const data = await res.text();
-            
-            const rows = [];
-            let currentRow = [];
-            let currentCell = '';
-            let inQuotes = false;
-
-            for (let i = 0; i < data.length; i++) {
-                let char = data[i];
-                let nextChar = data[i + 1];
-
-                if (char === '"') {
-                    if (inQuotes && nextChar === '"') {
-                        currentCell += '"';
-                        i++;
-                    } else {
-                        inQuotes = !inQuotes;
-                    }
-                } else if (char === ',' && !inQuotes) {
-                    currentRow.push(currentCell.trim());
-                    currentCell = '';
-                } else if ((char === '\r' || char === '\n') && !inQuotes) {
-                    if (char === '\r' && nextChar === '\n') { i++; }
-                    currentRow.push(currentCell.trim());
-                    rows.push(currentRow);
-                    currentRow = [];
-                    currentCell = '';
-                } else {
-                    currentCell += char;
-                }
-            }
-            if (currentCell !== '' || currentRow.length > 0) {
-                currentRow.push(currentCell.trim());
-                rows.push(currentRow);
-            }
-
-            // RECORRER LA PLANILLA FILA POR FILA BUSCANDO EL ID
-            let user = null;
-            for (let r of rows) {
-                if (r && r[0]) {
-                    let idFila = r[0].replace(/[^a-zA-Z0-9]/g, '').trim().toLowerCase();
-                    if (idFila === idLimpioBusqueda) {
-                        user = r;
-                        break;
-                    }
-                }
-            }
-            
-            if (user) {
-                // Columna B (índice 1) -> Título
-                let nombreAfiliado = user[1] ? user[1].replace(/['"]+/g, '').trim() : "TaxiClick";
-                // Columna C (índice 2) -> Subtítulo
-                let subtituloAfiliado = user[2] ? user[2].replace(/['"]+/g, '').trim() : "Línea de Taxis";
-
-                document.getElementById('nombre-visual').innerText = nombreAfiliado;
-                document.getElementById('subtitulo-visual').innerText = subtituloAfiliado;
-                document.title = nombreAfiliado + " - TaxiClick";
-
-                // Columna O (índice 14) -> Ícono
-                let iconoUrl = (user[14] && user[14].trim() !== "") ? user[14].replace(/['"]+/g, '').trim() : "./icono.jpg";
-
-                let faviconTag = document.getElementById('dynamic-favicon');
-                if (faviconTag) faviconTag.href = iconoUrl;
-
-                const manifestData = {
-                    "name": nombreAfiliado,
-                    "short_name": nombreAfiliado,
-                    "start_url": window.location.href,
-                    "display": "standalone",
-                    "background_color": "#0f172a",
-                    "theme_color": "#0f172a",
-                    "icons": [
-                        { "src": iconoUrl, "sizes": "192x192", "type": "image/jpeg" },
-                        { "src": iconoUrl, "sizes": "512x512", "type": "image/jpeg" }
-                    ]
-                };
-
-                const stringManifest = JSON.stringify(manifestData);
-                const blob = new Blob([stringManifest], {type: 'application/json'});
-                const manifestURL = URL.createObjectURL(blob);
-                document.getElementById('dynamic-manifest').setAttribute('href', manifestURL);
-
-                // Columna D (índice 3) -> WhatsApp
-                if (user[3] && user[3].trim() !== "") {
-                    let urlBot = user[3].replace(/['"]+/g, '').trim();
-                    document.getElementById('btn-wa').href = urlBot;
-                }
-
-                // Columnas E a N (índices 4 a 13) -> Carrusel
-                for (let i = 0; i < 5; i++) {
-                    let fotoCol = 4 + (i * 2);
-                    let descCol = 5 + (i * 2);
-                    
-                    let imgUrl = user[fotoCol] ? user[fotoCol].replace(/['"]+/g, '').trim() : "";
-                    let descText = user[descCol] ? user[descCol].replace(/['"]+/g, '').trim() : "";
-
-                    let slideElement = document.getElementById('slide-' + (i + 1));
-
-                    if (slideElement && imgUrl !== "") {
-                        slideElement.style.display = 'flex';
-                        if (document.getElementById('f' + (i + 1))) document.getElementById('f' + (i + 1)).src = imgUrl;
-                        if (document.getElementById('desc' + (i + 1))) document.getElementById('desc' + (i + 1)).innerText = descText;
-                    }
-                }
-
-                // Columna P en adelante (índice 15+) -> Grilla de Móviles
-                const driversContainer = document.getElementById('drivers-container');
-                driversContainer.innerHTML = '';
-                let count = 0;
-
-                for (let col = 15; col < user.length; col += 2) {
-                    let desc = user[col] ? user[col].replace(/['"]+/g, '').trim() : "";
-                    let link = user[col + 1] ? user[col + 1].replace(/['"]+/g, '').trim() : "";
-
-                    if (desc !== "" && link !== "") {
-                        count++;
-                        let formattedCount = count < 10 ? '0' + count : count;
-                        let telLink = link.startsWith('tel:') ? link : 'tel:' + link;
-
-                        let card = document.createElement('div');
-                        card.className = 'driver-card';
-                        card.innerHTML = `
-                            <div class="driver-info">
-                                <span class="driver-badge">Móvil ${formattedCount}</span>
-                                <span class="driver-name">${desc}</span>
-                            </div>
-                            <a href="${telLink}" class="btn-call">📞 Llamar</a>
-                        `;
-                        driversContainer.appendChild(card);
-                    }
-                }
-
-                document.getElementById('active-drivers-count').innerText = `${count} Móviles Activos`;
-                document.getElementById('contenido-principal').style.display = 'block';
-
-                new Swiper('.main-swiper', { loop: true, autoplay: { delay: 3500 }, pagination: { el: '.swiper-pagination' } });
-
-            } else {
-                document.getElementById('nombre-visual').innerText = "ID NO ENCONTRADO";
-                document.getElementById('subtitulo-visual').innerText = "VERIFICA TU ENLACE";
-            }
-        } catch (e) {
-            console.error("Error al cargar configuración:", e);
-            document.getElementById('nombre-visual').innerText = "ERROR DE CONEXIÓN";
-            document.getElementById('subtitulo-visual').innerText = "INTENTA NUEVAMENTE";
-        }
+      }
+      r.push(p.trim().replace(/^"|"$/g, ''));
+      return r;
     }
-    init();
-</script>
+
+    // 2. Cargar datos desde Google Sheets
+    async function loadAppData() {
+      try {
+        const response = await fetch(SHEET_CSV_URL);
+        const csvData = await response.text();
+        
+        const lines = csvData.split('\n').filter(line => line.trim() !== '');
+        if (lines.length < 2) throw new Error("Planilla vacía");
+
+        let targetRow = null;
+
+        // Iterar filas buscando coincidencia exacta con el ID (Columna A / indice 0)
+        for (let i = 1; i < lines.length; i++) {
+          const columns = parseCSVLine(lines[i]);
+          if (columns[0] && columns[0].toLowerCase() === targetId.toLowerCase()) {
+            targetRow = columns;
+            break;
+          }
+        }
+
+        if (!targetRow) {
+          document.getElementById('loading-msg').innerHTML = `<p style="color: #ff5555;">No se encontró la línea con el ID: <b>${targetId}</b></p>`;
+          return;
+        }
+
+        renderApp(targetRow);
+
+      } catch (error) {
+        console.error("Error al cargar datos:", error);
+        document.getElementById('loading-msg').innerHTML = `<p style="color: #ff5555;">Error de conexión al cargar la información.</p>`;
+      }
+    }
+
+    // 3. Renderizar la interfaz con los datos
+    function renderApp(row) {
+      // Mapeo de columnas según la planilla:
+      // Col 0: ID
+      // Col 1: Nombre_Visual
+      // Col 2: Subtitulo
+      // Col 3..7: Imagenes del carrusel (WebP)
+      // Col 8: Telefono / WhatsApp Central
+      // Col 9..13: Choferes / Móviles
+      // Col 14 (O): Icono de la App / Logo (.webp)
+
+      const nombreVisual = row[1] || 'RadioTaxi';
+      const subtitulo = row[2] || 'Servicio Ejecutivo';
+      const whatsappCentral = row[8] || '';
+      const iconUrl = row[14] || ''; // Columna O
+
+      // Update Título y Subtítulo
+      document.getElementById('app-title').textContent = nombreVisual;
+      document.getElementById('app-subtitle').textContent = subtitulo;
+      document.title = nombreVisual;
+
+      // Update Ícono superior (mismo icono de la PWA)
+      const logoImg = document.getElementById('header-app-logo');
+      if (iconUrl) {
+        logoImg.src = iconUrl;
+        logoImg.style.display = 'block';
+
+        // Actualizar dinámicamente el Favicon de la página
+        const favicon = document.getElementById('dynamic-favicon');
+        if (favicon) favicon.href = iconUrl;
+      }
+
+      // Extraer imágenes del carrusel (Columnas 3 a 7)
+      const carouselImages = [];
+      for (let i = 3; i <= 7; i++) {
+        if (row[i] && row[i].startsWith('http')) {
+          carouselImages.push(row[i]);
+        }
+      }
+
+      // Extraer choferes (Columnas 9 en adelante, ej: "Móvil 01 - Carlos Pérez | +56912345678")
+      const drivers = [];
+      for (let i = 9; i < row.length && i <= 13; i++) {
+        if (row[i] && row[i].trim() !== '') {
+          const parts = row[i].split('|');
+          drivers.push({
+            label: parts[0] ? parts[0].trim() : `Móvil 0${i-8}`,
+            name: parts[1] ? parts[1].trim() : 'Conductor',
+            phone: parts[2] ? parts[2].trim() : parts[0].trim()
+          });
+        }
+      }
+
+      // Construcción del HTML Principal
+      const mainContainer = document.getElementById('main-content');
+      
+      let html = '';
+
+      // Render Carrusel
+      if (carouselImages.length > 0) {
+        html += `
+          <div class="carousel-container">
+            <div class="carousel-track" id="carousel-track">
+              ${carouselImages.map(img => `<img src="${img}" class="carousel-slide" alt="Banner">`).join('')}
+            </div>
+          </div>
+          <div class="carousel-dots" id="carousel-dots">
+            ${carouselImages.map((_, idx) => `<div class="dot ${idx === 0 ? 'active' : ''}"></div>`).join('')}
+          </div>
+        `;
+      }
+
+      // Render Botón WhatsApp
+      if (whatsappCentral) {
+        const cleanPhone = whatsappCentral.replace(/[^0-9+]/g, '');
+        html += `
+          <a href="https://wa.me/${cleanPhone}" target="_blank" class="btn-whatsapp">
+            <span>💬</span> Contactar Central WhatsApp
+          </a>
+        `;
+      }
+
+      // Render Choferes
+      html += `
+        <div class="section-header">
+          <div class="section-title">🚖 Selecciona un móvil para llamar:</div>
+          <div class="badge-count">${drivers.length} Móviles Activos</div>
+        </div>
+        <div class="drivers-list">
+      `;
+
+      if (drivers.length > 0) {
+        drivers.forEach(driver => {
+          html += `
+            <div class="driver-card">
+              <div class="driver-info">
+                <span class="movil-tag">${driver.label}</span>
+                <span class="driver-name">${driver.name}</span>
+              </div>
+              <a href="tel:${driver.phone}" class="btn-call">📞 Llamar</a>
+            </div>
+          `;
+        });
+      } else {
+        html += `<div class="status-msg">No hay móviles registrados en este momento.</div>`;
+      }
+
+      html += `</div>`;
+
+      mainContainer.innerHTML = html;
+
+      // Iniciar animación del carrusel si hay imágenes
+      if (carouselImages.length > 1) {
+        initCarousel(carouselImages.length);
+      }
+    }
+
+    // Lógica sencilla de auto-play para el carrusel
+    function initCarousel(totalSlides) {
+      let currentIndex = 0;
+      const track = document.getElementById('carousel-track');
+      const dots = document.querySelectorAll('.dot');
+
+      setInterval(() => {
+        currentIndex = (currentIndex + 1) % totalSlides;
+        if (track) {
+          track.style.transform = `translateX(-${currentIndex * 100}%)`;
+        }
+        dots.forEach((dot, idx) => {
+          dot.classList.toggle('active', idx === currentIndex);
+        });
+      }, 3500);
+    }
+
+    // Iniciar carga al abrir
+    loadAppData();
+  </script>
 </body>
 </html>
