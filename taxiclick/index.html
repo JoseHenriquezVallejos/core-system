@@ -5,9 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TaxiClick - Plataforma de Taxis</title>
 
-  <!-- PWA Manifest & Favicon dinámicos -->
+  <!-- PWA Favicon dinámico -->
   <link id="dynamic-favicon" rel="icon" type="image/webp" href="">
-  <link id="dynamic-manifest" rel="manifest" href="">
 
   <style>
     /* RESET Y ESTILOS BASE */
@@ -36,11 +35,11 @@
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
     }
 
-    /* ENCABEZADO PREMIUM CON LOGO */
+    /* ENCABEZADO PREMIUM ALINEADO A LA IZQUIERDA */
     .app-header {
       background-color: #0b132b;
-      padding: 16px 20px;
-      border-bottom: 2px solid #d4af37; /* LÍnea Dorada */
+      padding: 14px 18px;
+      border-bottom: 2px solid #d4af37; /* Línea Dorada */
       position: sticky;
       top: 0;
       z-index: 100;
@@ -49,17 +48,18 @@
     .header-content {
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start; /* Alineado a la izquierda */
       gap: 12px;
     }
 
     .header-logo {
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
       object-fit: cover;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(212, 175, 55, 0.3);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      flex-shrink: 0;
     }
 
     .header-titles {
@@ -69,14 +69,14 @@
     }
 
     .header-titles h1 {
-      font-size: 1.2rem;
+      font-size: 1.15rem;
       color: #ffffff;
       font-weight: 700;
       line-height: 1.2;
     }
 
     .header-titles p {
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       color: #d4af37; /* Color Dorado */
       margin-top: 2px;
     }
@@ -87,7 +87,7 @@
       flex: 1;
     }
 
-    /* CARRUSEL DE IMÁGENES */
+    /* CARRUSEL DE IMÁGENES CON LEYENDA */
     .carousel-container {
       width: 100%;
       overflow: hidden;
@@ -95,7 +95,6 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.5);
       background-color: #000;
       position: relative;
-      margin-bottom: 20px;
     }
 
     .carousel-track {
@@ -103,17 +102,36 @@
       transition: transform 0.4s ease-in-out;
     }
 
-    .carousel-slide {
+    .carousel-slide-wrapper {
       min-width: 100%;
-      height: 220px;
+      position: relative;
+    }
+
+    .carousel-slide {
+      width: 100%;
+      height: 200px;
       object-fit: cover;
+      display: block;
+    }
+
+    .carousel-caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+      color: #d4af37;
+      text-align: center;
+      padding: 12px 8px 6px 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
     }
 
     .carousel-dots {
       display: flex;
       justify-content: center;
       gap: 8px;
-      padding: 10px 0;
+      padding: 10px 0 18px 0;
     }
 
     .dot {
@@ -140,20 +158,15 @@
       color: #ffffff;
       text-decoration: none;
       font-weight: bold;
-      font-size: 1rem;
+      font-size: 0.95rem;
       padding: 14px 20px;
       border-radius: 10px;
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 22px;
       box-shadow: 0 4px 10px rgba(0, 179, 107, 0.3);
-      transition: background-color 0.2s;
     }
 
-    .btn-whatsapp:active {
-      background-color: #008f55;
-    }
-
-    /* LISTA DE CHOFERES / MÓVILES */
+    /* LISTA DE CHOFERES */
     .section-header {
       display: flex;
       justify-content: space-between;
@@ -162,7 +175,7 @@
     }
 
     .section-title {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 600;
       color: #e0e0e0;
       display: flex;
@@ -189,7 +202,7 @@
       border: 1px solid #333;
       border-left: 4px solid #d4af37;
       border-radius: 8px;
-      padding: 12px 16px;
+      padding: 12px 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -198,7 +211,7 @@
     .driver-info {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
     .movil-tag {
@@ -212,7 +225,7 @@
 
     .driver-name {
       font-weight: 600;
-      font-size: 1rem;
+      font-size: 0.95rem;
       color: #fff;
     }
 
@@ -220,7 +233,7 @@
       background-color: #00b36b;
       color: white;
       text-decoration: none;
-      padding: 8px 16px;
+      padding: 8px 14px;
       border-radius: 6px;
       font-size: 0.85rem;
       font-weight: bold;
@@ -229,7 +242,6 @@
       gap: 6px;
     }
 
-    /* ESTADOS DE CARGA Y ERROR */
     .status-msg {
       text-align: center;
       padding: 40px 20px;
@@ -243,7 +255,6 @@
     <!-- ENCABEZADO -->
     <header class="app-header">
       <div class="header-content">
-        <!-- Ícono dinámico tomado de la Columna O de la planilla -->
         <img id="header-app-logo" src="" alt="Logo" class="header-logo" style="display: none;">
         <div class="header-titles">
           <h1 id="app-title">Cargando...</h1>
@@ -259,12 +270,12 @@
   </div>
 
   <script>
-    // Configuración de la planilla Google Sheet (CSV publicado)
-    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS6_2XQtbSl22bsX-_ZKI94Ef3oNDG9I1MtxXTDbTBBoQ9JDmZ7g_HRacm90_qow7wzN8QHbA68k4Bs/pub?gid=0&single=true&output=csv'; // Reemplazar si fuera necesario
+    // PEGA AQUÍ TU ENLACE CSV REAL DE GOOGLE SHEETS
+    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTw0-YOUR_SHEET_ID_HERE/pub?output=csv';
 
-    // 1. Obtener el ID desde la URL (?id=taxiasoc1)
+    // 1. Obtener el ID desde la URL (?id=radiotaximet)
     const urlParams = new URLSearchParams(window.location.search);
-    const targetId = urlParams.get('id') || 'taxiasoc1';
+    const targetId = urlParams.get('id') || 'radiotaximet';
 
     // Helper para parsear CSV correctamente contemplando comillas
     function parseCSVLine(text) {
@@ -285,7 +296,7 @@
       return r;
     }
 
-    // 2. Cargar datos desde Google Sheets
+    // 2. Cargar datos de la planilla
     async function loadAppData() {
       try {
         const response = await fetch(SHEET_CSV_URL);
@@ -296,7 +307,6 @@
 
         let targetRow = null;
 
-        // Iterar filas buscando coincidencia exacta con el ID (Columna A / indice 0)
         for (let i = 1; i < lines.length; i++) {
           const columns = parseCSVLine(lines[i]);
           if (columns[0] && columns[0].toLowerCase() === targetId.toLowerCase()) {
@@ -318,89 +328,90 @@
       }
     }
 
-    // 3. Renderizar la interfaz con los datos
+    // 3. Renderizar la app mapeando exactamente la planilla dada
     function renderApp(row) {
-      // Mapeo de columnas según la planilla:
-      // Col 0: ID
-      // Col 1: Nombre_Visual
-      // Col 2: Subtitulo
-      // Col 3..7: Imagenes del carrusel (WebP)
-      // Col 8: Telefono / WhatsApp Central
-      // Col 9..13: Choferes / Móviles
-      // Col 14 (O): Icono de la App / Logo (.webp)
+      const nombreVisual = row[1] || 'RadioTaxi';            // Col B
+      const subtitulo = row[2] || 'Servicio Ejecutivo';       // Col C
+      const whatsappUrl = row[3] || '';                     // Col D
+      const iconUrl = row[14] || '';                        // Col O (Icono WebP)
 
-      const nombreVisual = row[1] || 'RadioTaxi';
-      const subtitulo = row[2] || 'Servicio Ejecutivo';
-      const whatsappCentral = row[8] || '';
-      const iconUrl = row[14] || ''; // Columna O
-
-      // Update Título y Subtítulo
+      // Actualizar Título y Subtítulo
       document.getElementById('app-title').textContent = nombreVisual;
       document.getElementById('app-subtitle').textContent = subtitulo;
       document.title = nombreVisual;
 
-      // Update Ícono superior (mismo icono de la PWA)
+      // Actualizar Ícono superior y Favicon (Columna O)
       const logoImg = document.getElementById('header-app-logo');
       if (iconUrl) {
         logoImg.src = iconUrl;
         logoImg.style.display = 'block';
 
-        // Actualizar dinámicamente el Favicon de la página
         const favicon = document.getElementById('dynamic-favicon');
         if (favicon) favicon.href = iconUrl;
       }
 
-      // Extraer imágenes del carrusel (Columnas 3 a 7)
-      const carouselImages = [];
-      for (let i = 3; i <= 7; i++) {
-        if (row[i] && row[i].startsWith('http')) {
-          carouselImages.push(row[i]);
+      // Extraer imágenes del carrusel y sus descripciones (Columnas E, G, I, K, M -> 4, 6, 8, 10, 12)
+      const carouselData = [];
+      const imgIndexes = [4, 6, 8, 10, 12];
+      imgIndexes.forEach(idx => {
+        const imgUrl = row[idx];
+        const desc = row[idx + 1] || ''; // Columna contigua de descripción
+        if (imgUrl && imgUrl.startsWith('http')) {
+          carouselData.push({ url: imgUrl, desc: desc });
         }
-      }
+      });
 
-      // Extraer choferes (Columnas 9 en adelante, ej: "Móvil 01 - Carlos Pérez | +56912345678")
+      // Extraer chóferes (Columnas P, Q, R, S, T, U -> índices 15, 17, 19)
       const drivers = [];
-      for (let i = 9; i < row.length && i <= 13; i++) {
-        if (row[i] && row[i].trim() !== '') {
-          const parts = row[i].split('|');
+      const driverIndexes = [15, 17, 19];
+      driverIndexes.forEach((idx, num) => {
+        const name = row[idx];
+        const phone = row[idx + 1];
+        if (name && name.trim() !== '') {
           drivers.push({
-            label: parts[0] ? parts[0].trim() : `Móvil 0${i-8}`,
-            name: parts[1] ? parts[1].trim() : 'Conductor',
-            phone: parts[2] ? parts[2].trim() : parts[0].trim()
+            label: `Móvil 0${num + 1}`,
+            name: name.trim(),
+            phone: phone ? phone.trim() : ''
           });
         }
-      }
+      });
 
-      // Construcción del HTML Principal
       const mainContainer = document.getElementById('main-content');
-      
       let html = '';
 
       // Render Carrusel
-      if (carouselImages.length > 0) {
+      if (carouselData.length > 0) {
         html += `
           <div class="carousel-container">
             <div class="carousel-track" id="carousel-track">
-              ${carouselImages.map(img => `<img src="${img}" class="carousel-slide" alt="Banner">`).join('')}
+              ${carouselData.map(item => `
+                <div class="carousel-slide-wrapper">
+                  <img src="${item.url}" class="carousel-slide" alt="Carrusel">
+                  ${item.desc ? `<div class="carousel-caption">${item.desc}</div>` : ''}
+                </div>
+              `).join('')}
             </div>
           </div>
           <div class="carousel-dots" id="carousel-dots">
-            ${carouselImages.map((_, idx) => `<div class="dot ${idx === 0 ? 'active' : ''}"></div>`).join('')}
+            ${carouselData.map((_, idx) => `<div class="dot ${idx === 0 ? 'active' : ''}"></div>`).join('')}
           </div>
         `;
       }
 
-      // Render Botón WhatsApp
-      if (whatsappCentral) {
-        const cleanPhone = whatsappCentral.replace(/[^0-9+]/g, '');
+      // Render Botón WhatsApp Central
+      if (whatsappUrl) {
+        let finalWa = whatsappUrl;
+        if (!finalWa.startsWith('http')) {
+          finalWa = `https://wa.me/${whatsappUrl.replace(/[^0-9+]/g, '')}`;
+        }
         html += `
-          <a href="https://wa.me/${cleanPhone}" target="_blank" class="btn-whatsapp">
+          <a href="${finalWa}" target="_blank" class="btn-whatsapp">
             <span>💬</span> Contactar Central WhatsApp
           </a>
         `;
       }
 
-      // Render Choferes
+      // Render Lista de Choferes
       html += `
         <div class="section-header">
           <div class="section-title">🚖 Selecciona un móvil para llamar:</div>
@@ -411,13 +422,14 @@
 
       if (drivers.length > 0) {
         drivers.forEach(driver => {
+          const cleanPhone = driver.phone.replace(/[^0-9+]/g, '');
           html += `
             <div class="driver-card">
               <div class="driver-info">
                 <span class="movil-tag">${driver.label}</span>
                 <span class="driver-name">${driver.name}</span>
               </div>
-              <a href="tel:${driver.phone}" class="btn-call">📞 Llamar</a>
+              <a href="tel:${cleanPhone}" class="btn-call">📞 Llamar</a>
             </div>
           `;
         });
@@ -429,13 +441,12 @@
 
       mainContainer.innerHTML = html;
 
-      // Iniciar animación del carrusel si hay imágenes
-      if (carouselImages.length > 1) {
-        initCarousel(carouselImages.length);
+      // Iniciar auto-play del carrusel
+      if (carouselData.length > 1) {
+        initCarousel(carouselData.length);
       }
     }
 
-    // Lógica sencilla de auto-play para el carrusel
     function initCarousel(totalSlides) {
       let currentIndex = 0;
       const track = document.getElementById('carousel-track');
@@ -452,7 +463,6 @@
       }, 3500);
     }
 
-    // Iniciar carga al abrir
     loadAppData();
   </script>
 </body>
