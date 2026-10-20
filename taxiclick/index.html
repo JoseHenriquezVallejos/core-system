@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TaxiClick</title>
-    <!-- Manifest dinámico -->
+    <!-- Manifest dinámico idéntico a Llave en Mano -->
     <link id="dynamic-manifest" rel="manifest" href="./manifest.json">
     <!-- Icono dinámico -->
     <link id="dynamic-favicon" rel="icon" href="./icono.jpg" type="image/jpeg">
@@ -88,7 +88,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
-    const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS6_2XQtbSl22bsX-_ZKI94Ef3oNDG9I1MtxXTDbTBBoQ9JDmZ7g_HRacm90_qow7wzN8QHbA68k4Bs/pub?gid=0&single=true&output=csv';
+    // URL completa con parámetros correctos de Google Sheets
+    const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS6_2XQtbS122bsX-_ZKI94Ef3oNDG9I1MtxXTDbTBBoQ9JDmZ7g_HRacm90_qow7wzN8QHbA68k4Bs/pub?gid=0&single=true&output=csv';
 
     async function init() {
         const params = new URLSearchParams(window.location.search);
@@ -140,7 +141,7 @@
                 rows.push(currentRow);
             }
 
-            // BÚSQUEDA 100% IDÉNTICA A LA DE "LLAVE EN MANO"
+            // Búsqueda exacta original de Llave en Mano
             const user = rows.find(r => r[0] && r[0].replace(/['"]+/g, '').trim().toLowerCase() === idLimpioBusqueda);
             
             if (user) {
@@ -156,6 +157,7 @@
                 let faviconTag = document.getElementById('dynamic-favicon');
                 if (faviconTag) faviconTag.href = iconoUrl;
 
+                // MANIFEST EXACTO DE LLAVE EN MANO
                 const manifestData = {
                     "name": nombreAfiliado,
                     "short_name": nombreAfiliado,
@@ -174,6 +176,7 @@
                 const manifestURL = URL.createObjectURL(blob);
                 document.getElementById('dynamic-manifest').setAttribute('href', manifestURL);
 
+                // Configurar WhatsApp
                 if (user[3] && user[3].trim() !== "") {
                     let urlBot = user[3].replace(/['"]+/g, '').trim();
                     let textoMensaje = `Hola, vengo del enlace de ${nombreAfiliado}, necesito un taxi.`;
@@ -186,6 +189,7 @@
                     }
                 }
 
+                // Cargar Carrusel
                 for (let i = 0; i < 5; i++) {
                     let fotoCol = 5 + (i * 2);
                     let descCol = 6 + (i * 2);
@@ -202,6 +206,7 @@
                     }
                 }
 
+                // Cargar lista dinámica de taxistas
                 const driversContainer = document.getElementById('drivers-container');
                 driversContainer.innerHTML = '';
                 let count = 0;
