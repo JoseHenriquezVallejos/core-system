@@ -272,7 +272,7 @@
 
   <script>
     // ⚠️ COLOCA AQUÍ TU ENLACE CSV PUBLICADO DE GOOGLE SHEETS
-    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS6_2XQtbSl22bsX-_ZKI94Ef3oNDG9I1MtxXTDbTBBoQ9JDmZ7g_HRacm90_qow7wzN8QHbA68k4Bs/pub?gid=0&single=true&output=csv';
+    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTw0-YOUR_SHEET_ID_HERE/pub?output=csv';
 
     // Obtener ID de la URL (?id=radiotaximet)
     const urlParams = new URLSearchParams(window.location.search);
@@ -329,7 +329,7 @@
       }
     }
 
-    // MAPEO EXACTO DE TU PLANILLA
+    // MAPEO EXACTO DE LA PLANILLA CON CHOFERES TOTALMENTE DINÁMICOS
     function renderApp(row) {
       const nombreVisual = row[1] || 'RadioTaxi';            // Col B (1)
       const subtitulo = row[2] || 'Servicio Ejecutivo';       // Col C (2)
@@ -356,26 +356,25 @@
       const imgIndexes = [4, 6, 8, 10, 12];
       imgIndexes.forEach(idx => {
         const imgUrl = row[idx];
-        const desc = row[idx + 1] || ''; // Descripción en la columna contigua (F, H, J, L, N)
+        const desc = row[idx + 1] || '';
         if (imgUrl && imgUrl.startsWith('http')) {
           carouselData.push({ url: imgUrl, desc: desc });
         }
       });
 
-      // Choferes (Col P a U -> Índices 15, 17, 19 para nombre y 16, 18, 20 para teléfono)
+      // 🚖 Choferes Dinámicos e Ilimitados (Lee desde la columna P / índice 15 en adelante de 2 en 2)
       const drivers = [];
-      const driverIndexes = [15, 17, 19];
-      driverIndexes.forEach((idx, num) => {
-        const name = row[idx];
-        const phone = row[idx + 1];
+      for (let i = 15; i < row.length; i += 2) {
+        const name = row[i];
+        const phone = row[i + 1];
         if (name && name.trim() !== '') {
           drivers.push({
-            label: `Móvil 0${num + 1}`,
+            label: `Móvil ${String(drivers.length + 1).padStart(2, '0')}`,
             name: name.trim(),
             phone: phone ? phone.trim() : ''
           });
         }
-      });
+      }
 
       const mainContainer = document.getElementById('main-content');
       let html = '';
