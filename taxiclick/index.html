@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TaxiClick - Plataforma de Taxis</title>
+  <title>TaxiClick</title>
 
-  <!-- PWA Favicon dinámico -->
+  <!-- Favicon dinámico -->
   <link id="dynamic-favicon" rel="icon" type="image/webp" href="">
 
   <style>
-    /* RESET Y ESTILOS BASE */
+    /* RESET Y ESTILOS GENERALES */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -35,7 +35,7 @@
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
     }
 
-    /* ENCABEZADO PREMIUM ALINEADO A LA IZQUIERDA */
+    /* ENCABEZADO CON LOGO A LA IZQUIERDA */
     .app-header {
       background-color: #0b132b;
       padding: 14px 18px;
@@ -53,8 +53,8 @@
     }
 
     .header-logo {
-      width: 42px;
-      height: 42px;
+      width: 44px;
+      height: 44px;
       border-radius: 8px;
       object-fit: cover;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
@@ -77,7 +77,7 @@
 
     .header-titles p {
       font-size: 0.82rem;
-      color: #d4af37; /* Color Dorado */
+      color: #d4af37; /* Dorado */
       margin-top: 2px;
     }
 
@@ -87,7 +87,7 @@
       flex: 1;
     }
 
-    /* CARRUSEL DE IMÁGENES CON LEYENDA */
+    /* CARRUSEL DE IMÁGENES */
     .carousel-container {
       width: 100%;
       overflow: hidden;
@@ -148,7 +148,7 @@
       height: 10px;
     }
 
-    /* BOTÓN CENTRAL WHATSAPP */
+    /* BOTÓN WHATSAPP CENTRAL */
     .btn-whatsapp {
       display: flex;
       align-items: center;
@@ -166,7 +166,7 @@
       box-shadow: 0 4px 10px rgba(0, 179, 107, 0.3);
     }
 
-    /* LISTA DE CHOFERES */
+    /* SECCIÓN DE CHOFERES */
     .section-header {
       display: flex;
       justify-content: space-between;
@@ -255,6 +255,7 @@
     <!-- ENCABEZADO -->
     <header class="app-header">
       <div class="header-content">
+        <!-- Ícono tomado de la Columna O (row[14]) -->
         <img id="header-app-logo" src="" alt="Logo" class="header-logo" style="display: none;">
         <div class="header-titles">
           <h1 id="app-title">Cargando...</h1>
@@ -263,21 +264,21 @@
       </div>
     </header>
 
-    <!-- CONTENIDO DE LA APP -->
+    <!-- CONTENIDO -->
     <main class="main-content" id="main-content">
       <div class="status-msg" id="loading-msg">Cargando información de la línea...</div>
     </main>
   </div>
 
   <script>
-    // PEGA AQUÍ TU ENLACE CSV REAL DE GOOGLE SHEETS
+    // ⚠️ COLOCA AQUÍ TU ENLACE CSV PUBLICADO DE GOOGLE SHEETS
     const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTw0-YOUR_SHEET_ID_HERE/pub?output=csv';
 
-    // 1. Obtener el ID desde la URL (?id=radiotaximet)
+    // Obtener ID de la URL (?id=radiotaximet)
     const urlParams = new URLSearchParams(window.location.search);
     const targetId = urlParams.get('id') || 'radiotaximet';
 
-    // Helper para parsear CSV correctamente contemplando comillas
+    // Función para procesar comillas en el CSV
     function parseCSVLine(text) {
       let p = '', c = '', r = [];
       let q = false;
@@ -296,7 +297,7 @@
       return r;
     }
 
-    // 2. Cargar datos de la planilla
+    // Cargar planilla
     async function loadAppData() {
       try {
         const response = await fetch(SHEET_CSV_URL);
@@ -328,19 +329,19 @@
       }
     }
 
-    // 3. Renderizar la app mapeando exactamente la planilla dada
+    // MAPEO EXACTO DE TU PLANILLA
     function renderApp(row) {
-      const nombreVisual = row[1] || 'RadioTaxi';            // Col B
-      const subtitulo = row[2] || 'Servicio Ejecutivo';       // Col C
-      const whatsappUrl = row[3] || '';                     // Col D
-      const iconUrl = row[14] || '';                        // Col O (Icono WebP)
+      const nombreVisual = row[1] || 'RadioTaxi';            // Col B (1)
+      const subtitulo = row[2] || 'Servicio Ejecutivo';       // Col C (2)
+      const whatsappUrl = row[3] || '';                     // Col D (3)
+      const iconUrl = row[14] || '';                        // Col O (14) - Icono WebP
 
-      // Actualizar Título y Subtítulo
+      // Actualizar Títulos
       document.getElementById('app-title').textContent = nombreVisual;
       document.getElementById('app-subtitle').textContent = subtitulo;
       document.title = nombreVisual;
 
-      // Actualizar Ícono superior y Favicon (Columna O)
+      // Actualizar Logo Superior e Ícono
       const logoImg = document.getElementById('header-app-logo');
       if (iconUrl) {
         logoImg.src = iconUrl;
@@ -350,18 +351,18 @@
         if (favicon) favicon.href = iconUrl;
       }
 
-      // Extraer imágenes del carrusel y sus descripciones (Columnas E, G, I, K, M -> 4, 6, 8, 10, 12)
+      // Carrusel (Imágenes en Col E, G, I, K, M -> Índices 4, 6, 8, 10, 12)
       const carouselData = [];
       const imgIndexes = [4, 6, 8, 10, 12];
       imgIndexes.forEach(idx => {
         const imgUrl = row[idx];
-        const desc = row[idx + 1] || ''; // Columna contigua de descripción
+        const desc = row[idx + 1] || ''; // Descripción en la columna contigua (F, H, J, L, N)
         if (imgUrl && imgUrl.startsWith('http')) {
           carouselData.push({ url: imgUrl, desc: desc });
         }
       });
 
-      // Extraer chóferes (Columnas P, Q, R, S, T, U -> índices 15, 17, 19)
+      // Choferes (Col P a U -> Índices 15, 17, 19 para nombre y 16, 18, 20 para teléfono)
       const drivers = [];
       const driverIndexes = [15, 17, 19];
       driverIndexes.forEach((idx, num) => {
@@ -398,7 +399,7 @@
         `;
       }
 
-      // Render Botón WhatsApp Central
+      // Render WhatsApp Central
       if (whatsappUrl) {
         let finalWa = whatsappUrl;
         if (!finalWa.startsWith('http')) {
@@ -411,7 +412,7 @@
         `;
       }
 
-      // Render Lista de Choferes
+      // Render Choferes
       html += `
         <div class="section-header">
           <div class="section-title">🚖 Selecciona un móvil para llamar:</div>
@@ -441,7 +442,7 @@
 
       mainContainer.innerHTML = html;
 
-      // Iniciar auto-play del carrusel
+      // Auto-play Carrusel
       if (carouselData.length > 1) {
         initCarousel(carouselData.length);
       }
