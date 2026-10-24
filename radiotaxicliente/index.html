@@ -1,1 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radiotaxi - Solicitar Móvil</title>
+    <!-- Estilos limpios y modernos estilo Uber -->
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .card {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 400px;
+        }
+        h2 {
+            margin-top: 0;
+            color: #111;
+            font-size: 22px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            box-sizing: border-box;
+            background: #fafafa;
+        }
+        input:focus, select:focus {
+            border-color: #000;
+            background: #fff;
+            outline: none;
+        }
+        .btn-pedir {
+            background-color: #000;
+            color: #fff;
+            border: none;
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        .btn-pedir:hover {
+            background-color: #333;
+        }
+        .status-msg {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
 
+    <div class="card">
+        <h2>🚗 Solicitar Radiotaxi</h2>
+        
+        <form id="formViaje" onsubmit="enviarSolicitud(event)">
+            <div class="form-group">
+                <label for="cliente">Tu Nombre</label>
+                <input type="text" id="cliente" required placeholder="Ej. Ana Pérez">
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">Teléfono / WhatsApp</label>
+                <input type="tel" id="telefono" required placeholder="Ej. +56987654321">
+            </div>
+
+            <div class="form-group">
+                <label for="origen">¿Dónde te buscamos? (Origen)</label>
+                <input type="text" id="origen" required placeholder="Ej. Arturo Prat 450">
+            </div>
+
+            <div class="form-group">
+                <label for="destino">¿A dónde vas? (Destino)</label>
+                <input type="text" id="destino" required placeholder="Ej. Terminal de Buses">
+            </div>
+
+            <div class="form-group">
+                <label for="movil">Seleccionar Móvil Disponible</label>
+                <select id="movil" required>
+                    <option value="">Cargando móviles libres...</option>
+                    <option value="Móvil 01">Móvil 01 (Libre)</option>
+                    <option value="Móvil 03">Móvil 03 (Libre)</option>
+                    <option value="Móvil 07">Móvil 07 (Libre)</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-pedir">Pedir Radiotaxi Ahora</button>
+        </form>
+
+        <div id="mensajeEstado" class="status-msg"></div>
+    </div>
+
+    <script>
+        function enviarSolicitud(event) {
+            event.preventDefault();
+            
+            const btn = document.querySelector('.btn-pedir');
+            const msg = document.getElementById('mensajeEstado');
+            
+            btn.disabled = true;
+            btn.textContent = "Enviando solicitud...";
+            msg.style.color = "#555";
+            msg.textContent = "Conectando con la central...";
+
+            // Datos que viajan a la planilla
+            const datosViaje = {
+                cliente: document.getElementById('cliente').value,
+                telefono: document.getElementById('telefono').value,
+                origen: document.getElementById('origen').value,
+                destino: document.getElementById('destino').value,
+                movil: document.getElementById('movil').value
+            };
+
+            // AQUÍ CONECTAREmos CON GOOGLE APPS SCRIPT (URL de tu Webhook)
+            // Por ahora simulamos la respuesta exitosa para validar la interfaz:
+            setTimeout(() => {
+                msg.style.color = "green";
+                msg.textContent = "¡Solicitud enviada con éxito! Tu móvil va en camino.";
+                btn.textContent = "¡Pedido en Curso!";
+                
+                // Limpiar formulario tras 3 segundos opcionalmente
+                // document.getElementById('formViaje').reset();
+            }, 1500);
+        }
+    </script>
+
+</body>
+</html>
