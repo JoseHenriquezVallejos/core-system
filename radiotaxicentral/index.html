@@ -42,12 +42,15 @@
 
 <script>
     // PEGA AQUÍ LA URL DE TU WEB APP DE GOOGLE APPS SCRIPT
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzjJA4UIRAarfrtTVo2WBpoHTlrKYtl2rLjWVzwszJBbud-UCwPt7eVx9NPrnV5xOeT/exec";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzjJA4UIRAarfrtTVo2WBpoHTlrKYtl2rLjWVzwszJBbud-UCwPt7eVx9NPrnV5xOeT/exec
+";
     let listaConductores = [];
+    let estaInteractuando = false; // Pausa el temporizador si estás eligiendo un chofer
 
     async function cargarDatos() {
+        if (estaInteractuando) return;
+
         const tbody = document.getElementById("tabla-pedidos");
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Actualizando...</td></tr>`;
         
         try {
             let response = await fetch(WEB_APP_URL);
@@ -56,6 +59,8 @@
             listaConductores = resJson.conductores || [];
             let pedidos = resJson.pedidos || [];
             
+            if (estaInteractuando) return;
+
             tbody.innerHTML = "";
             
             if (pedidos.length === 0) {
@@ -75,7 +80,7 @@
                     <td><span style="color: ${row.estado === 'Pendiente' ? 'orange' : 'green'}">${row.estado}</span></td>
                     <td>
                         ${row.estado === 'Pendiente' ? `
-                            <select id="conductor-${row.fila}">
+                            <select id="conductor-${row.fila}" onfocus="pausarActualizacion()" onblur="reanudarActualizacion()" onchange="reanudarActualizacion()">
                                 ${opcionesSelect}
                             </select>
                             <button class="btn-asignar" onclick="asignar(${row.fila})">Asignar</button>
@@ -85,13 +90,27 @@
                 tbody.appendChild(tr);
             });
         } catch (error) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Error al conectar con el servidor.</td></tr>`;
+            if (!estaInteractuando) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Error al conectar con el servidor.</td></tr>`;
+            }
         }
+    }
+
+    function pausarActualizacion() {
+        estaInteractuando = true;
+    }
+
+    function reanudarActualizacion() {
+        setTimeout(() => {
+            estaInteractuando = false;
+        }, 3000);
     }
 
     async function asignar(fila) {
         let select = document.getElementById(`conductor-${fila}`);
         let movilElegido = select.value;
+
+        estaInteractuando = true;
 
         let datos = {
             action: "asignar",
@@ -107,16 +126,18 @@
             let result = await response.json();
             if (result.result === "success") {
                 alert(`¡${movilElegido} asignado correctamente al viaje!`);
-                cargarDatos();
             } else {
                 alert("Hubo un error al asignar.");
             }
         } catch (error) {
             alert("Error de red.");
+        } finally {
+            estaInteractuando = false;
+            cargarDatos();
         }
     }
 
-    // Cargar al abrir la página y refrescar cada 15 segundos
+    // Cargar al abrir y refrescar cada 15 segundos en segundo plano de forma inteligente
     cargarDatos();
     setInterval(cargarDatos, 15000);
 </script>
