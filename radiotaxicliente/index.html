@@ -63,9 +63,8 @@
 
 <script>
     // PEGA AQUÍ TU MISMA URL DE GOOGLE APPS SCRIPT
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzjJA4UIRAarfrtTVo2WBpoHTlrKYtl2rLjWVzwszJBbud-UCwPt7eVx9NPrnV5xOeT/exec";
+    const WEB_APP_URL = "TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUI";
     
-    let filaGuardada = null;
     let timerSeguimiento = null;
 
     async function enviarPedido(event) {
@@ -95,16 +94,18 @@
             let res = await response.json();
 
             if (res.result === "success") {
-                // Bloquear inputs para que no los borre ni modifique mientras espera
+                // Bloquear inputs para que el usuario no borre sus datos
                 document.getElementById("cliente").disabled = true;
                 document.getElementById("telefono").disabled = true;
                 document.getElementById("origen").disabled = true;
                 document.getElementById("destino").disabled = true;
                 btn.style.display = "none";
 
-                // Mostrar la caja de estado "Buscando..."
+                // Mostrar la caja de estado con el número correlativo recibido del servidor
                 const statusBox = document.getElementById("statusBox");
                 statusBox.style.display = "block";
+                
+                document.getElementById("statusTextinnerHTML" in document.getElementById("statusText") ? "innerHTML" : "innerText") = `Pedido #${res.numeroPedido}: Buscando conductor...`;
 
                 // Iniciar la búsqueda en vivo del estado del viaje
                 iniciarSeguimiento(cliente, telefono);
@@ -121,7 +122,6 @@
     }
 
     function iniciarSeguimiento(cliente, telefono) {
-        // Consultar de inmediato y luego cada 8 segundos
         consultarEstado(cliente, telefono);
         timerSeguimiento = setInterval(() => {
             consultarEstado(cliente, telefono);
@@ -134,12 +134,17 @@
             let data = await response.json();
             let pedidos = data.pedidos || [];
 
-            // Buscar el pedido coincidente más reciente del cliente
-            let miPedido = pedidos.find(p => p.cliente === cliente && p.telefono === telefono);
+            // Limpiamos espacios y mayúsculas para asegurar una coincidencia exacta
+            let clienteBuscado = cliente.trim().toLowerCase();
+            let telefonoBuscado = telefono.trim();
+
+            let miPedido = pedidos.find(p => 
+                String(p.cliente).trim().toLowerCase() === clienteBuscado && 
+                String(p.telefono).trim() === telefonoBuscado
+            );
 
             if (miPedido) {
                 if (miPedido.estado === "Asignado") {
-                    // Detener el temporizador una vez asignado
                     clearInterval(timerSeguimiento);
 
                     const statusBox = document.getElementById("statusBox");
