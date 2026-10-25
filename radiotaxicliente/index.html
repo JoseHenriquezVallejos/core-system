@@ -3,159 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Radiotaxi - Solicitar Móvil</title>
-    <!-- Estilos limpios y modernos estilo Uber -->
+    <title>Pedir Radio Taxi</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f6f8;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .card {
-            background: #ffffff;
-            padding: 25px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            width: 100%;
-            max-width: 400px;
-        }
-        h2 {
-            margin-top: 0;
-            color: #111;
-            font-size: 22px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: #555;
-            margin-bottom: 5px;
-        }
-        input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 15px;
-            box-sizing: border-box;
-            background: #fafafa;
-        }
-        input:focus {
-            border-color: #000;
-            background: #fff;
-            outline: none;
-        }
-        .btn-pedir {
-            background-color: #000;
-            color: #fff;
-            border: none;
-            width: 100%;
-            padding: 14px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: background 0.2s;
-        }
-        .btn-pedir:hover {
-            background-color: #333;
-        }
-        .status-msg {
-            margin-top: 15px;
-            text-align: center;
-            font-size: 14px;
-            font-weight: 600;
-        }
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
+        .card { max-width: 450px; margin: auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; margin-top: 0; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 15px; }
+        input:disabled { background-color: #e9ecef; color: #495057; cursor: not-allowed; }
+        button { width: 100%; background: #007bff; color: white; border: none; padding: 12px; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        
+        /* Seccion de Estado del Viaje */
+        .status-box { display: none; margin-top: 20px; padding: 15px; border-radius: 8px; text-align: center; font-size: 16px; font-weight: bold; }
+        .status-pendiente { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .status-asignado { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .driver-info { margin-top: 10px; font-size: 18px; color: #0d531a; font-weight: bold; }
+        .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #856404; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite; vertical-align: middle; margin-right: 8px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h2>🚗 Solicitar Radiotaxi</h2>
+<div class="card">
+    <h2>🚕 Solicitar Radio Taxi</h2>
+    
+    <form id="taxiForm" onsubmit="enviarPedido(event)">
+        <div class="form-group">
+            <label>Nombre:</label>
+            <input type="text" id="cliente" required placeholder="Tu nombre">
+        </div>
         
-        <form id="formViaje" onsubmit="enviarSolicitud(event)">
-            <div class="form-group">
-                <label for="cliente">Tu Nombre</label>
-                <input type="text" id="cliente" required placeholder="Ej. Ana Pérez">
-            </div>
+        <div class="form-group">
+            <label>Teléfono WhatsApp:</label>
+            <input type="tel" id="telefono" required placeholder="Ej: 912345678">
+        </div>
 
-            <div class="form-group">
-                <label for="telefono">Teléfono / WhatsApp</label>
-                <input type="tel" id="telefono" required placeholder="Ej. +56987654321">
-            </div>
+        <div class="form-group">
+            <label>Origen (¿Dónde te buscamos?):</label>
+            <input type="text" id="origen" required placeholder="Ej: Plaza de armas">
+        </div>
 
-            <div class="form-group">
-                <label for="origen">¿Dónde te buscamos? (Origen)</label>
-                <input type="text" id="origen" required placeholder="Ej. Arturo Prat 450">
-            </div>
+        <div class="form-group">
+            <label>Destino (¿A dónde vas?):</label>
+            <input type="text" id="destino" required placeholder="Ej: Terminal de buses">
+        </div>
 
-            <div class="form-group">
-                <label for="destino">¿A dónde vas? (Destino)</label>
-                <input type="text" id="destino" required placeholder="Ej. Terminal de Buses">
-            </div>
+        <button type="submit" id="btnPedir">Pedir Taxi Ahora</button>
+    </form>
 
-            <button type="submit" class="btn-pedir">Pedir Radiotaxi Ahora</button>
-        </form>
-
-        <div id="mensajeEstado" class="status-msg"></div>
+    <!-- Caja de seguimiento en vivo -->
+    <div id="statusBox" class="status-box status-pendiente">
+        <span id="spinnerIcon" class="spinner"></span>
+        <span id="statusText">Buscando conductor asignado...</span>
+        <div id="driverDetail" class="driver-info"></div>
     </div>
+</div>
 
-    <script>
-        function enviarSolicitud(event) {
-            event.preventDefault();
-            
-            const btn = document.querySelector('.btn-pedir');
-            const msg = document.getElementById('mensajeEstado');
-            
-            btn.disabled = true;
-            btn.textContent = "Enviando solicitud...";
-            msg.style.color = "#555";
-            msg.textContent = "Conectando con la central...";
+<script>
+    // PEGA AQUÍ TU MISMA URL DE GOOGLE APPS SCRIPT
+    const WEB_APP_URL = "TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUI";
+    
+    let filaGuardada = null;
+    let timerSeguimiento = null;
 
-            // Datos que viajan a la planilla (sin el selector de móvil)
-            const datosViaje = {
-                cliente: document.getElementById('cliente').value,
-                telefono: document.getElementById('telefono').value,
-                origen: document.getElementById('origen').value,
-                destino: document.getElementById('destino').value,
-                movil: "Por asignar"
-            };
+    async function enviarPedido(event) {
+        event.preventDefault();
+        
+        const btn = document.getElementById("btnPedir");
+        btn.disabled = true;
+        btn.innerText = "Enviando solicitud...";
 
-            // URL DE TU WEBHOOK DE GOOGLE APPS SCRIPT
-            const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyCOtqssE_5j6QhV1NDYIUYqFffXeebK0MfD0sxRHf_jvkbP4wWSaGNmSQYh-9qIZ1h/exec";
+        const cliente = document.getElementById("cliente").value;
+        const telefono = document.getElementById("telefono").value;
+        const origen = document.getElementById("origen").value;
+        const destino = document.getElementById("destino").value;
 
-            fetch(WEBHOOK_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(datosViaje)
-            })
-            .then(() => {
-                msg.style.color = "green";
-                msg.textContent = "¡Solicitud enviada con éxito! La central ha recibido tu pedido.";
-                btn.textContent = "Pedir Radiotaxi Ahora";
-                btn.disabled = false;
-                document.getElementById('formViaje').reset();
-            })
-            .catch(error => {
-                msg.style.color = "red";
-                msg.textContent = "Error al conectar. Intenta nuevamente.";
-                btn.textContent = "Pedir Radiotaxi Ahora";
-                btn.disabled = false;
+        const datos = {
+            cliente: cliente,
+            telefono: telefono,
+            origen: origen,
+            destino: destino
+        };
+
+        try {
+            let response = await fetch(WEB_APP_URL, {
+                method: "POST",
+                body: JSON.stringify(datos)
             });
+            let res = await response.json();
+
+            if (res.result === "success") {
+                // Bloquear inputs para que no los borre ni modifique mientras espera
+                document.getElementById("cliente").disabled = true;
+                document.getElementById("telefono").disabled = true;
+                document.getElementById("origen").disabled = true;
+                document.getElementById("destino").disabled = true;
+                btn.style.display = "none";
+
+                // Mostrar la caja de estado "Buscando..."
+                const statusBox = document.getElementById("statusBox");
+                statusBox.style.display = "block";
+
+                // Iniciar la búsqueda en vivo del estado del viaje
+                iniciarSeguimiento(cliente, telefono);
+            } else {
+                alert("Ocurrió un error al enviar la solicitud.");
+                btn.disabled = false;
+                btn.innerText = "Pedir Taxi Ahora";
+            }
+        } catch (err) {
+            alert("Error de conexión. Intenta de nuevo.");
+            btn.disabled = false;
+            btn.innerText = "Pedir Taxi Ahora";
         }
-    </script>
+    }
+
+    function iniciarSeguimiento(cliente, telefono) {
+        // Consultar de inmediato y luego cada 8 segundos
+        consultarEstado(cliente, telefono);
+        timerSeguimiento = setInterval(() => {
+            consultarEstado(cliente, telefono);
+        }, 8000);
+    }
+
+    async function consultarEstado(cliente, telefono) {
+        try {
+            let response = await fetch(WEB_APP_URL);
+            let data = await response.json();
+            let pedidos = data.pedidos || [];
+
+            // Buscar el pedido coincidente más reciente del cliente
+            let miPedido = pedidos.find(p => p.cliente === cliente && p.telefono === telefono);
+
+            if (miPedido) {
+                if (miPedido.estado === "Asignado") {
+                    // Detener el temporizador una vez asignado
+                    clearInterval(timerSeguimiento);
+
+                    const statusBox = document.getElementById("statusBox");
+                    statusBox.className = "status-box status-asignado";
+                    
+                    document.getElementById("spinnerIcon").style.display = "none";
+                    document.getElementById("statusText").innerText = "¡Conductor en camino! 🚖";
+                    document.getElementById("driverDetail").innerHTML = `Tu móvil asignado es: <br><b>${miPedido.movilElegido}</b>`;
+                }
+            }
+        } catch (e) {
+            console.log("Error buscando estado del viaje:", e);
+        }
+    }
+</script>
 
 </body>
 </html>
