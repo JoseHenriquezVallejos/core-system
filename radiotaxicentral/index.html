@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Central - Radiotaxis</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 20px; }
+        h2 { color: #333; text-align: center; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; font-size: 14px; }
+        th { background: #007bff; color: white; }
+        .btn-asignar { background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+        .btn-asignar:hover { background: #218838; }
+        select { padding: 5px; border-radius: 4px; border: 1px solid #ccc; }
+        .refresh-btn { background: #17a2b8; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🚖 Panel de Control - Central de Taxis</h2>
+    <button class="refresh-btn" onclick="cargarPedidos()">🔄 Actualizar Pedidos</button>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Hora</th>
+                <th>Cliente</th>
+                <th>Teléfono</th>
+                <th>Origen -> Destino</th>
+                <th>Estado</th>
+                <th>Asignar Móvil</th>
+            </tr>
+        <span id="loading"></span>
+        </thead>
+        <tbody id="tabla-pedidos">
+            <tr><td colspan="6" style="text-align:center;">Cargando pedidos...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // PEGA AQUÍ LA URL DE TU WEB APP DE GOOGLE APPS SCRIPT
+    const WEB_APP_URL = "TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUI";
+
+    async function cargarPedidos() {
+        const tbody = document.getElementById("tabla-pedidos");
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Actualizando...</td></tr>`;
+        
+        try {
+            let response = await fetch(WEB_APP_URL);
+            let data = await response.json();
+            
+            tbody.innerHTML = "";
+            
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No hay pedidos registrados.</td></tr>`;
+                return;
+            }
+
+            data.reverse().forEach(row => {
+                let tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${row.fechaHora.split(" ")[1] || row.fechaHora}</td>
+                    <td><b>${row.cliente}</b></td>
+                    <td><a href="https://wa.me/56${row.telefono}" target="_blank">${row.telefono}</a></td>
+                    <td>${row.origen} ➔ ${row.destino}</td>
+                    <td><span style="color: ${row.estado === 'Pendiente' ? 'orange' : 'green'}">${row.estado}</span></td>
+                    <td>
+                        ${row.estado === 'Pendiente' ? `
+                            <select id="movil-${row.fila}">
+                                <option value="Móvil 1">Móvil 1</option>
+                                <option value="Móvil 2">Móvil 2</option>
+                                <option value="Móvil 3">Móvil 3</option>
+                                <option value="Móvil 4">Móvil 4</option>
+                            </select>
+                            <button class="btn-asignar" onclick="asignarMovil(${row.fila})">Asignar</button>
+                        ` : `<b>${row.movilElegido}</b>`}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } catch (error) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Error al cargar datos.</td></tr>`;
+        }
+    }
+
+    async function asignarMovil(fila) {
+        let select = document.getElementById(`movil-${fila}`);
+        let movilElegido = select.value;
+
+        let datos = {
+            action: "asignar",
+            fila: fila,
+            movilElegido: movilElegido
+        };
+
+        try {
+            let response = await fetch(WEB_APP_URL, {
+                method: "POST",
+                body: JSON.stringify(datos)
+            });
+            let result = await response.json();
+            if (result.result === "success") {
+                alert(`¡${movilElegido} asignado con éxito!`);
+                cargarPedidos(); // Recargar la tabla
+            } else {
+                alert("Error al asignar el móvil.");
+            }
+        } catch (error) {
+            alert("Error de conexión con el servidor.");
+        }
+    }
+
+    // Cargar automáticamente al abrir la página
+    cargarPedidos();
+</script>
+
+</body>
+</html>
