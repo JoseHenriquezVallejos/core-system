@@ -41,7 +41,7 @@
             color: #555;
             margin-bottom: 5px;
         }
-        input, select {
+        input {
             width: 100%;
             padding: 12px;
             border: 1px solid #ddd;
@@ -50,7 +50,7 @@
             box-sizing: border-box;
             background: #fafafa;
         }
-        input:focus, select:focus {
+        input:focus {
             border-color: #000;
             background: #fff;
             outline: none;
@@ -105,16 +105,6 @@
                 <input type="text" id="destino" required placeholder="Ej. Terminal de Buses">
             </div>
 
-            <div class="form-group">
-                <label for="movil">Seleccionar Móvil Disponible</label>
-                <select id="movil" required>
-                    <option value="">Cargando móviles libres...</option>
-                    <option value="Móvil 01">Móvil 01 (Libre)</option>
-                    <option value="Móvil 03">Móvil 03 (Libre)</option>
-                    <option value="Móvil 07">Móvil 07 (Libre)</option>
-                </select>
-            </div>
-
             <button type="submit" class="btn-pedir">Pedir Radiotaxi Ahora</button>
         </form>
 
@@ -133,25 +123,37 @@
             msg.style.color = "#555";
             msg.textContent = "Conectando con la central...";
 
-            // Datos que viajan a la planilla
+            // Datos que viajan a la planilla (sin el selector de móvil)
             const datosViaje = {
                 cliente: document.getElementById('cliente').value,
                 telefono: document.getElementById('telefono').value,
                 origen: document.getElementById('origen').value,
                 destino: document.getElementById('destino').value,
-                movil: document.getElementById('movil').value
+                movil: "Por asignar"
             };
 
-            // AQUÍ CONECTAREmos CON GOOGLE APPS SCRIPT (URL de tu Webhook)
-            // Por ahora simulamos la respuesta exitosa para validar la interfaz:
-            setTimeout(() => {
+            // URL DE TU WEBHOOK DE GOOGLE APPS SCRIPT
+            const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbvCOtqssE_5j6QhV1NDYIUYqFffXeebK0MfD0sxRHf_jvkbP4wWSAgNmSQYh-9q/exec";
+
+            fetch(WEBHOOK_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datosViaje)
+            })
+            .then(() => {
                 msg.style.color = "green";
-                msg.textContent = "¡Solicitud enviada con éxito! Tu móvil va en camino.";
-                btn.textContent = "¡Pedido en Curso!";
-                
-                // Limpiar formulario tras 3 segundos opcionalmente
-                // document.getElementById('formViaje').reset();
-            }, 1500);
+                msg.textContent = "¡Solicitud enviada con éxito! La central ha recibido tu pedido.";
+                btn.textContent = "Pedir Radiotaxi Ahora";
+                btn.disabled = false;
+                document.getElementById('formViaje').reset();
+            })
+            .catch(error => {
+                msg.style.color = "red";
+                msg.textContent = "Error al conectar. Intenta nuevamente.";
+                btn.textContent = "Pedir Radiotaxi Ahora";
+                btn.disabled = false;
+            });
         }
     </script>
 
