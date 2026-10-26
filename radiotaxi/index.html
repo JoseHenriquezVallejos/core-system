@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Control - Central de Taxis</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .animate-spin-fast { animation: spin 0.6s linear infinite; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen pb-12">
+
+  <!-- Header principal -->
+  <header class="bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 text-white shadow-lg py-5 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <span class="text-3xl">馃殨</span>
+        <div>
+          <h1 class="text-2xl font-bold tracking-tight">Panel de Control - Central de Taxis</h1>
+          <p class="text-blue-200 text-xs sm:text-sm">Gesti贸n Operativa FIFO en Tiempo Real | Multi-L铆nea SaaS</p>
+        </div>
+      </div>
+      
+      <!-- Controles Superiores -->
+      <div class="flex items-center gap-3 w-full md:w-auto">
+        <div class="bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/20 text-xs text-white">
+          <span class="opacity-75">Servidor:</span> <strong id="server-status" class="text-emerald-300">Modo Demo / Conectado</strong>
+        </div>
+        <button onclick="toggleModalCodigo()" class="bg-indigo-900/60 hover:bg-indigo-900 text-white text-xs px-3 py-2 rounded-lg border border-indigo-400/40 flex items-center gap-1.5 transition">
+          <i data-lucide="code-2" class="w-4 h-4"></i> C贸digo Backend (Apps Script)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 mt-8">
+
+    <!-- Configuraci贸n e Integraci贸n Backend -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 mb-6">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        
+        <!-- Selector de L铆nea -->
+        <div class="flex items-center gap-3 w-full md:w-auto">
+          <label for="selectLinea" class="font-semibold text-slate-700 text-sm whitespace-nowrap flex items-center gap-1.5">
+            <i data-lucide="building-2" class="w-4 h-4 text-blue-600"></i> L铆nea Activa:
+          </label>
+          <select id="selectLinea" onchange="cambiarLinea()" class="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 font-medium">
+            <option value="radiotaximetro">RadioTaxi Metro</option>
+            <option value="colectivolinea1">Colectivos L铆nea 1</option>
+            <option value="taxisejecutivos">Taxis Ejecutivos Centro</option>
+          </select>
+        </div>
+
+        <!-- URL Endpoint Apps Script (Integraci贸n Web Externa) -->
+        <div class="flex-1 w-full max-w-xl">
+          <div class="flex items-center gap-2">
+            <input type="text" id="apiUrlInput" placeholder="URL Web App de Apps Script (ej: https://script.google.com/macros/s/.../exec)" 
+              class="w-full text-xs p-2.5 border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+            <button onclick="guardarEndpoint()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs px-3 py-2.5 rounded-lg whitespace-nowrap transition">
+              Conectar API
+            </button>
+          </div>
+        </div>
+
+        <!-- Bot贸n Actualizar -->
+        <button onclick="actualizarTodo()" id="btnActualizar" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-4 py-2.5 rounded-lg shadow-sm flex items-center justify-center gap-2 transition active:scale-95">
+          <i data-lucide="rotate-cw" id="iconRefresh" class="w-4 h-4"></i>
+          <span>Actualizar Panel</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Pizarra de Cola FIFO en Vivo de Conductor Libres -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      
+      <!-- Monitor de Cola FIFO Horizontal -->
+      <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <div class="flex justify-between items-center mb-4 border-b pb-3">
+          <div>
+            <h2 class="font-bold text-slate-800 text-base flex items-center gap-2">
+              <i data-lucide="users" class="w-5 h-5 text-blue-600"></i>
+              Cola FIFO en Vivo (Planilla Horizontales)
+            </h2>
+            <p class="text-xs text-slate-500">M贸viles le铆dos secuencialmente desde la fila de configuraci贸n (<code class="bg-slate-100 px-1 py-0.5 rounded">b1</code>, <code class="bg-slate-100 px-1 py-0.5 rounded">b2</code>, etc.)</p>
+          </div>
+          <span id="badge-libres-count" class="bg-emerald-100 text-emerald-800 text-xs font-semibold px-2.5 py-1 rounded-full">
+            4 M贸viles Libres
+          </span>
+        </div>
+
+        <!-- Visualizaci贸n de Conductores -->
+        <div id="contenedor-conductores" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+          <!-- Cargado din谩micamente -->
+        </div>
+      </div>
+
+      <!-- Formulario para Simular Nuevo Pedido de Cliente -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2 border-b pb-2">
+          <i data-lucide="user-plus" class="w-4 h-4 text-emerald-600"></i>
+          Simular / Registrar Servicio Nuevo
+        </h3>
+        <form id="formNuevoPedido" onsubmit="agregarPedido(event)" class="space-y-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Nombre Pasajero</label>
+            <input type="text" id="clienteNombre" required placeholder="Ej: Jos茅 Henriquez" class="w-full text-xs p-2 border rounded-md">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Tel茅fono</label>
+            <input type="tel" id="clienteTelefono" required placeholder="+56963128383" class="w-full text-xs p-2 border rounded-md">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Origen 鈫?Destino</label>
+            <input type="text" id="clienteRuta" required placeholder="Plaza de Armas 鈫?Terminal" class="w-full text-xs p-2 border rounded-md">
+          </div>
+          <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold py-2.5 rounded-md transition shadow-sm">
+            + Recibir Carrera / Pedido
+          </button>
+        </form>
+      </div>
+
+    </div>
+
+    <!-- Tabla de Solicitudes y Asignaci贸n de Taxis -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
+        <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+          <i data-lucide="list-todo" class="w-5 h-5 text-indigo-600"></i>
+          Solicitudes Activas de Viaje
+        </h3>
+        <span class="text-xs text-slate-500">Haz clic en <strong>Asignar</strong> para enganchar al m贸vil libre de la cola.</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-slate-700">
+          <thead class="bg-blue-600 text-white text-xs uppercase font-semibold">
+            <tr>
+              <th class="py-3.5 px-4">Hora</th>
+              <th class="py-3.5 px-4">Cliente</th>
+              <th class="py-3.5 px-4">Tel茅fono</th>
+              <th class="py-3.5 px-4">Origen 鈫?Destino</th>
+              <th class="py-3.5 px-4">Estado</th>
+              <th class="py-3.5 px-4">Asignar Conductor (Solo Libres)</th>
+              <th class="py-3.5 px-4 text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-pedidos" class="divide-y divide-slate-200">
+            <!-- Filas din谩micas -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Modal para Visualizar / Copiar Backend Apps Script (Code.gs) -->
+  <div id="modalCodigo" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="bg-slate-800 text-white px-6 py-4 flex justify-between items-center">
+        <h3 class="font-bold text-lg flex items-center gap-2">
+          <i data-lucide="file-code" class="w-5 h-5 text-indigo-400"></i>
+          C贸digo backend de Google Apps Script (Code.gs)
+        </h3>
+        <button onclick="toggleModalCodigo()" class="text-slate-400 hover:text-white text-xl">&times;</button>
+      </div>
+      <div class="p-6 overflow-y-auto space-y-4">
+        <p class="text-xs text-slate-600">
+          Copia este c贸digo en tu editor de Google Apps Script (<code class="bg-slate-100 px-1 py-0.5 rounded">Extensiones > Apps Script</code>) y despliegalo como <strong>Aplicaci贸n Web</strong> con acceso <em>"Cualquier persona" (Anyone)</em> para conectar tu servidor externo.
+        </p>
+        <div class="relative">
+          <button onclick="copiarCodigoScript()" class="absolute top-3 right-3 bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded shadow">
+            Copiar C贸digo
+          </button>
+          <pre id="codigoAppsScript" class="bg-slate-900 text-slate-100 text-xs p-4 rounded-xl font-mono overflow-x-auto max-h-96">
+// ===================================================
+// BACKEND APPS SCRIPT - PAN脡L CENTRAL TAXIS FIFO
+// ===================================================
+
+function doGet(e) {
+  var action = e.parameter.action;
+  var idLinea = e.parameter.idLinea || "radiotaximetro";
+  
+  if (action === "getLibres") {
+    var libres = obtenerConductoresLibres(idLinea);
+    return ContentService.createTextOutput(JSON.stringify(libres))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify({ status: "OK", message: "API activa" }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    if (data.action === "asignar") {
+      var resultado = cambiarEstadoConductor(data.idLinea, data.conductorNombre, "OCUPADO");
+      return ContentService.createTextOutput(JSON.stringify(resultado))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({ exito: false, error: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// Obtiene 煤nicamente los m贸viles con estado LIBRE
+function obtenerConductoresLibres(idLinea) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Configuracion");
+  var data = sheet.getDataRange().getValues();
+  var headers = data[0];
+  var libres = [];
+
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0] === idLinea) {
+      // Bloques arrancan en F (col 5): b1 desc, b1 link, b1 estado...
+      for (var col = 5; col < headers.length; col += 3) {
+        var nombre = data[i][col];
+        var telefono = data[i][col+1];
+        var estado = data[i][col+2];
+
+        if (nombre && estado === "LIBRE") {
+          libres.push({
+            nombre: nombre,
+            telefono: telefono,
+            bloque: headers[col].substring(0, 2)
+          });
+        }
+      }
+      break;
+    }
+  }
+  return libres;
+}
+
+// Modifica el estado en la celda correspondiente
+function cambiarEstadoConductor(idLinea, conductorNombre, nuevoEstado) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Configuracion");
+  var data = sheet.getDataRange().getValues();
+  var headers = data[0];
+
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0] === idLinea) {
+      for (var col = 5; col < headers.length; col += 3) {
+        if (data[i][col] === conductorNombre) {
+          // La columna de estado es col + 2
+          sheet.getRange(i + 1, col + 3).setValue(nuevoEstado);
+          return { exito: true, conductor: conductorNombre, estado: nuevoEstado };
+        }
+      }
+    }
+  }
+  return { exito: false, mensaje: "Conductor no encontrado" };
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ESTADO INICIAL / DATOS MOCK SIMULADOS (Para pruebas inmediatas sin backend)
+    let apiEndpointUrl = localStorage.getItem('central_taxis_api') || '';
+    
+    // Simulaci贸n de la hoja de c谩lculo horizontal en Google Sheets
+    let conductoresMemoria = [
+      { idBloque: 'b1', nombre: 'Carlos P茅rez', telefono: '56987654321', estado: 'LIBRE' },
+      { idBloque: 'b2', nombre: 'Juan Soto', telefono: '56991234567', estado: 'OCUPADO' },
+      { idBloque: 'b3', nombre: 'Luis Morales', telefono: '56978901234', estado: 'LIBRE' },
+      { idBloque: 'b4', nombre: 'Jorge Morales', telefono: '56978901235', estado: 'LIBRE' },
+      { idBloque: 'b5', nombre: 'V铆ctor Manr铆quez', telefono: '56978901236', estado: 'LIBRE' },
+      { idBloque: 'b6', nombre: 'Luis Henriquez', telefono: '56978901237', estado: 'OCUPADO' }
+    ];
+
+    let pedidosMemoria = [
+      {
+        id: 1,
+        hora: '4:16:55',
+        cliente: 'Jose Joel Henriquez',
+        telefono: '963128383',
+        origenDestino: 'Plaza de armas 鈫?Terminal buses',
+        estado: 'Pendiente',
+        conductorAsignado: ''
+      }
+    ];
+
+    window.onload = function() {
+      lucide.createIcons();
+      document.getElementById('apiUrlInput').value = apiEndpointUrl;
+      renderizarTodo();
+    };
+
+    function renderizarTodo() {
+      renderizarMovilesCola();
+      renderizarTablaPedidos();
+    }
+
+    // Renderiza la cola FIFO de m贸viles libres/ocupados
+    function renderizarMovilesCola() {
+      const contenedor = document.getElementById('contenedor-conductores');
+      const badgeCount = document.getElementById('badge-libres-count');
+      contenedor.innerHTML = '';
+
+      const libres = conductoresMemoria.filter(c => c.estado === 'LIBRE');
+      badgeCount.textContent = `${libres.length} M贸viles Libres`;
+
+      conductoresMemoria.forEach((c, index) => {
+        const esLibre = c.estado === 'LIBRE';
+        const card = document.createElement('div');
+        card.className = `p-3 rounded-lg border text-center transition flex flex-col justify-between ${
+          esLibre ? 'bg-emerald-50/60 border-emerald-300 text-emerald-900' : 'bg-slate-50 border-slate-200 text-slate-400 opacity-60'
+        }`;
+        
+        card.innerHTML = `
+          <div>
+            <div class="text-[10px] uppercase tracking-wider font-bold mb-1 ${esLibre ? 'text-emerald-700' : 'text-slate-400'}">
+              Turno ${c.idBloque.toUpperCase()}
+            </div>
+            <div class="font-bold text-xs truncate" title="${c.nombre}">${c.nombre}</div>
+          </div>
+          <div class="mt-2 flex items-center justify-between text-[11px]">
+            <span class="font-semibold ${esLibre ? 'text-emerald-600' : 'text-slate-400'}">${c.estado}</span>
+            <button onclick="toggleEstado('${c.nombre}')" class="text-[10px] underline text-slate-500 hover:text-blue-600">
+              Cambiar
+            </button>
+          </div>
+        `;
+        contenedor.appendChild(card);
+      });
+    }
+
+    // Renderiza la tabla de pedidos y llena 煤nicamente los conductores LIBRES en el select
+    function renderizarTablaPedidos() {
+      const tbody = document.getElementById('tabla-pedidos');
+      tbody.innerHTML = '';
+
+      const conductoresLibres = conductoresMemoria.filter(c => c.estado === 'LIBRE');
+
+      if (pedidosMemoria.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-slate-400 text-xs">No hay pedidos registrados en este momento.</td></tr>`;
+        return;
+      }
+
+      pedidosMemoria.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50/80 transition';
+
+        // Opciones desplegables compuestas SOLO por choferes LIBRES
+        let optionsHtml = '';
+        if (conductoresLibres.length === 0) {
+          optionsHtml = `<option value="" disabled selected>No hay m贸viles libres</option>`;
+        } else {
+          optionsHtml = `<option value="">-- Seleccionar M贸vil Libre --</option>` + 
+            conductoresLibres.map(c => `<option value="${c.nombre}">${c.nombre} (LIBRE)</option>`).join('');
+        }
+
+        const badgeEstado = p.estado === 'Pendiente' 
+          ? `<span class="bg-amber-100 text-amber-800 text-xs font-semibold px-2.5 py-1 rounded-full">Pendiente</span>`
+          : `<span class="bg-emerald-100 text-emerald-800 text-xs font-semibold px-2.5 py-1 rounded-full">Asignado: ${p.conductorAsignado}</span>`;
+
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-medium text-xs whitespace-nowrap">${p.hora}</td>
+          <td class="py-3 px-4 font-bold text-slate-800 text-xs">${p.cliente}</td>
+          <td class="py-3 px-4 text-xs">
+            <a href="tel:${p.telefono}" class="text-blue-600 hover:underline font-semibold flex items-center gap-1">
+              <i data-lucide="phone" class="w-3 h-3"></i> ${p.telefono}
+            </a>
+          </td>
+          <td class="py-3 px-4 text-xs font-medium text-slate-600">${p.origenDestino}</td>
+          <td class="py-3 px-4 whitespace-nowrap">${badgeEstado}</td>
+          <td class="py-3 px-4 whitespace-nowrap">
+            ${p.estado === 'Pendiente' ? `
+              <select id="selectConductor-${p.id}" class="text-xs p-1.5 border border-slate-300 rounded-md bg-white focus:ring-2 focus:ring-blue-500 outline-none w-48 font-medium">
+                ${optionsHtml}
+              </select>
+            ` : `<span class="text-xs text-slate-500 font-medium">鉁?Conductor en camino</span>`}
+          </td>
+          <td class="py-3 px-4 text-center whitespace-nowrap">
+            ${p.estado === 'Pendiente' ? `
+              <button onclick="asignarMovil(${p.id})" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-md shadow-sm transition active:scale-95 inline-flex items-center gap-1">
+                <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Asignar
+              </button>
+            ` : `
+              <button onclick="notificarWhatsapp('${p.telefono}', '${p.conductorAsignado}')" class="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-300 text-xs font-medium px-2.5 py-1 rounded-md transition inline-flex items-center gap-1">
+                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> Notificar
+              </button>
+            `}
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+
+      lucide.createIcons();
+    }
+
+    // Acci贸n de Asignar el conductor al pedido
+    function asignarMovil(idPedido) {
+      const select = document.getElementById(`selectConductor-${idPedido}`);
+      const nombreConductor = select ? select.value : '';
+
+      if (!nombreConductor) {
+        mostrarNotificacion("Por favor selecciona un conductor de la lista de disponibles.", "warning");
+        return;
+      }
+
+      // 1. Cambiar estado del chofer en la cola a OCUPADO
+      const conductor = conductoresMemoria.find(c => c.nombre === nombreConductor);
+      if (conductor) {
+        conductor.estado = 'OCUPADO';
+      }
+
+      // 2. Actualizar el pedido
+      const pedido = pedidosMemoria.find(p => p.id === idPedido);
+      if (pedido) {
+        pedido.estado = 'Asignado';
+        pedido.conductorAsignado = nombreConductor;
+      }
+
+      // 3. Si hay URL de API activa, enviar la actualizaci贸n a Google Sheets
+      if (apiEndpointUrl) {
+        fetch(apiEndpointUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'asignar', conductorNombre: nombreConductor, idLinea: document.getElementById('selectLinea').value })
+        });
+      }
+
+      mostrarNotificacion(`隆Viaje asignado con 茅xito a ${nombreConductor}! Pasa a estado OCUPADO.`, "success");
+      renderizarTodo();
+    }
+
+    // Toggle r谩pido de estado para pruebas manuales
+    function toggleEstado(nombre) {
+      const cond = conductoresMemoria.find(c => c.nombre === nombre);
+      if (cond) {
+        cond.estado = cond.estado === 'LIBRE' ? 'OCUPADO' : 'LIBRE';
+        renderizarTodo();
+      }
+    }
+
+    // Agregar un pedido simulado
+    function agregarPedido(e) {
+      e.preventDefault();
+      const nombre = document.getElementById('clienteNombre').value;
+      const tel = document.getElementById('clienteTelefono').value;
+      const ruta = document.getElementById('clienteRuta').value;
+
+      const nuevoId = Date.now();
+      const horaActual = new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+      pedidosMemoria.unshift({
+        id: nuevoId,
+        hora: horaActual,
+        cliente: nombre,
+        telefono: tel,
+        origenDestino: ruta,
+        estado: 'Pendiente',
+        conductorAsignado: ''
+      });
+
+      document.getElementById('formNuevoPedido').reset();
+      mostrarNotificacion("Nuevo pedido de cliente registrado en la central.", "info");
+      renderizarTodo();
+    }
+
+    function cambiarLinea() {
+      mostrarNotificacion(`Cargando disponibilidad de ${document.getElementById('selectLinea').selectedOptions[0].text}...`, "info");
+      renderizarTodo();
+    }
+
+    function actualizarTodo() {
+      const icon = document.getElementById('iconRefresh');
+      icon.classList.add('animate-spin-fast');
+      setTimeout(() => {
+        icon.classList.remove('animate-spin-fast');
+        renderizarTodo();
+        mostrarNotificacion("Panel actualizado con la planilla.", "success");
+      }, 500);
+    }
+
+    function guardarEndpoint() {
+      const input = document.getElementById('apiUrlInput').value.trim();
+      apiEndpointUrl = input;
+      localStorage.setItem('central_taxis_api', input);
+      document.getElementById('server-status').textContent = input ? "Conectado a Google Sheets" : "Modo Demo / Local";
+      mostrarNotificacion(input ? "URL de Apps Script conectada correctamente." : "Modo local activado.", "success");
+    }
+
+    function notificarWhatsapp(telefono, conductor) {
+      const msg = encodeURIComponent(`Hola, su taxi con el conductor ${conductor} ha sido asignado y va en camino.`);
+      window.open(`https://wa.me/${telefono}?text=${msg}`, '_blank');
+    }
+
+    function toggleModalCodigo() {
+      document.getElementById('modalCodigo').classList.toggle('hidden');
+    }
+
+    function copiarCodigoScript() {
+      const code = document.getElementById('codigoAppsScript').innerText;
+      const temp = document.createElement('textarea');
+      temp.value = code;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      document.body.removeChild(temp);
+      mostrarNotificacion("C贸digo backend copiado al portapapeles.", "success");
+    }
+
+    function mostrarNotificacion(mensaje, tipo = 'info') {
+      const banner = document.createElement('div');
+      const colores = {
+        success: 'bg-emerald-600 text-white',
+        warning: 'bg-amber-600 text-white',
+        info: 'bg-slate-800 text-white'
+      };
+      banner.className = `fixed bottom-4 right-4 ${colores[tipo]} text-xs font-semibold px-4 py-3 rounded-xl shadow-xl z-50 transition transform translate-y-2 opacity-0`;
+      banner.textContent = mensaje;
+      document.body.appendChild(banner);
+
+      setTimeout(() => {
+        banner.classList.remove('translate-y-2', 'opacity-0');
+      }, 50);
+
+      setTimeout(() => {
+        banner.classList.add('opacity-0');
+        setTimeout(() => banner.remove(), 300);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
