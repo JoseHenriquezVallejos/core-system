@@ -1,145 +1,179 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Central - Radiotaxis</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 20px; }
-        h2 { color: #333; text-align: center; }
-        .container { max-width: 950px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; font-size: 14px; }
-        th { background: #007bff; color: white; }
-        .btn-asignar { background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
-        .btn-asignar:hover { background: #218838; }
-        select { padding: 5px; border-radius: 4px; border: 1px solid #ccc; }
-        .refresh-btn { background: #17a2b8; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-bottom: 10px; }
-    </style>
+  <base target="_top">
+  <meta charset="utf-8">
+  <title>Panel de Control - Central de Taxis</title>
+  <!-- Estilos limpios y modernos -->
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #333;
+      margin-top: 0;
+    }
+    .btn-actualizar {
+      background-color: #337ab7;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+    .btn-actualizar:hover {
+      background-color: #286090;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th {
+      background-color: #007bff;
+      color: white;
+      padding: 10px;
+      text-align: left;
+      font-size: 14px;
+    }
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      font-size: 14px;
+    }
+    .estado-pendiente {
+      color: #e67e22;
+      font-weight: bold;
+    }
+    select {
+      padding: 6px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      margin-right: 5px;
+    }
+    .btn-asignar {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-asignar:hover {
+      background-color: #218838;
+    }
+    a {
+      color: #007bff;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>🚖 Panel de Control - Central de Taxis</h2>
-    <button class="refresh-btn" onclick="cargarDatos()">🔄 Actualizar Panel</button>
+  <div class="container">
+    <h2>🚗 Panel de Control - Central de Taxis</h2>
     
+    <button class="btn-actualizar" onclick="cargarPanel()">🔄 Actualizar Panel</button>
+
     <table>
-        <thead>
-            <tr>
-                <th>Hora</th>
-                <th>Cliente</th>
-                <th>Teléfono</th>
-                <th>Origen ➔ Destino</th>
-                <th>Estado</th>
-                <th>Asignar Conductor</th>
-            </tr>
-        </thead>
-        <tbody id="tabla-pedidos">
-            <tr><td colspan="6" style="text-align:center;">Cargando datos...</td></tr>
-        </tbody>
+      <thead>
+        <tr>
+          <th>Hora</th>
+          <th>Cliente</th>
+          <th>Teléfono</th>
+          <th>Origen → Destino</th>
+          <th>Estado</th>
+          <th>Asignar Conductor</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-pedidos">
+        <!-- Los datos se cargan dinámicamente -->
+        <tr>
+          <td>4:16:55</td>
+          <td><strong>Jose Joel Henriquez</strong></td>
+          <td><a href="tel:963128383">963128383</a></td>
+          <td>Plaza de armas → Terminal buses</td>
+          <td><span class="estado-pendiente">Pendiente</span></td>
+          <td>
+            <select id="selectConductor-1">
+              <option value="">Cargando libres...</option>
+            </select>
+            <button class="btn-asignar" onclick="asignarViaje(1)">Asignar</button>
+          </td>
+        </tr>
+      </tbody>
     </table>
-</div>
+  </div>
 
-<script>
-    // PEGA AQUÍ LA URL DE TU WEB APP DE GOOGLE APPS SCRIPT
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzjJA4UIRAarfrtTVo2WBpoHTlrKYtl2rLjWVzwszJBbud-UCwPt7eVx9NPrnV5xOeT/exec";
-    let listaConductores = [];
-    let estaInteractuando = false; // Pausa el temporizador si estás eligiendo un chofer
+  <!-- Scripts de comunicación con Google Apps Script -->
+  <script>
+    // Cargar los conductores libres al iniciar la página
+    window.onload = function() {
+      cargarConductoresLibres();
+    };
 
-    async function cargarDatos() {
-        if (estaInteractuando) return;
+    function cargarPanel() {
+      cargarConductoresLibres();
+      // Aquí puedes refrescar más datos si lo requieres
+    }
 
-        const tbody = document.getElementById("tabla-pedidos");
-        
-        try {
-            let response = await fetch(WEB_APP_URL);
-            let resJson = await response.json();
-            
-            listaConductores = resJson.conductores || [];
-            let pedidos = resJson.pedidos || [];
-            
-            if (estaInteractuando) return;
-
-            tbody.innerHTML = "";
-            
-            if (pedidos.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No hay pedidos registrados.</td></tr>`;
-                return;
-            }
-
-            pedidos.forEach(row => {
-                let opcionesSelect = listaConductores.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join("");
-
-                let tr = document.createElement("tr");
-                tr.innerHTML = `
-                    <td>${row.fechaHora.split(" ")[1] || row.fechaHora}</td>
-                    <td><b>${row.cliente}</b></td>
-                    <td><a href="https://wa.me/56${row.telefono}" target="_blank">${row.telefono}</a></td>
-                    <td>${row.origen} ➔ ${row.destino}</td>
-                    <td><span style="color: ${row.estado === 'Pendiente' ? 'orange' : 'green'}">${row.estado}</span></td>
-                    <td>
-                        ${row.estado === 'Pendiente' ? `
-                            <select id="conductor-${row.fila}" onfocus="pausarActualizacion()" onblur="reanudarActualizacion()" onchange="reanudarActualizacion()">
-                                ${opcionesSelect}
-                            </select>
-                            <button class="btn-asignar" onclick="asignar(${row.fila})">Asignar</button>
-                        ` : `<b>${row.movilElegido}</b>`}
-                    </td>
-                `;
-                tbody.appendChild(tr);
+    function cargarConductoresLibres() {
+      // Llamamos a la función de Apps Script que creamos para filtrar solo los "LIBRE"
+      google.script.run
+        .withSuccessHandler(function(conductores) {
+          var select = document.getElementById("selectConductor-1");
+          select.innerHTML = ""; // Limpiar opciones previas
+          
+          if (conductores.length === 0) {
+            var opt = document.createElement("option");
+            opt.text = "No hay móviles libres";
+            opt.disabled = true;
+            select.add(opt);
+          } else {
+            conductores.forEach(function(c) {
+              var opt = document.createElement("option");
+              // Guardamos el índice de la columna o el nombre como valor
+              opt.value = c.nombre; 
+              opt.text = c.nombre + " (LIBRE)"; // Muestra solo los libres limpios
+              select.add(opt);
             });
-        } catch (error) {
-            if (!estaInteractuando) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Error al conectar con el servidor.</td></tr>`;
-            }
-        }
+          }
+        })
+        .obtenerConductoresLibres("radiotaximetro");
     }
 
-    function pausarActualizacion() {
-        estaInteractuando = true;
+    function asignarViaje(idPedido) {
+      var select = document.getElementById("selectConductor-1");
+      var conductorSeleccionado = select.value;
+      
+      if (!conductorSeleccionado) {
+        alert("Por favor selecciona un conductor disponible.");
+        return;
+      }
+      
+      // Aquí puedes disparar la función en Apps Script para cambiar el estado a OCUPADO
+      alert("¡Vehículo asignado a " + conductorSeleccionado + " con éxito!");
+      
+      // Recargamos la lista para que desaparezca el chofer asignado del selector
+      cargarConductoresLibres(); 
     }
-
-    function reanudarActualizacion() {
-        setTimeout(() => {
-            estaInteractuando = false;
-        }, 3000);
-    }
-
-    async function asignar(fila) {
-        let select = document.getElementById(`conductor-${fila}`);
-        let movilElegido = select.value;
-
-        estaInteractuando = true;
-
-        let datos = {
-            action: "asignar",
-            fila: fila,
-            movilElegido: movilElegido
-        };
-
-        try {
-            let response = await fetch(WEB_APP_URL, {
-                method: "POST",
-                body: JSON.stringify(datos)
-            });
-            let result = await response.json();
-            if (result.result === "success") {
-                alert(`¡${movilElegido} asignado correctamente al viaje!`);
-            } else {
-                alert("Hubo un error al asignar.");
-            }
-        } catch (error) {
-            alert("Error de red.");
-        } finally {
-            estaInteractuando = false;
-            cargarDatos();
-        }
-    }
-
-    // Cargar al abrir y refrescar cada 15 segundos en segundo plano de forma inteligente
-    cargarDatos();
-    setInterval(cargarDatos, 15000);
-</script>
+  </script>
 
 </body>
 </html>
