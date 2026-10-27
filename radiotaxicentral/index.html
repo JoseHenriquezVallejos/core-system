@@ -37,14 +37,36 @@
             <span id="contadorLibres" class="badge bg-success fs-6">0 Móviles Libres</span>
         </div>
         <div id="gridConductores" class="row g-3">
-            <!-- Las tarjetas de los conductores se cargarán aquí dinámicamente -->
-            <div class="text-center text-muted py-3">Cargando conductores desde la planilla...</div>
+            <div class="text-center text-muted py-3">Cargando conductores...</div>
         </div>
     </div>
 
-    <!-- SECCIÓN REGISTRAR SERVICIO -->
+    <!-- SECCIÓN PEDIDOS DE CLIENTES EN LÍNEA -->
+    <div class="card shadow-sm border-0 mb-4 p-4 border-start border-primary border-4">
+        <h5 class="fw-bold mb-3"><i class="fa-solid fa-globe text-primary me-2"></i> Solicitudes Web de Clientes (En Espera)</h5>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Hora</th>
+                        <th>Cliente</th>
+                        <th>Teléfono</th>
+                        <th>Origen</th>
+                        <th>Destino</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaPedidosWeb">
+                    <tr><td colspan="7" class="text-center text-muted">No hay solicitudes web pendientes.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- SECCIÓN REGISTRAR SERVICIO MANUAL -->
     <div class="card shadow-sm border-0 p-4">
-        <h5 class="fw-bold mb-3"><i class="fa-solid fa-file-lines text-primary me-2"></i> Registrar Servicio / Carrera</h5>
+        <h5 class="fw-bold mb-3"><i class="fa-solid fa-file-lines text-primary me-2"></i> Registrar Servicio Manual / Telefónico</h5>
         <div class="row g-3">
             <div class="col-md-3">
                 <input type="text" id="pasajero" class="form-control" placeholder="Nombre Pasajero">
@@ -60,7 +82,7 @@
             </div>
         </div>
         <div class="mt-3">
-            <button class="btn btn-success fw-bold px-4" onclick="asignarServicio()">
+            <button class="btn btn-success fw-bold px-4" onclick="asignarServicioManual()">
                 <i class="fa-solid fa-check me-2"></i> Asignar y Guardar Carrera
             </button>
         </div>
@@ -68,13 +90,13 @@
 </div>
 
 <script>
-    // URL FIJA DE APPS SCRIPT
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzdFv2weB9CumUMx95gmQBnAl2ZHSXTBeL79mXsieH3nYK1rlx_V4pL8d4VsLuK4Tld/exec";
     let listaConductores = [];
+    let listaPedidos = [];
 
     document.addEventListener("DOMContentLoaded", () => {
         cargarDatos();
-        setInterval(cargarDatos, 15000);
+        setInterval(cargarDatos, 10000); // Actualiza cada 10 segundos
     });
 
     function cargarDatos() {
@@ -85,7 +107,10 @@
                     document.getElementById("nombreVisual").innerText = data.nombreVisual;
                 }
                 listaConductores = data.conductores || [];
+                listaPedidos = data.pedidos || [];
+                
                 renderizarConductores();
+                renderizarPedidosWeb();
             })
             .catch(error => {
                 console.error("Error al cargar datos:", error);
@@ -111,7 +136,6 @@
             if (c.estado === "LIBRE") badgeClass = "badge-libre";
             if (c.estado === "OCUPADO") badgeClass = "badge-ocupado";
 
-            // Limpiamos el número para el enlace tel: y lo estilizamos como link activo
             let telLimpio = c.link ? c.link.replace(/\s+/g, '') : '';
             let telefonoHtml = telLimpio ? `<a href="tel:${telLimpio}" class="text-decoration-none text-primary fw-bold" title="Hacer llamada"><i class="fa-solid fa-phone me-1"></i> ${c.link}</a>` : `<span class="text-muted"><i class="fa-solid fa-phone me-1"></i> Sin Celular</span>`;
 
@@ -139,20 +163,72 @@
         document.getElementById("contadorLibres").innerText = `${libresCount} Móviles Libres`;
     }
 
+    function renderizarPedidosWeb() {
+        const tbody = document.getElementById("tablaPedidosWeb");
+        tbody.innerHTML = "";
+
+        // Filtrar solo los que están pendientes
+        let pendientes = listaPedidos.filter(p => p.estado === "Pendiente");
+
+        if (pendientes.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">No hay solicitudes web pendientes.</td></tr>`;
+            return;
+        }
+
+        pendientes.forEach((p, index) => {
+            let tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${p.hora || '--:--'}</td>
+                <td class="fw-bold">${p.cliente}</td>
+                <td><a href="tel:${p.telefono}" class="text-decoration-none text-primary"><i class="fa-solid fa-phone me-1"></i>${p.telefono}</a></td>
+                <td>${p.origen}</td>
+                <td>${p.destino}</td>
+                <td><span class="badge bg-warning text-dark">Pendiente</span></td>
+                <td>
+                    <button class="btn btn-sm btn-primary fw-bold" onclick="asignarPedidoWeb('${p.cliente}', '${p.telefono}', '${p.origen}', '${p.destino}')">
+                        <i class="fa-solid fa-taxi me-1"></i> Asignar Móvil Libre
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
     function cambiarEstado(rowIndex) {
         let url = `${WEB_APP_URL}?action=toggleState&row=${rowIndex}`;
-        
         fetch(url)
             .then(response => response.json())
             .then(res => {
-                if(res.status === "success") {
-                    cargarDatos();
-                }
+                if(res.status === "success") cargarDatos();
             })
             .catch(err => console.error("Error al cambiar estado", err));
     }
 
-    function asignarServicio() {
+    function asignarPedidoWeb(cliente, telefono, origen, destino) {
+        let choferLibre = listaConductores.find(c => c.estado === "LIBRE");
+
+        if(!choferLibre) {
+            alert("¡No hay móviles LIBRES en este momento para asignar el servicio!");
+            return;
+        }
+
+        let url = `${WEB_APP_URL}?action=guardarPedido&pasajero=${encodeURIComponent(cliente)}&telefono=${encodeURIComponent(telefono)}&origen=${encodeURIComponent(origen)}&destino=${encodeURIComponent(destino)}&conductor=${encodeURIComponent(choferLibre.movil + ' - ' + choferLibre.nombre)}&rowIndex=${choferLibre.rowIndex}`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(res => {
+                if(res.status === "success") {
+                    alert(`¡Carrera asignada al móvil ${choferLibre.movil} (${choferLibre.nombre}) para el cliente ${cliente}!`);
+                    cargarDatos();
+                }
+            })
+            .catch(err => {
+                console.error("Error al asignar pedido", err);
+                alert("Hubo un error al asignar la carrera.");
+            });
+    }
+
+    function asignarServicioManual() {
         let pasajero = document.getElementById("pasajero").value.trim();
         let telefono = document.getElementById("telPasajero").value.trim();
         let origen = document.getElementById("origen").value.trim();
