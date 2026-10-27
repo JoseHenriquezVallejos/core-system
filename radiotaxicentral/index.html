@@ -54,7 +54,7 @@
 </div>
 
 <script>
-    // CAMBIA ESTE LINK POR TU URL DE GOOGLE APPS SCRIPT
+    // PEGA AQUÍ TU URL ACTUALIZADA DE GOOGLE APPS SCRIPT
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw1F6D9YseRBTQLu36ewOIyzbFSC4Iws9z0Fj03sECHq6Q-R-x65BbqWtKfrN4H4ra9/exec";
 
     async function cargarDatosCentral() {
@@ -98,7 +98,7 @@
         let tbody = document.getElementById("tablaPedidos");
         tbody.innerHTML = "";
 
-        // Filtramos solo los pedidos que están pendientes ("Por Asignar" o vacíos)
+        // Filtramos solo los pedidos pendientes (que dicen "Por Asignar" o están vacíos)
         let pendientes = pedidos.filter(p => !p.movilElegido || p.movilElegido === "Por Asignar");
 
         if (pendientes.length === 0) {
@@ -159,7 +159,7 @@
         }
     }
 
-    // Cargar al iniciar y actualizar cada 6 segundos
+    // Cargar al iniciar y refrescar cada 6 segundos
     cargarDatosCentral();
     setInterval(cargarDatosCentral, 6000);
 </script>
