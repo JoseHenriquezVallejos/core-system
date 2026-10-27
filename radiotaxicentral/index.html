@@ -1,179 +1,195 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <base target="_top">
-  <meta charset="utf-8">
-  <title>Panel de Control - Central de Taxis</title>
-  <!-- Estilos limpios y modernos -->
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f6f9;
-      margin: 0;
-      padding: 20px;
-    }
-    .container {
-      max-width: 1100px;
-      margin: 0 auto;
-      background: #ffffff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    h2 {
-      color: #333;
-      margin-top: 0;
-    }
-    .btn-actualizar {
-      background-color: #337ab7;
-      color: white;
-      border: none;
-      padding: 8px 15px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 14px;
-      margin-bottom: 15px;
-    }
-    .btn-actualizar:hover {
-      background-color: #286090;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    th {
-      background-color: #007bff;
-      color: white;
-      padding: 10px;
-      text-align: left;
-      font-size: 14px;
-    }
-    td {
-      padding: 10px;
-      border-bottom: 1px solid #ddd;
-      font-size: 14px;
-    }
-    .estado-pendiente {
-      color: #e67e22;
-      font-weight: bold;
-    }
-    select {
-      padding: 6px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      margin-right: 5px;
-    }
-    .btn-asignar {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .btn-asignar:hover {
-      background-color: #218838;
-    }
-    a {
-      color: #007bff;
-      text-decoration: none;
-    }
-    a:hover {
-      text-decoration: underline;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control - Central de Taxis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .header-card { background: linear-gradient(135deg, #0d6efd, #0b5ed7); color: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .card-driver { border-radius: 10px; border: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s; }
+        .card-driver:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .badge-libre { background-color: #198754; color: white; cursor: pointer; }
+        .badge-ocupado { background-color: #dc3545; color: white; cursor: pointer; }
+        .badge-fuera { background-color: #6c757d; color: white; cursor: pointer; }
+    </style>
 </head>
 <body>
 
-  <div class="container">
-    <h2>🚗 Panel de Control - Central de Taxis</h2>
-    
-    <button class="btn-actualizar" onclick="cargarPanel()">🔄 Actualizar Panel</button>
+<div class="container py-4">
+    <!-- CABECERA -->
+    <div class="header-card mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 id="nombreVisual" class="mb-1 fw-bold">Panel de Control - Central de Taxis</h2>
+            <p class="mb-0 text-light opacity-75">Gestión Operativa FIFO en Tiempo Real</p>
+        </div>
+        <button class="btn btn-light text-primary fw-bold" onclick="cargarDatos()">
+            <i class="fa-solid fa-sync fa-spin-pulse me-1"></i> Actualizar Panel
+        </button>
+    </div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Hora</th>
-          <th>Cliente</th>
-          <th>Teléfono</th>
-          <th>Origen → Destino</th>
-          <th>Estado</th>
-          <th>Asignar Conductor</th>
-        </tr>
-      </thead>
-      <tbody id="tabla-pedidos">
-        <!-- Los datos se cargan dinámicamente -->
-        <tr>
-          <td>4:16:55</td>
-          <td><strong>Jose Joel Henriquez</strong></td>
-          <td><a href="tel:963128383">963128383</a></td>
-          <td>Plaza de armas → Terminal buses</td>
-          <td><span class="estado-pendiente">Pendiente</span></td>
-          <td>
-            <select id="selectConductor-1">
-              <option value="">Cargando libres...</option>
-            </select>
-            <button class="btn-asignar" onclick="asignarViaje(1)">Asignar</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    <!-- SECCIÓN COLA FIFO Y CONDUCTORES -->
+    <div class="card shadow-sm border-0 mb-4 p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0"><i class="fa-solid fa-car text-primary me-2"></i> Flota y Cola de Conductores</h5>
+            <span id="contadorLibres" class="badge bg-success fs-6">0 Móviles Libres</span>
+        </div>
+        <div id="gridConductores" class="row g-3">
+            <!-- Las tarjetas de los conductores se cargarán aquí dinámicamente -->
+            <div class="text-center text-muted py-3">Cargando conductores desde la planilla...</div>
+        </div>
+    </div>
 
-  <!-- Scripts de comunicación con Google Apps Script -->
-  <script>
-    // Cargar los conductores libres al iniciar la página
-    window.onload = function() {
-      cargarConductoresLibres();
-    };
+    <!-- SECCIÓN REGISTRAR SERVICIO -->
+    <div class="card shadow-sm border-0 p-4">
+        <h5 class="fw-bold mb-3"><i class="fa-solid fa-file-lines text-primary me-2"></i> Registrar Servicio / Carrera</h5>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <input type="text" id="pasajero" class="form-control" placeholder="Nombre Pasajero">
+            </div>
+            <div class="col-md-3">
+                <input type="text" id="telPasajero" class="form-control" placeholder="Teléfono">
+            </div>
+            <div class="col-md-3">
+                <input type="text" id="origen" class="form-control" placeholder="Origen">
+            </div>
+            <div class="col-md-3">
+                <input type="text" id="destino" class="form-control" placeholder="Destino">
+            </div>
+        </div>
+        <div class="mt-3">
+            <button class="btn btn-success fw-bold px-4" onclick="asignarServicio()">
+                <i class="fa-solid fa-check me-2"></i> Asignar y Guardar Carrera
+            </button>
+        </div>
+    </div>
+</div>
 
-    function cargarPanel() {
-      cargarConductoresLibres();
-      // Aquí puedes refrescar más datos si lo requieres
-    }
+<script>
+    // URL FIJA DE APPS SCRIPT
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzdFv2weB9CumUMx95gmQBnAl2ZHSXTBeL79mXsieH3nYK1rlx_V4pL8d4VsLuK4Tld/exec";
+    let listaConductores = [];
 
-    function cargarConductoresLibres() {
-      // Llamamos a la función de Apps Script que creamos para filtrar solo los "LIBRE"
-      google.script.run
-        .withSuccessHandler(function(conductores) {
-          var select = document.getElementById("selectConductor-1");
-          select.innerHTML = ""; // Limpiar opciones previas
-          
-          if (conductores.length === 0) {
-            var opt = document.createElement("option");
-            opt.text = "No hay móviles libres";
-            opt.disabled = true;
-            select.add(opt);
-          } else {
-            conductores.forEach(function(c) {
-              var opt = document.createElement("option");
-              // Guardamos el índice de la columna o el nombre como valor
-              opt.value = c.nombre; 
-              opt.text = c.nombre + " (LIBRE)"; // Muestra solo los libres limpios
-              select.add(opt);
+    document.addEventListener("DOMContentLoaded", () => {
+        cargarDatos();
+        setInterval(cargarDatos, 15000);
+    });
+
+    function cargarDatos() {
+        fetch(WEB_APP_URL)
+            .then(response => response.json())
+            .then(data => {
+                if(data.nombreVisual) {
+                    document.getElementById("nombreVisual").innerText = data.nombreVisual;
+                }
+                listaConductores = data.conductores || [];
+                renderizarConductores();
+            })
+            .catch(error => {
+                console.error("Error al cargar datos:", error);
             });
-          }
-        })
-        .obtenerConductoresLibres("radiotaximetro");
     }
 
-    function asignarViaje(idPedido) {
-      var select = document.getElementById("selectConductor-1");
-      var conductorSeleccionado = select.value;
-      
-      if (!conductorSeleccionado) {
-        alert("Por favor selecciona un conductor disponible.");
-        return;
-      }
-      
-      // Aquí puedes disparar la función en Apps Script para cambiar el estado a OCUPADO
-      alert("¡Vehículo asignado a " + conductorSeleccionado + " con éxito!");
-      
-      // Recargamos la lista para que desaparezca el chofer asignado del selector
-      cargarConductoresLibres(); 
+    function renderizarConductores() {
+        const grid = document.getElementById("gridConductores");
+        grid.innerHTML = "";
+
+        if (listaConductores.length === 0) {
+            grid.innerHTML = `<div class="text-center text-muted py-3">No hay conductores registrados en la planilla.</div>`;
+            document.getElementById("contadorLibres").innerText = "0 Móviles Libres";
+            return;
+        }
+
+        let libresCount = 0;
+
+        listaConductores.forEach(c => {
+            if (c.estado === "LIBRE") libresCount++;
+
+            let badgeClass = "badge-fuera";
+            if (c.estado === "LIBRE") badgeClass = "badge-libre";
+            if (c.estado === "OCUPADO") badgeClass = "badge-ocupado";
+
+            // Limpiamos el número para el enlace tel: y lo estilizamos como link activo
+            let telLimpio = c.link ? c.link.replace(/\s+/g, '') : '';
+            let telefonoHtml = telLimpio ? `<a href="tel:${telLimpio}" class="text-decoration-none text-primary fw-bold" title="Hacer llamada"><i class="fa-solid fa-phone me-1"></i> ${c.link}</a>` : `<span class="text-muted"><i class="fa-solid fa-phone me-1"></i> Sin Celular</span>`;
+
+            let col = document.createElement("div");
+            col.className = "col-md-4 col-sm-6";
+            col.innerHTML = `
+                <div class="card card-driver p-3 bg-white">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <h6 class="fw-bold mb-0 text-primary">${c.movil}</h6>
+                            <small class="text-dark fw-semibold">${c.nombre}</small>
+                        </div>
+                        <span class="badge ${badgeClass} px-2 py-1" style="font-size: 0.8rem; cursor: pointer;" onclick="cambiarEstado(${c.rowIndex})" title="Haz clic para cambiar estado">
+                            ${c.estado} <i class="fa-solid fa-rotate ms-1"></i>
+                        </span>
+                    </div>
+                    <div style="font-size: 0.85rem;">
+                        ${telefonoHtml}
+                    </div>
+                </div>
+            `;
+            grid.appendChild(col);
+        });
+
+        document.getElementById("contadorLibres").innerText = `${libresCount} Móviles Libres`;
     }
-  </script>
+
+    function cambiarEstado(rowIndex) {
+        let url = `${WEB_APP_URL}?action=toggleState&row=${rowIndex}`;
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(res => {
+                if(res.status === "success") {
+                    cargarDatos();
+                }
+            })
+            .catch(err => console.error("Error al cambiar estado", err));
+    }
+
+    function asignarServicio() {
+        let pasajero = document.getElementById("pasajero").value.trim();
+        let telefono = document.getElementById("telPasajero").value.trim();
+        let origen = document.getElementById("origen").value.trim();
+        let destino = document.getElementById("destino").value.trim();
+
+        if(!pasajero || !origen || !destino) {
+            alert("Por favor completa al menos el pasajero, el origen y el destino.");
+            return;
+        }
+
+        let choferLibre = listaConductores.find(c => c.estado === "LIBRE");
+
+        if(!choferLibre) {
+            alert("¡No hay móviles LIBRES en este momento para asignar el servicio!");
+            return;
+        }
+
+        let url = `${WEB_APP_URL}?action=guardarPedido&pasajero=${encodeURIComponent(pasajero)}&telefono=${encodeURIComponent(telefono)}&origen=${encodeURIComponent(origen)}&destino=${encodeURIComponent(destino)}&conductor=${encodeURIComponent(choferLibre.movil + ' - ' + choferLibre.nombre)}&rowIndex=${choferLibre.rowIndex}`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(res => {
+                if(res.status === "success") {
+                    alert(`¡Carrera asignada exitosamente al móvil ${choferLibre.movil} (${choferLibre.nombre})!`);
+                    document.getElementById("pasajero").value = "";
+                    document.getElementById("telPasajero").value = "";
+                    document.getElementById("origen").value = "";
+                    document.getElementById("destino").value = "";
+                    cargarDatos();
+                }
+            })
+            .catch(err => {
+                console.error("Error al guardar pedido", err);
+                alert("Hubo un error al registrar la carrera.");
+            });
+    }
+</script>
 
 </body>
 </html>
