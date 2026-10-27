@@ -62,8 +62,8 @@
 </div>
 
 <script>
-    // URL de tu Apps Script (la misma que usa la central)
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzjJA4UIRAarfrtTVo2WBpoHTlrKYtl2rLjWVzwszJBbud-UCwPt7eVx9NPrnV5xOeT/exec";
+    // PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT (debe terminar en /exec)
+    const WEB_APP_URL = "AQUÍ_PEGA_TU_URL_DE_APPS_SCRIPT";
     
     let timerSeguimiento = null;
 
@@ -79,13 +79,12 @@
         const origen = document.getElementById("origen").value.trim();
         const destino = document.getElementById("destino").value.trim();
 
-        // Enviamos los datos por GET con la acción crearPedidoWeb para evitar bloqueos CORS
         let urlPedido = `${WEB_APP_URL}?action=crearPedidoWeb&cliente=${encodeURIComponent(cliente)}&telefono=${encodeURIComponent(telefono)}&origen=${encodeURIComponent(origen)}&destino=${encodeURIComponent(destino)}`;
 
         try {
             await fetch(urlPedido);
 
-            // Bloquear inputs para mantener la información visualizada mientras espera
+            // Bloquear inputs para mantener la información visible mientras espera
             document.getElementById("cliente").disabled = true;
             document.getElementById("telefono").disabled = true;
             document.getElementById("origen").disabled = true;
@@ -97,7 +96,7 @@
             statusBox.style.display = "block";
             document.getElementById("statusText").innerText = "¡Solicitud enviada! Buscando conductor...";
 
-            // Iniciar consulta periódica del estado del viaje
+            // Iniciar seguimiento periódico
             iniciarSeguimiento(cliente, telefono);
 
         } catch (err) {
@@ -117,20 +116,17 @@
 
     async function consultarEstado(cliente, telefono) {
         try {
-            // Usamos ?t= para evitar la caché de Google
             let response = await fetch(WEB_APP_URL + "?t=" + new Date().getTime());
             let data = await response.json();
             let pedidos = data.pedidos || [];
 
             let telefonoBuscado = telefono.trim();
 
-            // Buscamos el pedido en la planilla usando el teléfono como clave única
             let miPedido = pedidos.find(p => 
                 String(p.telefono).trim() === telefonoBuscado
             );
 
             if (miPedido) {
-                // Si la columna G (movilElegido) ya no dice "Por Asignar", significa que la central le asignó un chofer
                 if (miPedido.movilElegido && miPedido.movilElegido !== "Por Asignar") {
                     clearInterval(timerSeguimiento);
 
