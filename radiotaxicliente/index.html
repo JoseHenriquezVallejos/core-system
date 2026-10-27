@@ -15,7 +15,7 @@
         button { width: 100%; background: #007bff; color: white; border: none; padding: 12px; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; }
         button:disabled { background: #6c757d; cursor: not-allowed; }
         
-        /* Seccion de Estado del Viaje */
+        /* Sección de Estado del Viaje */
         .status-box { display: none; margin-top: 20px; padding: 15px; border-radius: 8px; text-align: center; font-size: 16px; font-weight: bold; }
         .status-pendiente { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
         .status-asignado { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
@@ -62,7 +62,7 @@
 </div>
 
 <script>
-    // PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT
+    // URL de tu Apps Script (la misma que usa la central)
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzjJA4UIRAarfrtTVo2WBpoHTlrKYtl2rLjWVzwszJBbud-UCwPt7eVx9NPrnV5xOeT/exec";
     
     let timerSeguimiento = null;
@@ -74,45 +74,34 @@
         btn.disabled = true;
         btn.innerText = "Enviando solicitud...";
 
-        const cliente = document.getElementById("cliente").value;
-        const telefono = document.getElementById("telefono").value;
-        const origen = document.getElementById("origen").value;
-        const destino = document.getElementById("destino").value;
+        const cliente = document.getElementById("cliente").value.trim();
+        const telefono = document.getElementById("telefono").value.trim();
+        const origen = document.getElementById("origen").value.trim();
+        const destino = document.getElementById("destino").value.trim();
 
-        const datos = {
-            cliente: cliente,
-            telefono: telefono,
-            origen: origen,
-            destino: destino
-        };
+        // Enviamos los datos por GET con la acción crearPedidoWeb para evitar bloqueos CORS
+        let urlPedido = `${WEB_APP_URL}?action=crearPedidoWeb&cliente=${encodeURIComponent(cliente)}&telefono=${encodeURIComponent(telefono)}&origen=${encodeURIComponent(origen)}&destino=${encodeURIComponent(destino)}`;
 
         try {
-            // Usamos mode: 'no-cors' para evitar restricciones de seguridad del navegador con Apps Script
-            await fetch(WEB_APP_URL, {
-                method: "POST",
-                mode: 'no-cors',
-                headers: {
-                    "Content-Type": "text/plain"
-                },
-                body: JSON.stringify(datos)
-            });
+            await fetch(urlPedido);
 
-            // Bloquear inputs para que el usuario mantenga sus datos visibles mientras espera
+            // Bloquear inputs para mantener la información visualizada mientras espera
             document.getElementById("cliente").disabled = true;
             document.getElementById("telefono").disabled = true;
             document.getElementById("origen").disabled = true;
             document.getElementById("destino").disabled = true;
             btn.style.display = "none";
 
-            // Mostrar la caja de estado de búsqueda
+            // Mostrar estado de búsqueda
             const statusBox = document.getElementById("statusBox");
             statusBox.style.display = "block";
             document.getElementById("statusText").innerText = "¡Solicitud enviada! Buscando conductor...";
 
-            // Iniciar la búsqueda periódica del estado del viaje
+            // Iniciar consulta periódica del estado del viaje
             iniciarSeguimiento(cliente, telefono);
 
         } catch (err) {
+            console.error("Error al enviar:", err);
             alert("Error de conexión. Intenta de nuevo.");
             btn.disabled = false;
             btn.innerText = "Pedir Taxi Ahora";
@@ -123,26 +112,26 @@
         consultarEstado(cliente, telefono);
         timerSeguimiento = setInterval(() => {
             consultarEstado(cliente, telefono);
-        }, 8000);
+        }, 6000);
     }
 
     async function consultarEstado(cliente, telefono) {
         try {
-            let response = await fetch(WEB_APP_URL);
+            // Usamos ?t= para evitar la caché de Google
+            let response = await fetch(WEB_APP_URL + "?t=" + new Date().getTime());
             let data = await response.json();
             let pedidos = data.pedidos || [];
 
-            // Limpieza de espacios y minúsculas para una coincidencia exacta con Google Sheets
-            let clienteBuscado = cliente.trim().toLowerCase();
             let telefonoBuscado = telefono.trim();
 
+            // Buscamos el pedido en la planilla usando el teléfono como clave única
             let miPedido = pedidos.find(p => 
-                String(p.cliente).trim().toLowerCase() === clienteBuscado && 
                 String(p.telefono).trim() === telefonoBuscado
             );
 
             if (miPedido) {
-                if (miPedido.estado === "Asignado") {
+                // Si la columna G (movilElegido) ya no dice "Por Asignar", significa que la central le asignó un chofer
+                if (miPedido.movilElegido && miPedido.movilElegido !== "Por Asignar") {
                     clearInterval(timerSeguimiento);
 
                     const statusBox = document.getElementById("statusBox");
