@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RestoPOS Cloud - Toma de Pedidos en Tiempo Real</title>
+    <title>RestoMaster Cloud - Sistema de Atención Gastronómica</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome para iconos -->
@@ -16,12 +16,12 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
 
     <!-- Toast Notification -->
     <div id="toast" class="fixed top-5 right-5 z-50 transform translate-x-full transition-transform duration-300 bg-emerald-600 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center space-x-3 pointer-events-none">
         <i class="fa-solid fa-circle-check text-xl"></i>
-        <span id="toast-message" class="font-medium">¡Operación realizada con éxito!</span>
+        <span id="toast-message" class="font-medium">¡Sincronizado con la nube!</span>
     </div>
 
     <!-- Barra de Navegación -->
@@ -32,10 +32,20 @@
             </div>
             <div>
                 <h1 class="font-bold text-lg leading-tight flex items-center gap-2">
-                    RestoPOS <span class="text-xs font-semibold text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Cloud Active</span>
+                    RestoMaster <span class="text-xs font-semibold text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Cloud</span>
                 </h1>
-                <p class="text-xs text-slate-400">Sincronización fluida entre Garzones, Cocina y Caja</p>
+                <p class="text-xs text-slate-400">Atención en vivo desde cualquier celular</p>
             </div>
+        </div>
+
+        <!-- Identificador del Garzón actual en este Celular -->
+        <div class="hidden sm:flex items-center space-x-2 bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-xl">
+            <i class="fa-solid fa-user-gear text-indigo-400 text-xs"></i>
+            <span class="text-xs text-slate-400">Garzón:</span>
+            <span id="header-waiter-name" class="text-xs font-bold text-white">Cargando...</span>
+            <button onclick="window.changeDeviceWaiterName()" class="text-slate-500 hover:text-indigo-400 text-xs ml-1" title="Cambiar Nombre">
+                <i class="fa-solid fa-pen-to-square"></i>
+            </button>
         </div>
 
         <!-- Pestañas de Vista -->
@@ -184,6 +194,23 @@
 
     </main>
 
+    <!-- Modal para Configurar Nombre del Garzón en este Dispositivo -->
+    <div id="modal-waiter-config" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-2xl p-6 space-y-4 text-center">
+            <div class="bg-indigo-600/20 text-indigo-400 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto border border-indigo-500/30">
+                <i class="fa-solid fa-mobile-screen-button text-2xl"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-lg text-white">Identifica este Teléfono</h3>
+                <p class="text-xs text-slate-400 mt-1">Ingresa tu nombre para saber qué garzón atiende cada mesa desde este celular.</p>
+            </div>
+            <input type="text" id="device-waiter-input" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-center text-white focus:outline-none focus:border-indigo-500" placeholder="Ej: Juan Pérez">
+            <button onclick="window.saveDeviceWaiterName()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-indigo-600/30">
+                Guardar e Iniciar Turno
+            </button>
+        </div>
+    </div>
+
     <!-- Modal para Agregar Notas -->
     <div id="modal-note" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 space-y-4">
@@ -196,22 +223,37 @@
         </div>
     </div>
 
-    <!-- Application Script Engine -->
-    <script>
-        // ESTADO GLOBAL DE LA APLICACIÓN
+    <!-- Firebase SDK Modules -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'restomaster-app';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "demo", authDomain: "demo.firebaseapp.com", projectId: "demo", storageBucket: "demo.appspot.com", messagingSenderId: "0", appId: "0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let user = null;
+
         window.appState = {
             selectedTable: "Mesa 1",
             selectedCategory: "all",
             searchQuery: "",
             currentCart: [],
             tablesData: {},
-            editingCartId: null
+            editingCartId: null,
+            waiterName: localStorage.getItem('restomaster_waiter_name') || ""
         };
 
         const MENU_DATA = [
-            { id: 1, name: "Empanadas de Pino (2 un.)", category: "entradas", price: 4500, desc: "Carne picada, cebolla, huevo duro y aceituna.", icon: "fa-dumpster-fire" },
+            { id: 1, name: "Empanadas de Pino (2 un.)", category: "entradas", price: 4500, desc: "Carne picada, cebolla, huevo duro y aceituna.", icon: "fa-dumpling" },
             { id: 2, name: "Ceviche de Salmón", category: "entradas", price: 8900, desc: "Cubos frescos de salmón marinado en leche de tigre.", icon: "fa-fish" },
-            { id: 3, name: "Lomo Saltado Peruano", category: "fondos", price: 12500, desc: "Salteado al wok con cebolla, tomate y papas fritas.", icon: "fa-utensils" },
+            { id: 3, name: "Lomo Saltado Peruano", category: "fondos", price: 12500, desc: "Salteado al wok con cebolla, tomate y papas fritas.", icon: "fa-plate-wheat" },
             { id: 4, name: "Hamburguesa Artesanal", category: "fondos", price: 9800, desc: "Carne 180g, queso cheddar, tocino y salsa especial.", icon: "fa-burger" },
             { id: 5, name: "Salmón a la Plancha", category: "fondos", price: 13900, desc: "Filete con risotto de quínoa y finas hierbas.", icon: "fa-fish-fins" },
             { id: 6, name: "Limonada Menta Jengibre", category: "bebidas", price: 3500, desc: "Refrescante batido natural recién hecho.", icon: "fa-glass-water" },
@@ -220,15 +262,63 @@
             { id: 9, name: "Cheesecake Frutos Rojos", category: "postres", price: 5200, desc: "Tarta de queso cremoso con mermelada casera.", icon: "fa-cake-candles" }
         ];
 
-        // Inicialización de Mesas por defecto en Memoria
-        for (let i = 1; i <= 10; i++) {
-            const tableId = `Mesa ${i}`;
-            window.appState.tablesData[tableId] = {
-                tableId: tableId,
-                status: 'free',
-                items: [],
-                total: 0
-            };
+        /* ================= GESTIÓN DE IDENTIDAD DE DISPOSITIVO ================= */
+        window.checkWaiterIdentity = function() {
+            if (!window.appState.waiterName) {
+                document.getElementById('modal-waiter-config').classList.remove('hidden');
+            } else {
+                document.getElementById('header-waiter-name').textContent = window.appState.waiterName;
+            }
+        };
+
+        window.saveDeviceWaiterName = function() {
+            const input = document.getElementById('device-waiter-input').value.trim();
+            if (input) {
+                window.appState.waiterName = input;
+                localStorage.setItem('restomaster_waiter_name', input);
+                document.getElementById('header-waiter-name').textContent = input;
+                document.getElementById('modal-waiter-config').classList.add('hidden');
+                window.showToast(`¡Bienvenido/a ${input}! Dispositivo configurado.`);
+            }
+        };
+
+        window.changeDeviceWaiterName = function() {
+            document.getElementById('device-waiter-input').value = window.appState.waiterName;
+            document.getElementById('modal-waiter-config').classList.remove('hidden');
+        };
+
+        /* ================= AUTENTICACIÓN Y LISTENERS ================= */
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    user = (await signInWithCustomToken(auth, __initial_auth_token)).user;
+                } else {
+                    user = (await signInAnonymously(auth)).user;
+                }
+                startRealtimeListeners();
+            } catch (err) {
+                console.error("Error autenticando Firebase:", err);
+            }
+        }
+
+        function startRealtimeListeners() {
+            if (!user) return;
+            const tablesRef = collection(db, 'artifacts', appId, 'public', 'data', 'tables');
+
+            onSnapshot(tablesRef, (snapshot) => {
+                const data = {};
+                snapshot.forEach(doc => {
+                    data[doc.id] = doc.data();
+                });
+                window.appState.tablesData = data;
+                
+                window.renderTablesGrid();
+                window.renderKitchenView();
+                window.renderCashierView();
+                window.updateBadges();
+            }, (error) => {
+                console.error("Error en snapshot:", error);
+            });
         }
 
         /* ================= VISTA MESAS ================= */
@@ -239,7 +329,7 @@
 
             for (let i = 1; i <= 10; i++) {
                 const tableId = `Mesa ${i}`;
-                const tableData = window.appState.tablesData[tableId] || { status: 'free', items: [] };
+                const tableData = window.appState.tablesData[tableId] || { status: 'free', items: [], waiter: '' };
                 
                 let statusColor = "border-slate-800 bg-slate-900/60";
                 let statusBadge = `<span class="text-slate-500 text-[10px] font-bold">DISPONIBLE</span>`;
@@ -257,12 +347,14 @@
                 card.onclick = () => window.selectTableAndOpenPos(tableId);
 
                 const totalItems = (tableData.items || []).reduce((acc, curr) => acc + curr.quantity, 0);
+                const waiterInfo = tableData.waiter ? `<span class="text-[10px] text-indigo-400 block font-semibold"><i class="fa-solid fa-user text-[9px]"></i> ${tableData.waiter}</span>` : '';
 
                 card.innerHTML = `
                     <div class="flex justify-between items-start">
                         <div>
                             <h3 class="font-bold text-base text-white">${tableId}</h3>
                             ${statusBadge}
+                            ${waiterInfo}
                         </div>
                         <i class="fa-solid fa-chair text-slate-700 text-xl"></i>
                     </div>
@@ -283,7 +375,7 @@
             
             const tableData = window.appState.tablesData[tableId];
             if (tableData && tableData.items) {
-                window.appState.currentCart = JSON.parse(JSON.stringify(tableData.items));
+                window.appState.currentCart = [...tableData.items];
             } else {
                 window.appState.currentCart = [];
             }
@@ -433,26 +525,33 @@
             window.renderCart();
         };
 
-        /* ================= ENVÍO CLOUD / LOCAL ================= */
-        window.sendOrderToCloud = function() {
-            if (window.appState.currentCart.length === 0) return;
+        /* ================= ENVÍO CLOUD AUTOMÁTICO CON NOMBRE ================= */
+        window.sendOrderToCloud = async function() {
+            if (!user || window.appState.currentCart.length === 0) return;
+
+            // Si el celular no tiene nombre de garzón guardado, se le pide antes de enviar
+            if (!window.appState.waiterName) {
+                window.changeDeviceWaiterName();
+                return;
+            }
 
             const tableId = window.appState.selectedTable;
+            const tableRef = doc(db, 'artifacts', appId, 'public', 'data', 'tables', tableId);
             const total = window.appState.currentCart.reduce((acc, i) => acc + (i.price * i.quantity), 0);
 
-            window.appState.tablesData[tableId] = {
-                tableId: tableId,
-                status: 'occupied',
-                items: JSON.parse(JSON.stringify(window.appState.currentCart)),
-                total: total,
-                updatedAt: new Date().toISOString()
-            };
-
-            window.renderTablesGrid();
-            window.renderKitchenView();
-            window.renderCashierView();
-            window.updateBadges();
-            window.showToast("¡Pedido enviado a Cocina!");
+            try {
+                await setDoc(tableRef, {
+                    tableId: tableId,
+                    status: 'occupied',
+                    waiter: window.appState.waiterName, // <--- Sincroniza el garzón de este dispositivo
+                    items: window.appState.currentCart,
+                    total: total,
+                    updatedAt: new Date().toISOString()
+                });
+                window.showToast(`¡Pedido de ${tableId} enviado a cocina por ${window.appState.waiterName}!`);
+            } catch (err) {
+                console.error("Error al guardar pedido en Firestore:", err);
+            }
         };
 
         /* ================= VISTA COCINA ================= */
@@ -484,7 +583,10 @@
 
                 card.innerHTML = `
                     <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                        <h3 class="font-bold text-base text-white">${table.tableId}</h3>
+                        <div>
+                            <h3 class="font-bold text-base text-white">${table.tableId}</h3>
+                            <span class="text-[10px] text-indigo-400 font-semibold"><i class="fa-solid fa-user text-[9px]"></i> ${table.waiter || 'Garzón'}</span>
+                        </div>
                         <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full">EN PREPARACIÓN</span>
                     </div>
                     <div class="space-y-1">${itemsList}</div>
@@ -496,14 +598,14 @@
             });
         };
 
-        window.markTableReady = function(tableId) {
-            if (window.appState.tablesData[tableId]) {
-                window.appState.tablesData[tableId].status = 'ready_to_pay';
-                window.renderTablesGrid();
-                window.renderKitchenView();
-                window.renderCashierView();
-                window.updateBadges();
+        window.markTableReady = async function(tableId) {
+            if (!user) return;
+            const tableRef = doc(db, 'artifacts', appId, 'public', 'data', 'tables', tableId);
+            try {
+                await updateDoc(tableRef, { status: 'ready_to_pay' });
                 window.showToast(`¡${tableId} lista para servir/cobrar!`);
+            } catch (err) {
+                console.error("Error actualizando cocina:", err);
             }
         };
 
@@ -532,7 +634,10 @@
 
                     card.innerHTML = `
                         <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                            <h3 class="font-bold text-base text-white">${tableId}</h3>
+                            <div>
+                                <h3 class="font-bold text-base text-white">${tableId}</h3>
+                                <span class="text-[10px] text-indigo-400 font-semibold"><i class="fa-solid fa-user text-[9px]"></i> Atendió: ${tableData.waiter || 'Garzón'}</span>
+                            </div>
                             <span class="text-[10px] ${tableData.status === 'ready_to_pay' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'} px-2 py-0.5 rounded-full">
                                 ${tableData.status === 'ready_to_pay' ? 'LISTO PARA COBRAR' : 'EN CONSUMO'}
                             </span>
@@ -567,18 +672,22 @@
             if (totalEl) totalEl.textContent = `$${globalTotalSales.toLocaleString('es-CL')}`;
         };
 
-        window.closeTableAndPay = function(tableId) {
-            window.appState.tablesData[tableId] = {
-                tableId: tableId,
-                status: 'free',
-                items: [],
-                total: 0
-            };
-            window.renderTablesGrid();
-            window.renderKitchenView();
-            window.renderCashierView();
-            window.updateBadges();
-            window.showToast(`¡${tableId} cobrada y liberada con éxito!`);
+        window.closeTableAndPay = async function(tableId) {
+            if (!user) return;
+            const tableRef = doc(db, 'artifacts', appId, 'public', 'data', 'tables', tableId);
+            try {
+                await setDoc(tableRef, {
+                    tableId: tableId,
+                    status: 'free',
+                    items: [],
+                    total: 0,
+                    waiter: '',
+                    updatedAt: new Date().toISOString()
+                });
+                window.showToast(`¡${tableId} cobrada y liberada con éxito!`);
+            } catch (err) {
+                console.error("Error al cobrar mesa:", err);
+            }
         };
 
         /* ================= NAVEGACIÓN Y UTILIDADES ================= */
@@ -655,13 +764,12 @@
             window.closeNoteModal();
         };
 
-        // Inicialización al cargar la ventana
-        window.addEventListener('DOMContentLoaded', () => {
-            window.renderTablesGrid();
-            window.initCategories();
-            window.renderMenu();
-            window.updateBadges();
-        });
+        // INICIALIZACIÓN INMEDIATA Y EVENTOS
+        window.renderTablesGrid();
+        window.checkWaiterIdentity();
+        initAuth();
+        initCategories();
+        renderMenu();
     </script>
 </body>
 </html>
