@@ -3,13 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RestoMaster - Sistema de Atención Gastronómica (Google Sheets)</title>
+    <title>RestoMaster - Sistema de Atención Gastronómica (Supabase)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- LIBRERÍA OFICIAL DE SUPABASE (CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
         body { font-family: 'Inter', sans-serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -21,20 +25,20 @@
     <!-- Toast Notification -->
     <div id="toast" class="fixed top-5 right-5 z-50 transform translate-x-full transition-transform duration-300 bg-emerald-600 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center space-x-3 pointer-events-none">
         <i class="fa-solid fa-circle-check text-xl"></i>
-        <span id="toast-message" class="font-medium">¡Sincronizado con Google Drive!</span>
+        <span id="toast-message" class="font-medium">¡Sincronizado con Supabase!</span>
     </div>
 
     <!-- Barra de Navegación -->
     <header class="bg-slate-900 border-b border-slate-800 px-4 py-3 sticky top-0 z-30 flex items-center justify-between shadow-lg">
         <div class="flex items-center space-x-3">
-            <div class="bg-emerald-600 text-white p-2 rounded-xl shadow-inner">
-                <i class="fa-solid fa-table text-xl"></i>
+            <div class="bg-indigo-600 text-white p-2 rounded-xl shadow-inner">
+                <i class="fa-solid fa-[#fa-bolt] fa-bolt text-xl"></i>
             </div>
             <div>
                 <h1 class="font-bold text-lg leading-tight flex items-center gap-2">
-                    RestoMaster <span class="text-xs font-semibold text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Google Sheets</span>
+                    RestoMaster <span class="text-xs font-semibold text-indigo-400 bg-indigo-950/80 border border-indigo-800 px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span> Supabase Realtime</span>
                 </h1>
-                <p class="text-xs text-slate-400">Atención en vivo sincronizada con Drive</p>
+                <p class="text-xs text-slate-400">Atención en vivo ultrarrápida</p>
             </div>
         </div>
 
@@ -83,7 +87,7 @@
                         <p class="text-xs text-slate-400">Selecciona una mesa para tomar un pedido o consultar la cuenta.</p>
                     </div>
                     <button onclick="window.loadCloudData()" class="bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 px-3 py-2 rounded-xl text-xs flex items-center gap-2 transition">
-                        <i class="fa-solid fa-rotate"></i> Actualizar desde Drive
+                        <i class="fa-solid fa-rotate"></i> Recargar Datos
                     </button>
                 </div>
 
@@ -143,7 +147,7 @@
 
                     <div class="grid grid-cols-2 gap-2 pt-2">
                         <button onclick="window.clearCurrentCart()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 py-2.5 rounded-xl text-xs font-semibold border border-slate-700 transition">Vaciar</button>
-                        <button onclick="window.sendOrderToDrive()" id="btn-send-order" class="bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-xl text-xs font-semibold shadow-lg shadow-indigo-600/30 transition">Enviar a Cocina</button>
+                        <button onclick="window.sendOrderToSupabase()" id="btn-send-order" class="bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-xl text-xs font-semibold shadow-lg shadow-indigo-600/30 transition">Enviar a Cocina</button>
                     </div>
                 </div>
             </aside>
@@ -155,7 +159,7 @@
                 <div class="border-b border-slate-800 pb-4 flex justify-between items-center">
                     <div>
                         <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-fire-burner text-rose-500"></i> Pantalla KDS de Cocina</h2>
-                        <p class="text-xs text-slate-400">Comandas recibidas directamente desde los celulares.</p>
+                        <p class="text-xs text-slate-400">Comandas recibidas en tiempo real desde Supabase.</p>
                     </div>
                 </div>
 
@@ -169,7 +173,7 @@
                 <div class="border-b border-slate-800 pb-4 flex justify-between items-center">
                     <div>
                         <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-cash-register text-emerald-400"></i> Panel de Caja y Cobro</h2>
-                        <p class="text-xs text-slate-400">Cierre de mesas y registro automático en Google Sheets.</p>
+                        <p class="text-xs text-slate-400">Cierre de mesas y liberación instantánea.</p>
                     </div>
                 </div>
 
@@ -208,10 +212,14 @@
         </div>
     </div>
 
-    <!-- Lógica de Conexión con Google Sheets -->
+    <!-- LÓGICA DE CONEXIÓN CON SUPABASE -->
     <script>
-        // PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwozhxSiPaTm3eQzgdW16WymqSFa5ByySbbBYS8U_cdONdSMM4aJ2SC8LfKF2prIx75/exec';
+        // 1. REEMPLAZA ESTOS VALORES CON TUS CREDENCIALES DE SUPABASE
+        const SUPABASE_URL = 'https://TU_PROYECTO.supabase.co';
+        const SUPABASE_KEY = 'TU_ANON_KEY';
+
+        // Inicializar Cliente de Supabase
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         window.appState = {
             selectedTable: "Mesa 1",
@@ -222,6 +230,25 @@
             menuData: [],
             editingCartId: null,
             waiterName: localStorage.getItem('restomaster_waiter_name') || ""
+        };
+
+        // Modal y Toast helpers
+        window.showToast = function(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = msg;
+            toast.classList.remove('translate-x-full');
+            setTimeout(() => toast.classList.add('translate-x-full'), 3000);
+        };
+
+        window.switchView = function(viewName) {
+            ['tables', 'pos', 'kitchen', 'cashier'].forEach(v => {
+                document.getElementById(`view-${v}`).classList.add('hidden');
+                document.getElementById(`nav-${v}`).classList.remove('bg-indigo-600', 'text-white');
+                document.getElementById(`nav-${v}`).classList.add('text-slate-400');
+            });
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+            document.getElementById(`nav-${viewName}`).classList.add('bg-indigo-600', 'text-white');
+            document.getElementById(`nav-${viewName}`).classList.remove('text-slate-400');
         };
 
         /* ================= IDENTIDAD DEL DISPOSITIVO ================= */
@@ -249,80 +276,97 @@
             document.getElementById('modal-waiter-config').classList.remove('hidden');
         };
 
-        /* ================= CARGA DE DATOS DESDE GOOGLE DRIVE ================= */
+        /* ================= CARGA DE DATOS DESDE SUPABASE ================= */
         window.loadCloudData = async function() {
-            if (WEB_APP_URL.includes('AQUÍ_PEGAS')) {
-                console.warn("URL de Google Apps Script pendiente de configurar.");
-                // Datos de prueba locales si aún no se configura la URL
-                loadFallbackMenu();
-                return;
-            }
-
             try {
-                const response = await fetch(`${WEB_APP_URL}?action=getData`);
-                const data = await response.json();
-                
-                // Procesar Mesas (Omitiendo encabezado en fila 0)
+                // 1. Cargar Mesas
+                const { data: tables, error: errTables } = await supabase.from('mesas').select('*');
+                if (errTables) throw errTables;
+
                 const tablesObj = {};
-                for (let i = 1; i < data.tables.length; i++) {
-                    const row = data.tables[i];
-                    if (row[0]) {
-                        let parsedItems = [];
-                        try { parsedItems = row[2] ? JSON.parse(row[2]) : []; } catch(e) { parsedItems = []; }
-                        
-                        tablesObj[row[0]] = {
-                            tableId: row[0],
-                            status: row[1] || 'free',
-                            items: parsedItems,
-                            total: Number(row[3]) || 0,
-                            waiter: row[4] || ''
-                        };
-                    }
-                }
+                tables.forEach(row => {
+                    tablesObj[row.numero_mesa] = {
+                        tableId: row.numero_mesa,
+                        status: row.estado || 'free',
+                        items: row.items || [],
+                        total: Number(row.total) || 0,
+                        waiter: row.garzon_actual || ''
+                    };
+                });
                 window.appState.tablesData = tablesObj;
 
-                // Procesar Menú (Omitiendo encabezado en fila 0)
-                const menuList = [];
-                for (let i = 1; i < data.menu.length; i++) {
-                    const row = data.menu[i];
-                    if (row[0]) {
-                        menuList.push({
-                            id: row[0],
-                            name: row[1],
-                            category: row[2],
-                            price: Number(row[3]) || 0,
-                            desc: row[4],
-                            icon: row[5] || 'fa-utensils'
-                        });
-                    }
-                }
-                window.appState.menuData = menuList;
+                // 2. Cargar Menú
+                const { data: menu, error: errMenu } = await supabase.from('menu').select('*').eq('disponible', true);
+                if (errMenu) throw errMenu;
 
+                window.appState.menuData = menu.map(item => ({
+                    id: item.id,
+                    name: item.nombre,
+                    category: item.categoria,
+                    price: Number(item.precio) || 0,
+                    desc: item.descripcion || '',
+                    icon: item.icono || 'fa-utensils'
+                }));
+
+                // Renderizar Interfaces
                 window.renderTablesGrid();
                 window.renderKitchenView();
                 window.renderCashierView();
                 window.updateBadges();
                 window.initCategories();
                 window.renderMenu();
-                window.showToast("¡Datos sincronizados desde Google Drive!");
 
             } catch (err) {
-                console.error("Error al conectar con Google Drive:", err);
-                window.showToast("Error de conexión con Google Drive");
+                console.error("Error al conectar con Supabase:", err);
+                window.showToast("Error de conexión con Supabase");
             }
         };
 
-        function loadFallbackMenu() {
-            window.appState.menuData = [
-                { id: 1, name: "Empanadas de Pino (2 un.)", category: "entradas", price: 4500, desc: "Carne picada, cebolla, huevo.", icon: "fa-dumpling" },
-                { id: 3, name: "Lomo Saltado Peruano", category: "fondos", price: 12500, desc: "Salteado al wok con papas.", icon: "fa-plate-wheat" },
-                { id: 6, name: "Limonada Menta Jengibre", category: "bebidas", price: 3500, desc: "Batido natural.", icon: "fa-glass-water" }
-            ];
-            window.initCategories();
-            window.renderMenu();
-        }
+        /* ================= TIEMPO REAL (REALTIME DE SUPABASE) ================= */
+        window.setupRealtime = function() {
+            supabase
+                .channel('escucha-resto')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'mesas' }, payload => {
+                    console.log('¡Cambio en Vivo en Mesas!', payload);
+                    window.loadCloudData(); // Se actualiza solo en milisegundos
+                })
+                .subscribe();
+        };
 
-        /* ================= VISTA MESAS ================= */
+        /* ================= ENVÍO A SUPABASE ================= */
+        window.sendOrderToSupabase = async function() {
+            if (!window.appState.waiterName) {
+                window.changeDeviceWaiterName();
+                return;
+            }
+            if (window.appState.currentCart.length === 0) return;
+
+            const tableId = window.appState.selectedTable;
+            const total = window.appState.currentCart.reduce((acc, i) => acc + (i.price * i.quantity), 0);
+
+            try {
+                // Guardar/Actualizar estado de la mesa en Supabase
+                const { error } = await supabase
+                    .from('mesas')
+                    .upsert({
+                        numero_mesa: tableId,
+                        estado: 'occupied',
+                        items: window.appState.currentCart,
+                        total: total,
+                        garzon_actual: window.appState.waiterName
+                    }, { onConflict: 'numero_mesa' });
+
+                if (error) throw error;
+
+                window.showToast(`¡Pedido de ${tableId} enviado a Cocina!`);
+                window.switchView('tables');
+            } catch (err) {
+                console.error("Error enviando pedido a Supabase:", err);
+                window.showToast("Error al guardar en Supabase");
+            }
+        };
+
+        /* ================= VISTA MESAS Y POS ================= */
         window.renderTablesGrid = function() {
             const grid = document.getElementById('tables-grid');
             if (!grid) return;
@@ -385,7 +429,6 @@
             window.switchView('pos');
         };
 
-        /* ================= MENÚ & POS ================= */
         window.initCategories = function() {
             const categories = [
                 { id: "all", name: "Todos" },
@@ -442,7 +485,7 @@
                         <h4 class="font-bold text-xs text-white mb-1">${item.name}</h4>
                         <p class="text-[11px] text-slate-400 leading-tight mb-3">${item.desc}</p>
                     </div>
-                    <button onclick="window.addToCart(${item.id})" class="w-full bg-slate-800 hover:bg-indigo-600 text-white text-xs py-1.5 rounded-xl font-medium transition">
+                    <button onclick="window.addToCart('${item.id}')" class="w-full bg-slate-800 hover:bg-indigo-600 text-white text-xs py-1.5 rounded-xl font-medium transition">
                         + Agregar
                     </button>
                 `;
@@ -525,41 +568,6 @@
             window.renderCart();
         };
 
-        /* ================= ENVÍO A GOOGLE DRIVE ================= */
-        window.sendOrderToDrive = async function() {
-            if (!window.appState.waiterName) {
-                window.changeDeviceWaiterName();
-                return;
-            }
-            if (window.appState.currentCart.length === 0) return;
-
-            const tableId = window.appState.selectedTable;
-            const total = window.appState.currentCart.reduce((acc, i) => acc + (i.price * i.quantity), 0);
-
-            try {
-                await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'updateTable',
-                        tableId: tableId,
-                        status: 'occupied',
-                        items: window.appState.currentCart,
-                        total: total,
-                        waiter: window.appState.waiterName
-                    })
-                });
-
-                window.showToast(`¡Pedido de ${tableId} enviado a Google Drive!`);
-                setTimeout(() => window.loadCloudData(), 1500);
-                window.switchView('tables');
-            } catch (err) {
-                console.error("Error enviando a Drive:", err);
-                window.showToast("Error al sincronizar con Drive");
-            }
-        };
-
         /* ================= VISTA COCINA (KDS) ================= */
         window.renderKitchenView = function() {
             const container = document.getElementById('kitchen-orders-grid');
@@ -589,44 +597,13 @@
 
                 card.innerHTML = `
                     <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                        <div>
-                            <h3 class="font-bold text-base text-white">${table.tableId}</h3>
-                            <span class="text-[10px] text-indigo-400 font-semibold"><i class="fa-solid fa-user text-[9px]"></i> ${table.waiter || 'Garzón'}</span>
-                        </div>
-                        <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full">EN PREPARACIÓN</span>
+                        <h3 class="font-bold text-base text-white">${table.tableId}</h3>
+                        <span class="text-[10px] bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded border border-indigo-500/20 font-bold">${table.waiter}</span>
                     </div>
                     <div class="space-y-1">${itemsList}</div>
-                    <button onclick="window.markTableReady('${table.tableId}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2 rounded-xl text-xs transition">
-                        Marcar Pedido Listo
-                    </button>
                 `;
                 container.appendChild(card);
             });
-        };
-
-        window.markTableReady = async function(tableId) {
-            const table = window.appState.tablesData[tableId];
-            if (!table) return;
-
-            try {
-                await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'updateTable',
-                        tableId: tableId,
-                        status: 'ready_to_pay',
-                        items: table.items,
-                        total: table.total,
-                        waiter: table.waiter
-                    })
-                });
-                window.showToast(`¡${tableId} lista para servir/cobrar!`);
-                setTimeout(() => window.loadCloudData(), 1500);
-            } catch (err) {
-                console.error("Error marcando listo:", err);
-            }
         };
 
         /* ================= VISTA CAJA ================= */
@@ -635,163 +612,73 @@
             if (!container) return;
             container.innerHTML = '';
 
-            let hasActiveTables = false;
+            const activeTables = Object.values(window.appState.tablesData).filter(t => t.items && t.items.length > 0);
 
-            for (let i = 1; i <= 10; i++) {
-                const tableId = `Mesa ${i}`;
-                const tableData = window.appState.tablesData[tableId];
-
-                if (tableData && tableData.items && tableData.items.length > 0) {
-                    hasActiveTables = true;
-                    const card = document.createElement('div');
-                    card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3";
-
-                    const subtotal = tableData.total || 0;
-                    const tip = Math.round(subtotal * 0.10);
-                    const finalTotal = subtotal + tip;
-
-                    card.innerHTML = `
-                        <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                            <div>
-                                <h3 class="font-bold text-base text-white">${tableId}</h3>
-                                <span class="text-[10px] text-indigo-400 font-semibold"><i class="fa-solid fa-user text-[9px]"></i> Atendió: ${tableData.waiter || 'Garzón'}</span>
-                            </div>
-                            <span class="text-[10px] ${tableData.status === 'ready_to_pay' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'} px-2 py-0.5 rounded-full">
-                                ${tableData.status === 'ready_to_pay' ? 'LISTO PARA COBRAR' : 'EN CONSUMO'}
-                            </span>
-                        </div>
-                        <div class="space-y-1 text-xs">
-                            <div class="flex justify-between text-slate-400">
-                                <span>Subtotal Consumo:</span>
-                                <span class="text-white">$${subtotal.toLocaleString('es-CL')}</span>
-                            </div>
-                            <div class="flex justify-between text-slate-400">
-                                <span>Propina sugerida (10%):</span>
-                                <span class="text-white">$${tip.toLocaleString('es-CL')}</span>
-                            </div>
-                            <div class="flex justify-between font-bold text-sm text-indigo-400 border-t border-slate-800 pt-1">
-                                <span>Total a Pagar:</span>
-                                <span>$${finalTotal.toLocaleString('es-CL')}</span>
-                            </div>
-                        </div>
-                        <button onclick="window.closeTableAndPay('${tableId}', ${subtotal}, ${tip}, ${finalTotal}, '${tableData.waiter}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2 rounded-xl text-xs transition shadow-lg shadow-emerald-600/20">
-                            Cobrar y Registrar Venta
-                        </button>
-                    `;
-                    container.appendChild(card);
-                }
+            if (activeTables.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-20 text-slate-500 text-sm">Sin cuentas pendientes de cobro</div>`;
+                return;
             }
 
-            if (!hasActiveTables) {
-                container.innerHTML = `<div class="col-span-full text-center py-20 text-slate-500 text-sm">No hay mesas ocupadas en este momento</div>`;
-            }
-        };
+            activeTables.forEach(table => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3";
 
-        window.closeTableAndPay = async function(tableId, subtotal, tip, total, waiter) {
-            const table = window.appState.tablesData[tableId];
-            if (!table) return;
-
-            try {
-                // 1. Registrar en la hoja Ventas y liberar mesa en Drive
-                await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'closeSale',
-                        tableId: tableId,
-                        subtotal: subtotal,
-                        tip: tip,
-                        total: total,
-                        waiter: waiter,
-                        items: table.items
-                    })
-                });
-
-                window.showToast(`¡${tableId} cobrada y guardada en el historial!`);
-                setTimeout(() => window.loadCloudData(), 1500);
-            } catch (err) {
-                console.error("Error al cobrar:", err);
-            }
-        };
-
-        /* ================= NAVEGACIÓN Y UTILIDADES ================= */
-        window.switchView = function(viewId) {
-            ['tables', 'pos', 'kitchen', 'cashier'].forEach(v => {
-                const el = document.getElementById(`view-${v}`);
-                const nav = document.getElementById(`nav-${v}`);
-                if (el) el.classList.add('hidden');
-                if (nav) {
-                    nav.classList.remove('bg-indigo-600', 'text-white');
-                    nav.classList.add('text-slate-400');
-                }
+                card.innerHTML = `
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                        <h3 class="font-bold text-base text-white">${table.tableId}</h3>
+                        <span class="font-bold text-emerald-400 text-sm">$${table.total.toLocaleString('es-CL')}</span>
+                    </div>
+                    <div class="text-xs text-slate-400 space-y-1">
+                        <p>Garzón: <span class="text-white font-medium">${table.waiter}</span></p>
+                        <p>Ítems: <span class="text-white font-medium">${table.items.length} productos</span></p>
+                    </div>
+                    <button onclick="window.closeTableInCashier('${table.tableId}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-xl text-xs shadow-lg transition">
+                        Cobrar y Liberar Mesa
+                    </button>
+                `;
+                container.appendChild(card);
             });
+        };
 
-            const targetView = document.getElementById(`view-${viewId}`);
-            const targetNav = document.getElementById(`nav-${viewId}`);
-            if (targetView) targetView.classList.remove('hidden');
-            if (targetNav) {
-                targetNav.classList.remove('text-slate-400');
-                targetNav.classList.add('bg-indigo-600', 'text-white');
+        window.closeTableInCashier = async function(tableId) {
+            try {
+                // Liberar la mesa en Supabase
+                const { error } = await supabase
+                    .from('mesas')
+                    .update({ estado: 'free', items: [], total: 0, garzon_actual: '' })
+                    .eq('numero_mesa', tableId);
+
+                if (error) throw error;
+
+                window.showToast(`¡${tableId} cobrada y liberada!`);
+            } catch (err) {
+                console.error("Error cobrando mesa:", err);
+                window.showToast("Error al liberar la mesa");
             }
         };
 
         window.updateBadges = function() {
-            const tables = Object.values(window.appState.tablesData);
-            const kitchenCount = tables.filter(t => t.items && t.items.length > 0 && t.status !== 'ready_to_pay').length;
-            const cashierCount = tables.filter(t => t.items && t.items.length > 0).length;
+            const activeCount = Object.values(window.appState.tablesData).filter(t => t.items && t.items.length > 0).length;
+            const bKitchen = document.getElementById('badge-kitchen');
+            const bCashier = document.getElementById('badge-cashier');
 
-            const kBadge = document.getElementById('badge-kitchen');
-            const cBadge = document.getElementById('badge-cashier');
-
-            if (kBadge) {
-                kBadge.textContent = kitchenCount;
-                kBadge.classList.toggle('hidden', kitchenCount === 0);
-            }
-            if (cBadge) {
-                cBadge.textContent = cashierCount;
-                cBadge.classList.toggle('hidden', cashierCount === 0);
+            if (activeCount > 0) {
+                bKitchen.textContent = activeCount;
+                bKitchen.classList.remove('hidden');
+                bCashier.textContent = activeCount;
+                bCashier.classList.remove('hidden');
+            } else {
+                bKitchen.classList.add('hidden');
+                bCashier.classList.add('hidden');
             }
         };
 
-        window.showToast = function(msg) {
-            const toast = document.getElementById('toast');
-            const msgEl = document.getElementById('toast-message');
-            if (!toast || !msgEl) return;
-            msgEl.textContent = msg;
-            toast.classList.remove('translate-x-full');
-            setTimeout(() => {
-                toast.classList.add('translate-x-full');
-            }, 3000);
-        };
-
-        window.openNoteModal = function(cartId) {
-            window.appState.editingCartId = cartId;
-            const item = window.appState.currentCart.find(i => i.cartId === cartId);
-            document.getElementById('modal-note-item-name').textContent = item ? `Nota para: ${item.name}` : 'Especificación';
-            document.getElementById('modal-note-input').value = item ? item.note || '' : '';
-            document.getElementById('modal-note').classList.remove('hidden');
-        };
-
-        window.closeNoteModal = function() {
-            document.getElementById('modal-note').classList.add('hidden');
-            window.appState.editingCartId = null;
-        };
-
-        window.saveItemNote = function() {
-            const noteText = document.getElementById('modal-note-input').value;
-            const cartId = window.appState.editingCartId;
-            const idx = window.appState.currentCart.findIndex(i => i.cartId === cartId);
-            if (idx > -1) {
-                window.appState.currentCart[idx].note = noteText;
-                window.renderCart();
-            }
-            window.closeNoteModal();
-        };
-
-        // INICIALIZACIÓN
-        window.checkWaiterIdentity();
-        window.loadCloudData();
+        /* ================= INICIALIZACIÓN ================= */
+        window.addEventListener('DOMContentLoaded', () => {
+            window.checkWaiterIdentity();
+            window.loadCloudData();
+            window.setupRealtime(); // Iniciar escuchas en tiempo real
+        });
     </script>
 </body>
 </html>
