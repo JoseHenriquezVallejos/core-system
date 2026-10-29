@@ -220,6 +220,7 @@
 
         // Inicializar Cliente de Supabase
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        window.supabaseApp = supabaseClient; // Para usarlo de forma global
 
         window.appState = {
             selectedTable: "Mesa 1",
