@@ -209,31 +209,17 @@
                         <form onsubmit="window.createNewMenuItemInSupabase(event)" class="space-y-3">
                             <div>
                                 <label class="block text-xs text-slate-400 mb-1">Nombre</label>
-                                <input type="text" id="admin-item-name" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="Ej: Pisco Sour">
+                                <input type="text" id="admin-item-name" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="Ej: Lomo Saltado">
                             </div>
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
                                     <label class="block text-xs text-slate-400 mb-1">Categoría</label>
-                                    <select id="admin-item-category" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
-                                        <option value="entradas">Entradas</option>
-                                        <option value="fondos">Fondos</option>
-                                        <option value="bebidas">Bebidas</option>
-                                        <option value="postres">Postres</option>
-                                    </select>
+                                    <input type="text" id="admin-item-category" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="Ej: Platos de Fondo">
                                 </div>
                                 <div>
                                     <label class="block text-xs text-slate-400 mb-1">Precio ($)</label>
-                                    <input type="number" id="admin-item-price" required min="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="5000">
+                                    <input type="number" id="admin-item-price" required min="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="12990">
                                 </div>
-                            </div>
-                            <div>
-                                <label class="block text-xs text-slate-400 mb-1">Icono</label>
-                                <select id="admin-item-icon" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
-                                    <option value="fa-utensils">Plato</option>
-                                    <option value="fa-glass-water">Bebida</option>
-                                    <option value="fa-burger">Comida Rápida</option>
-                                    <option value="fa-cake-candles">Postre</option>
-                                </select>
                             </div>
                             <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-lg shadow-indigo-600/30">
                                 Guardar Producto
@@ -259,7 +245,8 @@
             searchQuery: "",
             currentCart: [],
             tablesData: {},
-            menuData: []
+            menuData: [],
+            currentRestaurantId: "don-pepe" // ID del restaurante actual según tu tabla
         };
 
         window.showToast = function(msg) {
@@ -313,18 +300,20 @@
                 }
                 window.appState.tablesData = tablesObj;
 
-                // 2. Cargar Menú
-                const { data: menu, error: errMenu } = await window.supabaseClient.from('menu').select('*').eq('disponible', true);
+                // 2. Cargar Menú filtrado por restaurant_id
+                const { data: menu, error: errMenu } = await window.supabaseClient
+                    .from('menu')
+                    .select('*')
+                    .eq('restaurant_id', window.appState.currentRestaurantId);
+                
                 if (errMenu) throw errMenu;
 
                 if (menu) {
                     window.appState.menuData = menu.map(item => ({
                         id: item.id,
                         name: item.nombre,
-                        category: item.categoria,
-                        price: Number(item.precio) || 0,
-                        desc: item.descripcion || '',
-                        icon: item.icono || 'fa-utensils'
+                        category: item.categoria || 'General',
+                        price: Number(item.precio) || 0
                     }));
                 }
 
@@ -446,13 +435,10 @@
         };
 
         window.initCategories = function() {
-            const categories = [
-                { id: "all", name: "Todos" },
-                { id: "entradas", name: "Entradas" },
-                { id: "fondos", name: "Fondos" },
-                { id: "bebidas", name: "Bebidas" },
-                { id: "postres", name: "Postres" }
-            ];
+            // Extraer categorías únicas del menú cargado
+            const uniqueCats = [...new Set(window.appState.menuData.map(i => i.category))];
+            const categories = [{ id: "all", name: "Todos" }, ...uniqueCats.map(c => ({ id: c, name: c }))];
+            
             const container = document.getElementById('category-tabs');
             if (!container) return;
             container.innerHTML = '';
@@ -489,16 +475,22 @@
                 return catMatch && searchMatch;
             });
 
+            if (items.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-500 text-xs">No hay productos en esta categoría. Agrega algunos desde Administración (⚙️).</div>`;
+                return;
+            }
+
             items.forEach(item => {
                 const card = document.createElement('div');
                 card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-3.5 flex flex-col justify-between";
                 card.innerHTML = `
                     <div>
                         <div class="flex justify-between items-start mb-2">
-                            <i class="fa-solid ${item.icon} text-indigo-400 text-lg"></i>
+                            <i class="fa-solid fa-utensils text-indigo-400 text-lg"></i>
                             <span class="font-bold text-sm text-indigo-400">$${item.price.toLocaleString('es-CL')}</span>
                         </div>
                         <h4 class="font-bold text-xs text-white mb-1">${item.name}</h4>
+                        <span class="text-[10px] text-slate-500 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">${item.category}</span>
                     </div>
                     <button onclick="window.addToCart('${item.id}')" class="mt-3 w-full bg-slate-800 hover:bg-indigo-600 text-white text-xs py-1.5 rounded-xl font-medium transition">
                         + Agregar
@@ -702,14 +694,18 @@
         window.createNewMenuItemInSupabase = async function(event) {
             event.preventDefault();
             const name = document.getElementById('admin-item-name').value.trim();
-            const category = document.getElementById('admin-item-category').value;
+            const category = document.getElementById('admin-item-category').value.trim();
             const price = Number(document.getElementById('admin-item-price').value);
-            const icon = document.getElementById('admin-item-icon').value;
 
             try {
                 const { error } = await window.supabaseClient
                     .from('menu')
-                    .insert([{ nombre: name, categoria: category, precio: price, icono: icon, disponible: true }]);
+                    .insert([{ 
+                        restaurant_id: window.appState.currentRestaurantId,
+                        nombre: name, 
+                        categoria: category, 
+                        precio: price 
+                    }]);
 
                 if (error) throw error;
                 window.showToast(`¡${name} agregado al menú!`);
