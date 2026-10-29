@@ -246,7 +246,7 @@
             currentCart: [],
             tablesData: {},
             menuData: [],
-            currentRestaurantId: "don-pepe" // ID del restaurante actual según tu tabla
+            currentRestaurantId: "don-pepe"
         };
 
         window.showToast = function(msg) {
@@ -349,14 +349,15 @@
             }
 
             try {
+                // Actualización directa por número de mesa sin requerir constraint de upsert
                 const { error } = await window.supabaseClient
                     .from('mesas')
-                    .upsert({
-                        numero_mesa: tableId,
+                    .update({
                         estado: 'occupied',
                         items: window.appState.currentCart,
                         garzon_actual: waiterName
-                    }, { onConflict: 'numero_mesa' });
+                    })
+                    .eq('numero_mesa', tableId);
 
                 if (error) throw error;
 
@@ -435,7 +436,6 @@
         };
 
         window.initCategories = function() {
-            // Extraer categorías únicas del menú cargado
             const uniqueCats = [...new Set(window.appState.menuData.map(i => i.category))];
             const categories = [{ id: "all", name: "Todos" }, ...uniqueCats.map(c => ({ id: c, name: c }))];
             
@@ -635,12 +635,12 @@
             try {
                 const { error } = await window.supabaseClient
                     .from('mesas')
-                    .upsert({
-                        numero_mesa: tableId,
+                    .update({
                         estado: 'free',
                         items: [],
                         garzon_actual: null
-                    }, { onConflict: 'numero_mesa' });
+                    })
+                    .eq('numero_mesa', tableId);
 
                 if (error) throw error;
                 window.showToast(`¡${tableId} cobrada y liberada!`);
