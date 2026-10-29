@@ -214,13 +214,12 @@
 
     <!-- LÓGICA DE CONEXIÓN CON SUPABASE -->
     <script>
-        // 1. CREDENCIALES CONFIGURADAS DE SUPABASE (RestoMaster-DB)
+        // 1. Credenciales de Supabase
         const SUPABASE_URL = 'https://kosyaamaocsslumanzrm.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_JwZ4ND6W9nMsqsOME-bc0A_JZYisN-4'; // Inserte ti anon key ditoy no adda pannakaurnos
+        const SUPABASE_KEY = 'sb_publishable_JwZ4ND6W9nMsqsOME-bc0A_JZYisN-4';
 
-        // Inicializar Cliente de Supabase
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        window.supabaseApp = supabaseClient; // Para usarlo de forma global
+        // Inicializar cliente asignándolo a window.supabaseClient para evitar colisiones de nombres
+        window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         window.appState = {
             selectedTable: "Mesa 1",
@@ -281,33 +280,37 @@
         window.loadCloudData = async function() {
             try {
                 // 1. Cargar Mesas
-                const { data: tables, error: errTables } = await supabase.from('mesas').select('*');
+                const { data: tables, error: errTables } = await window.supabaseClient.from('mesas').select('*');
                 if (errTables) throw errTables;
 
                 const tablesObj = {};
-                tables.forEach(row => {
-                    tablesObj[row.numero_mesa] = {
-                        tableId: row.numero_mesa,
-                        status: row.estado || 'free',
-                        items: row.items || [],
-                        total: Number(row.total) || 0,
-                        waiter: row.garzon_actual || ''
-                    };
-                });
+                if (tables) {
+                    tables.forEach(row => {
+                        tablesObj[row.numero_mesa] = {
+                            tableId: row.numero_mesa,
+                            status: row.estado || 'free',
+                            items: row.items || [],
+                            total: Number(row.total) || 0,
+                            waiter: row.garzon_actual || ''
+                        };
+                    });
+                }
                 window.appState.tablesData = tablesObj;
 
                 // 2. Cargar Menú
-                const { data: menu, error: errMenu } = await supabase.from('menu').select('*').eq('disponible', true);
+                const { data: menu, error: errMenu } = await window.supabaseClient.from('menu').select('*').eq('disponible', true);
                 if (errMenu) throw errMenu;
 
-                window.appState.menuData = menu.map(item => ({
-                    id: item.id,
-                    name: item.nombre,
-                    category: item.categoria,
-                    price: Number(item.precio) || 0,
-                    desc: item.descripcion || '',
-                    icon: item.icono || 'fa-utensils'
-                }));
+                if (menu) {
+                    window.appState.menuData = menu.map(item => ({
+                        id: item.id,
+                        name: item.nombre,
+                        category: item.categoria,
+                        price: Number(item.precio) || 0,
+                        desc: item.descripcion || '',
+                        icon: item.icono || 'fa-utensils'
+                    }));
+                }
 
                 // Renderizar Interfaces
                 window.renderTablesGrid();
@@ -325,7 +328,7 @@
 
         /* ================= TIEMPO REAL (REALTIME DE SUPABASE) ================= */
         window.setupRealtime = function() {
-            supabase
+            window.supabaseClient
                 .channel('escucha-resto')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'mesas' }, payload => {
                     console.log('¡Cambio en Vivo en Mesas!', payload);
@@ -346,7 +349,7 @@
             const total = window.appState.currentCart.reduce((acc, i) => acc + (i.price * i.quantity), 0);
 
             try {
-                const { error } = await supabase
+                const { error } = await window.supabaseClient
                     .from('mesas')
                     .upsert({
                         numero_mesa: tableId,
@@ -568,7 +571,7 @@
             window.renderCart();
         };
 
-        /* ================= VISTA COCINA (KDS) ================= */
+        /* ================= VISTA COCINA (KDS) & CAJA ================= */
         window.renderKitchenView = function() {
             const container = document.getElementById('kitchen-orders-grid');
             if (!container) return;
@@ -584,13 +587,54 @@
             occupiedTables.forEach(table => {
                 const card = document.createElement('div');
                 card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3";
+                
+                let itemsList = table.items.map(i => `
+                    <div class="py-1 border-b border-slate-800/60 last:border-0 flex justify-between items-center text-xs">
+                        <div>
+                            <span class="font-bold text-white">${i.quantity}x</span> ${i.name}
+                            ${i.note ? `<span class="block text-[10px] text-amber-400">${i.note}</span>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                        <h3 class="font-bold text-base text-white">${table.tableId}</h3>
+                        <span class="text-xs text-indigo-400 font-semibold">${table.waiter}</span>
+                    </div>
+                    <div class="space-y-1">${itemsList}</div>
+                `;
                 container.appendChild(card);
             });
         };
 
-        window.updateBadges = function() {
-            // Actualizar contadores si es necesario
+        window.renderCashierView = function() {
+            const container = document.getElementById('cashier-tables-grid');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const activeTables = Object.values(window.appState.tablesData).filter(t => t.items && t.items.length > 0);
+
+            if (activeTables.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-20 text-slate-500 text-sm">Sin cuentas pendientes por cobrar</div>`;
+                return;
+            }
+
+            activeTables.forEach(table => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3";
+                card.innerHTML = `
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                        <h3 class="font-bold text-base text-white">${table.tableId}</h3>
+                        <span class="font-bold text-emerald-400 text-sm">$${table.total.toLocaleString('es-CL')}</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Atendido por: ${table.waiter || 'Sin asignar'}</p>
+                `;
+                container.appendChild(card);
+            });
         };
+
+        window.updateBadges = function() {};
 
         // Inicialización al cargar la ventana
         window.onload = function() {
