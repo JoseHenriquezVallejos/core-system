@@ -32,7 +32,7 @@
     <header class="bg-slate-900 border-b border-slate-800 px-4 py-3 sticky top-0 z-30 flex items-center justify-between shadow-lg">
         <div class="flex items-center space-x-3">
             <div class="bg-indigo-600 text-white p-2 rounded-xl shadow-inner">
-                <i class="fa-solid fa-[#fa-bolt] fa-bolt text-xl"></i>
+                <i class="fa-solid fa-bolt text-xl"></i>
             </div>
             <div>
                 <h1 class="font-bold text-lg leading-tight flex items-center gap-2">
@@ -214,12 +214,12 @@
 
     <!-- LÓGICA DE CONEXIÓN CON SUPABASE -->
     <script>
-        // 1. REEMPLAZA ESTOS VALORES CON TUS CREDENCIALES DE SUPABASE
-        const SUPABASE_URL = 'https://TU_PROYECTO.supabase.co';
-        const SUPABASE_KEY = 'TU_ANON_KEY';
+        // 1. CREDENCIALES CONFIGURADAS DE SUPABASE (RestoMaster-DB)
+        const SUPABASE_URL = 'https://kosyaamaocsslumanzrm.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_JwZ4ND6W9nMsqsOME-bc0A_JZYisN-4'; // Inserte ti anon key ditoy no adda pannakaurnos
 
         // Inicializar Cliente de Supabase
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         window.appState = {
             selectedTable: "Mesa 1",
@@ -328,7 +328,7 @@
                 .channel('escucha-resto')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'mesas' }, payload => {
                     console.log('¡Cambio en Vivo en Mesas!', payload);
-                    window.loadCloudData(); // Se actualiza solo en milisegundos
+                    window.loadCloudData();
                 })
                 .subscribe();
         };
@@ -345,7 +345,6 @@
             const total = window.appState.currentCart.reduce((acc, i) => acc + (i.price * i.quantity), 0);
 
             try {
-                // Guardar/Actualizar estado de la mesa en Supabase
                 const { error } = await supabase
                     .from('mesas')
                     .upsert({
@@ -584,101 +583,20 @@
             occupiedTables.forEach(table => {
                 const card = document.createElement('div');
                 card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3";
-
-                let itemsList = table.items.map(i => `
-                    <div class="py-1 border-b border-slate-800/60 last:border-0 flex justify-between items-center text-xs">
-                        <div>
-                            <span class="font-bold text-indigo-400 mr-2">${i.quantity}x</span>
-                            <span class="text-white">${i.name}</span>
-                            ${i.note ? `<p class="text-[10px] text-amber-400 mt-0.5">${i.note}</p>` : ''}
-                        </div>
-                    </div>
-                `).join('');
-
-                card.innerHTML = `
-                    <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                        <h3 class="font-bold text-base text-white">${table.tableId}</h3>
-                        <span class="text-[10px] bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded border border-indigo-500/20 font-bold">${table.waiter}</span>
-                    </div>
-                    <div class="space-y-1">${itemsList}</div>
-                `;
                 container.appendChild(card);
             });
-        };
-
-        /* ================= VISTA CAJA ================= */
-        window.renderCashierView = function() {
-            const container = document.getElementById('cashier-tables-grid');
-            if (!container) return;
-            container.innerHTML = '';
-
-            const activeTables = Object.values(window.appState.tablesData).filter(t => t.items && t.items.length > 0);
-
-            if (activeTables.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-20 text-slate-500 text-sm">Sin cuentas pendientes de cobro</div>`;
-                return;
-            }
-
-            activeTables.forEach(table => {
-                const card = document.createElement('div');
-                card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3";
-
-                card.innerHTML = `
-                    <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                        <h3 class="font-bold text-base text-white">${table.tableId}</h3>
-                        <span class="font-bold text-emerald-400 text-sm">$${table.total.toLocaleString('es-CL')}</span>
-                    </div>
-                    <div class="text-xs text-slate-400 space-y-1">
-                        <p>Garzón: <span class="text-white font-medium">${table.waiter}</span></p>
-                        <p>Ítems: <span class="text-white font-medium">${table.items.length} productos</span></p>
-                    </div>
-                    <button onclick="window.closeTableInCashier('${table.tableId}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-xl text-xs shadow-lg transition">
-                        Cobrar y Liberar Mesa
-                    </button>
-                `;
-                container.appendChild(card);
-            });
-        };
-
-        window.closeTableInCashier = async function(tableId) {
-            try {
-                // Liberar la mesa en Supabase
-                const { error } = await supabase
-                    .from('mesas')
-                    .update({ estado: 'free', items: [], total: 0, garzon_actual: '' })
-                    .eq('numero_mesa', tableId);
-
-                if (error) throw error;
-
-                window.showToast(`¡${tableId} cobrada y liberada!`);
-            } catch (err) {
-                console.error("Error cobrando mesa:", err);
-                window.showToast("Error al liberar la mesa");
-            }
         };
 
         window.updateBadges = function() {
-            const activeCount = Object.values(window.appState.tablesData).filter(t => t.items && t.items.length > 0).length;
-            const bKitchen = document.getElementById('badge-kitchen');
-            const bCashier = document.getElementById('badge-cashier');
-
-            if (activeCount > 0) {
-                bKitchen.textContent = activeCount;
-                bKitchen.classList.remove('hidden');
-                bCashier.textContent = activeCount;
-                bCashier.classList.remove('hidden');
-            } else {
-                bKitchen.classList.add('hidden');
-                bCashier.classList.add('hidden');
-            }
+            // Actualizar contadores si es necesario
         };
 
-        /* ================= INICIALIZACIÓN ================= */
-        window.addEventListener('DOMContentLoaded', () => {
+        // Inicialización al cargar la ventana
+        window.onload = function() {
             window.checkWaiterIdentity();
             window.loadCloudData();
-            window.setupRealtime(); // Iniciar escuchas en tiempo real
-        });
+            window.setupRealtime();
+        };
     </script>
 </body>
 </html>
