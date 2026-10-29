@@ -293,11 +293,10 @@
                         
                         tablesObj[row.numero_mesa] = {
                             tableId: row.numero_mesa,
-                            status: row.estado || 'free',
+                            status: row.estado || 'free', // 'free', 'occupied', 'ready'
                             items: itemsArr,
                             total: calculatedTotal,
-                            waiter: row.garzon_actual || '',
-                            listoCocina: row.listo_cocina || false
+                            waiter: row.garzon_actual || ''
                         };
                     });
                 }
@@ -352,14 +351,13 @@
             }
 
             try {
-                // Al enviar/actualizar pedido, si agregan algo más, podemos mantener o resetear la marca de cocina opcionalmente
+                // Si agregan algo más, cambiamos a 'occupied' para que cocina lo vuelva a revisar si es necesario
                 const { error } = await window.supabaseClient
                     .from('mesas')
                     .update({
                         estado: 'occupied',
                         items: window.appState.currentCart,
-                        garzon_actual: waiterName,
-                        listo_cocina: false // Si agregan más cosas, vuelve a requerir atención en cocina
+                        garzon_actual: waiterName
                     })
                     .eq('numero_mesa', tableId);
 
@@ -387,15 +385,16 @@
             keys.forEach(tableId => {
                 const tableData = window.appState.tablesData[tableId];
                 const totalItems = (tableData.items || []).reduce((acc, curr) => acc + curr.quantity, 0);
-                const estaOcupada = totalItems > 0;
+                const estaOcupada = tableData.status === 'occupied' || tableData.status === 'ready';
+                const esReady = tableData.status === 'ready';
                 
                 let statusColor = "border-slate-800 bg-slate-900/60";
                 let statusBadge = `<span class="text-slate-500 text-[10px] font-bold">DISPONIBLE</span>`;
 
                 if (estaOcupada) {
-                    statusColor = tableData.listoCocina ? "border-emerald-500/50 bg-emerald-950/20" : "border-amber-500/50 bg-amber-950/20";
-                    const estadoTexto = tableData.listoCocina ? "LISTO / EN CAJA" : "EN ATENCIÓN";
-                    statusBadge = `<span class="${tableData.listoCocina ? 'text-emerald-400' : 'text-amber-400'} text-[10px] font-bold">${estadoTexto} ($${tableData.total.toLocaleString('es-CL')})</span>`;
+                    statusColor = esReady ? "border-emerald-500/50 bg-emerald-950/20" : "border-amber-500/50 bg-amber-950/20";
+                    const estadoTexto = esReady ? "LISTO / EN CAJA" : "EN ATENCIÓN";
+                    statusBadge = `<span class="${esReady ? 'text-emerald-400' : 'text-amber-400'} text-[10px] font-bold">${estadoTexto} ($${tableData.total.toLocaleString('es-CL')})</span>`;
                 }
 
                 const waiterInfo = tableData.waiter && estaOcupada ? `<span class="text-[10px] text-indigo-400 block font-semibold mt-1"><i class="fa-solid fa-user text-[9px]"></i> ${tableData.waiter}</span>` : '';
@@ -435,7 +434,6 @@
                 waiterInput.value = (tableData && tableData.waiter) ? tableData.waiter : (localStorage.getItem('restomaster_last_waiter') || '');
             }
 
-            // Permite mantener los ítems actuales y agregar más si el cliente pide "algo más"
             window.appState.currentCart = tableData && tableData.items ? JSON.parse(JSON.stringify(tableData.items)) : [];
 
             window.renderCart();
@@ -582,11 +580,12 @@
             if (!container) return;
             container.innerHTML = '';
 
-            const occupiedTables = Object.values(window.appState.tablesData).filter(t => t.items && t.items.length > 0);
+            const occupiedTables = Object.values(window.appState.tablesData).filter(t => t.status === 'occupied' || t.status === 'ready');
 
             if (badge) {
-                if (occupiedTables.length > 0) {
-                    badge.textContent = occupiedTables.length;
+                const pendingKitchen = occupiedTables.filter(t => t.status === 'occupied');
+                if (pendingKitchen.length > 0) {
+                    badge.textContent = pendingKitchen.length;
                     badge.classList.remove('hidden');
                 } else {
                     badge.classList.add('hidden');
@@ -609,6 +608,8 @@
                     </div>
                 `).join('');
 
+                const isReady = table.status === 'ready';
+
                 card.innerHTML = `
                     <div>
                         <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-2">
@@ -617,8 +618,8 @@
                         </div>
                         <div class="space-y-1 mb-4">${itemsList}</div>
                     </div>
-                    <button onclick="window.markOrderReady('${table.tableId}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/25">
-                        <i class="fa-solid fa-check"></i> Marcar Listo (Avisa a Caja)
+                    <button onclick="window.markOrderReady('${table.tableId}')" class="w-full ${isReady ? 'bg-slate-800 text-emerald-400 border border-emerald-500/30' : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/25'} py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-check"></i> ${isReady ? 'Pedido Ya en Caja (Marcar de nuevo)' : 'Marcar Listo (Avisa a Caja)'}
                     </button>
                 `;
                 container.appendChild(card);
@@ -627,10 +628,10 @@
 
         window.markOrderReady = async function(tableId) {
             try {
-                // Actualiza en Supabase que la orden está lista para caja, pero la mesa sigue ocupada y abierta
+                // Cambiamos el estado a 'ready' para notificar a caja manteniendo la mesa abierta
                 const { error } = await window.supabaseClient
                     .from('mesas')
-                    .update({ listo_cocina: true })
+                    .update({ estado: 'ready' })
                     .eq('numero_mesa', tableId);
 
                 if (error) throw error;
@@ -648,12 +649,11 @@
             if (!container) return;
             container.innerHTML = '';
 
-            const activeTables = Object.values(window.appState.tablesData).filter(t => t.items && t.items.length > 0);
+            const activeTables = Object.values(window.appState.tablesData).filter(t => t.status === 'occupied' || t.status === 'ready');
 
             if (badge) {
                 if (activeTables.length > 0) {
                     badge.textContent = activeTables.length;
-                    badge.classList.add('flex');
                     badge.classList.remove('hidden');
                 } else {
                     badge.classList.add('hidden');
@@ -676,7 +676,8 @@
                     </div>
                 `).join('');
 
-                const estadoCocinaBadge = table.listoCocina 
+                const isReady = table.status === 'ready';
+                const estadoCocinaBadge = isReady 
                     ? `<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] px-2 py-0.5 rounded font-bold">✔ Pedido Listo</span>` 
                     : `<span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] px-2 py-0.5 rounded font-bold">⏳ En Preparación</span>`;
 
@@ -702,13 +703,13 @@
 
         window.liberarMesa = async function(tableId) {
             try {
+                // Al cobrar, la mesa vuelve a quedar libre y vacía
                 const { error } = await window.supabaseClient
                     .from('mesas')
                     .update({
                         estado: 'free',
                         items: [],
-                        garzon_actual: null,
-                        listo_cocina: false
+                        garzon_actual: null
                     })
                     .eq('numero_mesa', tableId);
 
@@ -750,7 +751,7 @@
             try {
                 const { error } = await window.supabaseClient
                     .from('mesas')
-                    .insert([{ numero_mesa: newTableId, estado: 'free', items: [], listo_cocina: false }]);
+                    .insert([{ numero_mesa: newTableId, estado: 'free', items: [] }]);
 
                 if (error) throw error;
                 window.showToast(`¡${newTableId} creada!`);
