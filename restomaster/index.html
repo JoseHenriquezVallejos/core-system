@@ -42,13 +42,20 @@
             </div>
         </div>
 
-        <!-- Identificador del Garzón actual en este Celular -->
-        <div class="hidden sm:flex items-center space-x-2 bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-xl">
-            <i class="fa-solid fa-user-gear text-indigo-400 text-xs"></i>
-            <span class="text-xs text-slate-400">Garzón:</span>
-            <span id="header-waiter-name" class="text-xs font-bold text-white">Cargando...</span>
-            <button onclick="window.changeDeviceWaiterName()" class="text-slate-500 hover:text-indigo-400 text-xs ml-1" title="Cambiar Nombre">
-                <i class="fa-solid fa-pen-to-square"></i>
+        <!-- Identificador del Garzón actual y Botón Admin -->
+        <div class="flex items-center space-x-2">
+            <div class="hidden sm:flex items-center space-x-2 bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-xl">
+                <i class="fa-solid fa-user-gear text-indigo-400 text-xs"></i>
+                <span class="text-xs text-slate-400">Garzón:</span>
+                <span id="header-waiter-name" class="text-xs font-bold text-white">Cargando...</span>
+                <button onclick="window.changeDeviceWaiterName()" class="text-slate-500 hover:text-indigo-400 text-xs ml-1" title="Cambiar Nombre">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+            </div>
+
+            <!-- Botón Acceso Panel Admin -->
+            <button onclick="window.switchView('admin')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-2 rounded-xl border border-slate-700 transition" title="Administración del Local">
+                <i class="fa-solid fa-gear text-indigo-400"></i>
             </button>
         </div>
 
@@ -65,12 +72,10 @@
             <button onclick="window.switchView('kitchen')" id="nav-kitchen" class="px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center space-x-1.5 text-slate-400 hover:text-white relative">
                 <i class="fa-solid fa-fire-burner"></i>
                 <span class="hidden md:inline">Cocina</span>
-                <span id="badge-kitchen" class="bg-amber-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold hidden">0</span>
             </button>
             <button onclick="window.switchView('cashier')" id="nav-cashier" class="px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center space-x-1.5 text-slate-400 hover:text-white relative">
                 <i class="fa-solid fa-cash-register"></i>
                 <span class="hidden md:inline">Caja</span>
-                <span id="badge-cashier" class="bg-emerald-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold hidden">0</span>
             </button>
         </nav>
     </header>
@@ -92,7 +97,7 @@
                 </div>
 
                 <div id="tables-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    <!-- Generado dinámicamente -->
+                    <!-- Generado dinámicamente según lo que tenga registrado Supabase -->
                 </div>
             </div>
         </section>
@@ -181,6 +186,76 @@
             </div>
         </section>
 
+        <!-- ================= VISTA 5: ADMINISTRACIÓN (CONFIGURACIÓN) ================= -->
+        <section id="view-admin" class="flex-1 p-4 md:p-6 overflow-y-auto hidden">
+            <div class="max-w-5xl mx-auto space-y-8">
+                <div class="border-b border-slate-800 pb-4">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-indigo-400"></i> Panel de Configuración del Local
+                    </h2>
+                    <p class="text-xs text-slate-400">Agrega mesas o edita la carta/menú del restaurante directamente a Supabase.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- 1. Gestión de Mesas -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+                        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                            <h3 class="font-bold text-base text-white flex items-center gap-2"><i class="fa-solid fa-chair text-indigo-400"></i> Gestión de Mesas</h3>
+                            <button onclick="window.createNewTableInSupabase()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition">
+                                + Agregar Mesa
+                            </button>
+                        </div>
+                        <p class="text-xs text-slate-400">Mesas configuradas actualmente en el local:</p>
+                        <div id="admin-tables-list" class="space-y-2 max-h-60 overflow-y-auto"></div>
+                    </div>
+
+                    <!-- 2. Gestión de Menú -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+                        <h3 class="font-bold text-base text-white border-b border-slate-800 pb-3 flex items-center gap-2"><i class="fa-solid fa-utensils text-indigo-400"></i> Agregar Nuevo Producto al Menú</h3>
+                        
+                        <form onsubmit="window.createNewMenuItemInSupabase(event)" class="space-y-3">
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">Nombre del Plato/Bebida</label>
+                                <input type="text" id="admin-item-name" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="Ej: Pisco Sour Cathedral">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">Categoría</label>
+                                    <select id="admin-item-category" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                                        <option value="entradas">Entradas</option>
+                                        <option value="fondos">Fondos</option>
+                                        <option value="bebidas">Bebidas</option>
+                                        <option value="postres">Postres</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">Precio ($)</label>
+                                    <input type="number" id="admin-item-price" required min="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="5500">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">Descripción</label>
+                                <input type="text" id="admin-item-desc" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="Ej: Con limón de Pica">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">Icono (FontAwesome)</label>
+                                <select id="admin-item-icon" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                                    <option value="fa-utensils">Plato / General</option>
+                                    <option value="fa-glass-water">Bebida / Trago</option>
+                                    <option value="fa-burger">Comida Rápida</option>
+                                    <option value="fa-cake-candles">Postre</option>
+                                    <option value="fa-mug-hot">Café / Té</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-lg shadow-indigo-600/30">
+                                Guardar Producto en Supabase
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- Modal para Configurar Nombre del Garzón -->
@@ -197,18 +272,6 @@
             <button onclick="window.saveDeviceWaiterName()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-indigo-600/30">
                 Guardar e Iniciar Turno
             </button>
-        </div>
-    </div>
-
-    <!-- Modal para Notas -->
-    <div id="modal-note" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 space-y-4">
-            <h3 id="modal-note-item-name" class="font-bold text-base text-white">Especificación del Plato</h3>
-            <textarea id="modal-note-input" rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="Ej: Sin sal, término medio..."></textarea>
-            <div class="flex justify-end space-x-2">
-                <button onclick="window.closeNoteModal()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold">Cancelar</button>
-                <button onclick="window.saveItemNote()" class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-semibold">Guardar</button>
-            </div>
         </div>
     </div>
 
@@ -241,14 +304,24 @@
         };
 
         window.switchView = function(viewName) {
-            ['tables', 'pos', 'kitchen', 'cashier'].forEach(v => {
-                document.getElementById(`view-${v}`).classList.add('hidden');
-                document.getElementById(`nav-${v}`).classList.remove('bg-indigo-600', 'text-white');
-                document.getElementById(`nav-${v}`).classList.add('text-slate-400');
+            ['tables', 'pos', 'kitchen', 'cashier', 'admin'].forEach(v => {
+                const el = document.getElementById(`view-${v}`);
+                if (el) el.classList.add('hidden');
+                
+                const nav = document.getElementById(`nav-${v}`);
+                if (nav) {
+                    nav.classList.remove('bg-indigo-600', 'text-white');
+                    nav.classList.add('text-slate-400');
+                }
             });
-            document.getElementById(`view-${viewName}`).classList.remove('hidden');
-            document.getElementById(`nav-${viewName}`).classList.add('bg-indigo-600', 'text-white');
-            document.getElementById(`nav-${viewName}`).classList.remove('text-slate-400');
+            const activeView = document.getElementById(`view-${viewName}`);
+            if (activeView) activeView.classList.remove('hidden');
+
+            const activeNav = document.getElementById(`nav-${viewName}`);
+            if (activeNav) {
+                activeNav.classList.add('bg-indigo-600', 'text-white');
+                activeNav.classList.remove('text-slate-400');
+            }
         };
 
         /* ================= IDENTIDAD DEL DISPOSITIVO ================= */
@@ -316,7 +389,7 @@
                 window.renderTablesGrid();
                 window.renderKitchenView();
                 window.renderCashierView();
-                window.updateBadges();
+                window.renderAdminTables();
                 window.initCategories();
                 window.renderMenu();
 
@@ -332,6 +405,10 @@
                 .channel('escucha-resto')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'mesas' }, payload => {
                     console.log('¡Cambio en Vivo en Mesas!', payload);
+                    window.loadCloudData();
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'menu' }, payload => {
+                    console.log('¡Cambio en Vivo en Menú!', payload);
                     window.loadCloudData();
                 })
                 .subscribe();
@@ -375,10 +452,15 @@
             if (!grid) return;
             grid.innerHTML = '';
 
-            for (let i = 1; i <= 10; i++) {
-                const tableId = `Mesa ${i}`;
-                const tableData = window.appState.tablesData[tableId] || { status: 'free', items: [], waiter: '' };
-                
+            const keys = Object.keys(window.appState.tablesData);
+            
+            if (keys.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-500 text-xs">No hay mesas registradas en el local. Agrégalas desde Administración (⚙️).</div>`;
+                return;
+            }
+
+            keys.forEach(tableId => {
+                const tableData = window.appState.tablesData[tableId];
                 const totalItems = (tableData.items || []).reduce((acc, curr) => acc + curr.quantity, 0);
                 
                 // Validación inteligente: Si no hay productos, la mesa está libre sí o sí
@@ -415,7 +497,7 @@
                     </button>
                 `;
                 grid.appendChild(card);
-            }
+            });
         };
 
         window.selectTableAndOpenPos = function(tableId) {
@@ -534,11 +616,7 @@
                             <span class="font-semibold text-white">${item.name}</span>
                             <span class="font-bold text-indigo-400">$${(item.price * item.quantity).toLocaleString('es-CL')}</span>
                         </div>
-                        ${item.note ? `<div class="text-[10px] text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">${item.note}</div>` : ''}
                         <div class="flex justify-between items-center pt-1">
-                            <button onclick="window.openNoteModal(${item.cartId})" class="text-[10px] text-slate-400 hover:text-indigo-400">
-                                <i class="fa-solid fa-pen"></i> Nota
-                            </button>
                             <div class="flex items-center space-x-2 bg-slate-900 border border-slate-800 rounded-lg px-2 py-0.5">
                                 <button onclick="window.updateQty(${item.cartId}, -1)" class="text-xs text-slate-400 hover:text-white">-</button>
                                 <span class="text-xs font-bold text-white">${item.quantity}</span>
@@ -593,7 +671,6 @@
                     <div class="py-1 border-b border-slate-800/60 last:border-0 flex justify-between items-center text-xs">
                         <div>
                             <span class="font-bold text-white">${i.quantity}x</span> ${i.name}
-                            ${i.note ? `<span class="block text-[10px] text-amber-400">${i.note}</span>` : ''}
                         </div>
                     </div>
                 `).join('');
@@ -635,7 +712,72 @@
             });
         };
 
-        window.updateBadges = function() {};
+        /* ================= LÓGICA DEL PANEL ADMIN ================= */
+        window.renderAdminTables = function() {
+            const container = document.getElementById('admin-tables-list');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const keys = Object.keys(window.appState.tablesData);
+            if (keys.length === 0) {
+                container.innerHTML = `<div class="text-xs text-slate-500 italic">No hay mesas. Presiona "+ Agregar Mesa".</div>`;
+                return;
+            }
+
+            keys.forEach(tableId => {
+                const item = document.createElement('div');
+                item.className = "bg-slate-950 border border-slate-800 p-2.5 rounded-xl flex justify-between items-center text-xs";
+                item.innerHTML = `
+                    <span class="font-bold text-white">${tableId}</span>
+                    <span class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Registrada</span>
+                `;
+                container.appendChild(item);
+            });
+        };
+
+        window.createNewTableInSupabase = async function() {
+            const currentCount = Object.keys(window.appState.tablesData).length;
+            const newTableId = `Mesa ${currentCount + 1}`;
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('mesas')
+                    .insert([{ numero_mesa: newTableId, estado: 'free', items: [], total: 0 }]);
+
+                if (error) throw error;
+
+                window.showToast(`¡${newTableId} creada exitosamente!`);
+                window.loadCloudData();
+            } catch (err) {
+                console.error("Error al crear mesa:", err);
+                window.showToast("Error al crear mesa en Supabase");
+            }
+        };
+
+        window.createNewMenuItemInSupabase = async function(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('admin-item-name').value.trim();
+            const category = document.getElementById('admin-item-category').value;
+            const price = Number(document.getElementById('admin-item-price').value);
+            const desc = document.getElementById('admin-item-desc').value.trim();
+            const icon = document.getElementById('admin-item-icon').value;
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('menu')
+                    .insert([{ nombre: name, categoria: category, precio: price, descripcion: desc, icono: icon, disponible: true }]);
+
+                if (error) throw error;
+
+                window.showToast(`¡${name} agregado al Menú!`);
+                event.target.reset();
+                window.loadCloudData();
+            } catch (err) {
+                console.error("Error al guardar plato:", err);
+                window.showToast("Error al agregar producto en Supabase");
+            }
+        };
 
         // Inicialización al cargar la ventana
         window.onload = function() {
