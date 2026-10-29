@@ -227,10 +227,6 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-xs text-slate-400 mb-1">Descripción</label>
-                                <input type="text" id="admin-item-desc" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="Ej: Preparado tradicional">
-                            </div>
-                            <div>
                                 <label class="block text-xs text-slate-400 mb-1">Icono</label>
                                 <select id="admin-item-icon" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
                                     <option value="fa-utensils">Plato</option>
@@ -357,7 +353,6 @@
             if (window.appState.currentCart.length === 0) return;
             const tableId = window.appState.selectedTable;
             
-            // Capturar garzon del input y guardarlo en localStorage para recordarlo
             const waiterInput = document.getElementById('input-waiter-name');
             const waiterName = waiterInput ? waiterInput.value.trim() : '';
             if (waiterName) {
@@ -441,7 +436,6 @@
             const tableData = window.appState.tablesData[tableId];
             window.appState.currentCart = tableData && tableData.items ? [...tableData.items] : [];
 
-            // Rellenar garzón si ya está registrado o guardado en este dispositivo
             const waiterInput = document.getElementById('input-waiter-name');
             if (waiterInput) {
                 waiterInput.value = (tableData && tableData.waiter) ? tableData.waiter : (localStorage.getItem('restomaster_last_waiter') || '');
@@ -505,9 +499,8 @@
                             <span class="font-bold text-sm text-indigo-400">$${item.price.toLocaleString('es-CL')}</span>
                         </div>
                         <h4 class="font-bold text-xs text-white mb-1">${item.name}</h4>
-                        <p class="text-[11px] text-slate-400 leading-tight mb-3">${item.desc}</p>
                     </div>
-                    <button onclick="window.addToCart('${item.id}')" class="w-full bg-slate-800 hover:bg-indigo-600 text-white text-xs py-1.5 rounded-xl font-medium transition">
+                    <button onclick="window.addToCart('${item.id}')" class="mt-3 w-full bg-slate-800 hover:bg-indigo-600 text-white text-xs py-1.5 rounded-xl font-medium transition">
                         + Agregar
                     </button>
                 `;
@@ -711,13 +704,12 @@
             const name = document.getElementById('admin-item-name').value.trim();
             const category = document.getElementById('admin-item-category').value;
             const price = Number(document.getElementById('admin-item-price').value);
-            const desc = document.getElementById('admin-item-desc').value.trim();
             const icon = document.getElementById('admin-item-icon').value;
 
             try {
                 const { error } = await window.supabaseClient
                     .from('menu')
-                    .insert([{ nombre: name, categoria: category, precio: price, descripcion: desc, icono: icon, disponible: true }]);
+                    .insert([{ nombre: name, categoria: category, precio: price, icono: icon, disponible: true }]);
 
                 if (error) throw error;
                 window.showToast(`¡${name} agregado al menú!`);
