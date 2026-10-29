@@ -62,10 +62,12 @@
             <button onclick="window.switchView('kitchen')" id="nav-kitchen" class="px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center space-x-1.5 text-slate-400 hover:text-white relative">
                 <i class="fa-solid fa-fire-burner"></i>
                 <span class="hidden md:inline">Cocina</span>
+                <span id="kitchen-badge" class="hidden absolute -top-1 -right-1 bg-rose-500 text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full">0</span>
             </button>
             <button onclick="window.switchView('cashier')" id="nav-cashier" class="px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center space-x-1.5 text-slate-400 hover:text-white relative">
                 <i class="fa-solid fa-cash-register"></i>
                 <span class="hidden md:inline">Caja</span>
+                <span id="cashier-badge" class="hidden absolute -top-1 -right-1 bg-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full">0</span>
             </button>
         </nav>
     </header>
@@ -79,7 +81,7 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-4">
                     <div>
                         <h2 class="text-xl font-bold">Plano de Mesas y Atención</h2>
-                        <p class="text-xs text-slate-400">Selecciona una mesa para tomar un pedido o consultar la cuenta.</p>
+                        <p class="text-xs text-slate-400">Selecciona una mesa para tomar un pedido o agregar más productos en cualquier momento.</p>
                     </div>
                     <button onclick="window.loadCloudData()" class="bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 px-3 py-2 rounded-xl text-xs flex items-center gap-2 transition">
                         <i class="fa-solid fa-rotate"></i> Recargar
@@ -122,7 +124,7 @@
             <!-- Carrito lateral -->
             <aside class="w-full md:w-96 bg-slate-900 border-t md:border-t-0 md:border-l border-slate-800 flex flex-col shadow-2xl">
                 <div class="p-4 border-b border-slate-800 flex items-center justify-between">
-                    <h3 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-receipt text-indigo-400"></i> Comanda Actual</h3>
+                    <h3 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-receipt text-indigo-400"></i> Comanda Abierta (Cuenta)</h3>
                     <span id="cart-item-count" class="text-xs bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-full text-slate-300">0 ítems</span>
                 </div>
 
@@ -140,13 +142,13 @@
                         <span id="pos-subtotal">$0</span>
                     </div>
                     <div class="flex justify-between text-lg font-bold text-white border-t border-slate-800 pt-2">
-                        <span>Total Pedido</span>
+                        <span>Total Cuenta Actual</span>
                         <span id="pos-total" class="text-indigo-400">$0</span>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2 pt-2">
                         <button onclick="window.clearCurrentCart()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 py-2.5 rounded-xl text-xs font-semibold border border-slate-700 transition">Vaciar</button>
-                        <button onclick="window.sendOrderToSupabase()" id="btn-send-order" class="bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-xl text-xs font-semibold shadow-lg shadow-indigo-600/30 transition">Enviar a Cocina</button>
+                        <button onclick="window.sendOrderToSupabase()" id="btn-send-order" class="bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-xl text-xs font-semibold shadow-lg shadow-indigo-600/30 transition">Actualizar / Pedir más</button>
                     </div>
                 </div>
             </aside>
@@ -158,7 +160,7 @@
                 <div class="border-b border-slate-800 pb-4 flex justify-between items-center">
                     <div>
                         <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-fire-burner text-rose-500"></i> Pantalla KDS de Cocina</h2>
-                        <p class="text-xs text-slate-400">Comandas en tiempo real.</p>
+                        <p class="text-xs text-slate-400">Comandas en tiempo real. Al marcar "Listo", la cuenta pasa a caja pero sigue abierta para modificaciones.</p>
                     </div>
                 </div>
 
@@ -172,7 +174,7 @@
                 <div class="border-b border-slate-800 pb-4 flex justify-between items-center">
                     <div>
                         <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-cash-register text-emerald-400"></i> Panel de Caja y Cobro</h2>
-                        <p class="text-xs text-slate-400">Cierre y cobro de cuentas.</p>
+                        <p class="text-xs text-slate-400">Cuentas activas y listas para cobro final.</p>
                     </div>
                 </div>
 
@@ -294,7 +296,8 @@
                             status: row.estado || 'free',
                             items: itemsArr,
                             total: calculatedTotal,
-                            waiter: row.garzon_actual || ''
+                            waiter: row.garzon_actual || '',
+                            listoCocina: row.listo_cocina || false
                         };
                     });
                 }
@@ -349,19 +352,20 @@
             }
 
             try {
-                // Actualización directa por número de mesa sin requerir constraint de upsert
+                // Al enviar/actualizar pedido, si agregan algo más, podemos mantener o resetear la marca de cocina opcionalmente
                 const { error } = await window.supabaseClient
                     .from('mesas')
                     .update({
                         estado: 'occupied',
                         items: window.appState.currentCart,
-                        garzon_actual: waiterName
+                        garzon_actual: waiterName,
+                        listo_cocina: false // Si agregan más cosas, vuelve a requerir atención en cocina
                     })
                     .eq('numero_mesa', tableId);
 
                 if (error) throw error;
 
-                window.showToast(`¡Pedido de ${tableId} enviado!`);
+                window.showToast(`¡Cuenta de ${tableId} actualizada con éxito!`);
                 window.switchView('tables');
             } catch (err) {
                 console.error("Error enviando pedido:", err);
@@ -389,8 +393,9 @@
                 let statusBadge = `<span class="text-slate-500 text-[10px] font-bold">DISPONIBLE</span>`;
 
                 if (estaOcupada) {
-                    statusColor = "border-amber-500/50 bg-amber-950/20";
-                    statusBadge = `<span class="text-amber-400 text-[10px] font-bold">EN ATENCIÓN ($${tableData.total.toLocaleString('es-CL')})</span>`;
+                    statusColor = tableData.listoCocina ? "border-emerald-500/50 bg-emerald-950/20" : "border-amber-500/50 bg-amber-950/20";
+                    const estadoTexto = tableData.listoCocina ? "LISTO / EN CAJA" : "EN ATENCIÓN";
+                    statusBadge = `<span class="${tableData.listoCocina ? 'text-emerald-400' : 'text-amber-400'} text-[10px] font-bold">${estadoTexto} ($${tableData.total.toLocaleString('es-CL')})</span>`;
                 }
 
                 const waiterInfo = tableData.waiter && estaOcupada ? `<span class="text-[10px] text-indigo-400 block font-semibold mt-1"><i class="fa-solid fa-user text-[9px]"></i> ${tableData.waiter}</span>` : '';
@@ -409,10 +414,10 @@
                         <i class="fa-solid fa-chair text-slate-700 text-xl"></i>
                     </div>
                     <div class="text-xs text-slate-400">
-                        <span>${totalItems} productos</span>
+                        <span>${totalItems} productos en cuenta</span>
                     </div>
                     <button class="w-full bg-slate-800 hover:bg-indigo-600 text-white text-xs font-semibold py-1.5 rounded-xl transition">
-                        ${estaOcupada ? 'Ver / Editar Cuenta' : 'Abrir Mesa'}
+                        ${estaOcupada ? 'Pedir más / Ver Cuenta' : 'Abrir Mesa'}
                     </button>
                 `;
                 grid.appendChild(card);
@@ -424,12 +429,14 @@
             document.getElementById('active-table-label').textContent = tableId;
             
             const tableData = window.appState.tablesData[tableId];
-            window.appState.currentCart = tableData && tableData.items ? [...tableData.items] : [];
-
+            
             const waiterInput = document.getElementById('input-waiter-name');
             if (waiterInput) {
                 waiterInput.value = (tableData && tableData.waiter) ? tableData.waiter : (localStorage.getItem('restomaster_last_waiter') || '');
             }
+
+            // Permite mantener los ítems actuales y agregar más si el cliente pide "algo más"
+            window.appState.currentCart = tableData && tableData.items ? JSON.parse(JSON.stringify(tableData.items)) : [];
 
             window.renderCart();
             window.switchView('pos');
@@ -571,10 +578,20 @@
 
         window.renderKitchenView = function() {
             const container = document.getElementById('kitchen-orders-grid');
+            const badge = document.getElementById('kitchen-badge');
             if (!container) return;
             container.innerHTML = '';
 
             const occupiedTables = Object.values(window.appState.tablesData).filter(t => t.items && t.items.length > 0);
+
+            if (badge) {
+                if (occupiedTables.length > 0) {
+                    badge.textContent = occupiedTables.length;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            }
 
             if (occupiedTables.length === 0) {
                 container.innerHTML = `<div class="col-span-full text-center py-20 text-slate-500 text-sm">Sin comandas en cocina</div>`;
@@ -583,47 +600,99 @@
 
             occupiedTables.forEach(table => {
                 const card = document.createElement('div');
-                card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3";
+                card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3 flex flex-col justify-between";
                 
                 let itemsList = table.items.map(i => `
                     <div class="py-1 border-b border-slate-800/60 last:border-0 flex justify-between items-center text-xs">
                         <div><span class="font-bold text-white">${i.quantity}x</span> ${i.name}</div>
+                        <span class="text-slate-400">$${(i.price * i.quantity).toLocaleString('es-CL')}</span>
                     </div>
                 `).join('');
 
                 card.innerHTML = `
-                    <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                        <h3 class="font-bold text-base text-white">${table.tableId}</h3>
-                        <span class="text-xs text-indigo-400 font-semibold">${table.waiter || 'Sin garzón'}</span>
+                    <div>
+                        <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-2">
+                            <h3 class="font-bold text-base text-white">${table.tableId}</h3>
+                            <span class="text-xs text-indigo-400 font-semibold">${table.waiter || 'Sin garzón'}</span>
+                        </div>
+                        <div class="space-y-1 mb-4">${itemsList}</div>
                     </div>
-                    <div class="space-y-1">${itemsList}</div>
+                    <button onclick="window.markOrderReady('${table.tableId}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/25">
+                        <i class="fa-solid fa-check"></i> Marcar Listo (Avisa a Caja)
+                    </button>
                 `;
                 container.appendChild(card);
             });
         };
 
+        window.markOrderReady = async function(tableId) {
+            try {
+                // Actualiza en Supabase que la orden está lista para caja, pero la mesa sigue ocupada y abierta
+                const { error } = await window.supabaseClient
+                    .from('mesas')
+                    .update({ listo_cocina: true })
+                    .eq('numero_mesa', tableId);
+
+                if (error) throw error;
+                window.showToast(`¡${tableId} lista! Notificada a caja.`);
+                window.loadCloudData();
+            } catch (err) {
+                console.error("Error marcando listo:", err);
+                window.showToast("Error al actualizar estado");
+            }
+        };
+
         window.renderCashierView = function() {
             const container = document.getElementById('cashier-tables-grid');
+            const badge = document.getElementById('cashier-badge');
             if (!container) return;
             container.innerHTML = '';
 
             const activeTables = Object.values(window.appState.tablesData).filter(t => t.items && t.items.length > 0);
 
+            if (badge) {
+                if (activeTables.length > 0) {
+                    badge.textContent = activeTables.length;
+                    badge.classList.add('flex');
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            }
+
             if (activeTables.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-20 text-slate-500 text-sm">Sin cuentas pendientes</div>`;
+                container.innerHTML = `<div class="col-span-full text-center py-20 text-slate-500 text-sm">Sin cuentas activas en el local</div>`;
                 return;
             }
 
             activeTables.forEach(table => {
                 const card = document.createElement('div');
                 card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3";
+                
+                let itemsList = table.items.map(i => `
+                    <div class="flex justify-between text-xs py-0.5 border-b border-slate-800/40">
+                        <span class="text-slate-300">${i.quantity}x ${i.name}</span>
+                        <span class="font-medium text-white">$${(i.price * i.quantity).toLocaleString('es-CL')}</span>
+                    </div>
+                `).join('');
+
+                const estadoCocinaBadge = table.listoCocina 
+                    ? `<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] px-2 py-0.5 rounded font-bold">✔ Pedido Listo</span>` 
+                    : `<span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] px-2 py-0.5 rounded font-bold">⏳ En Preparación</span>`;
+
                 card.innerHTML = `
                     <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                        <h3 class="font-bold text-base text-white">${table.tableId}</h3>
-                        <span class="font-bold text-emerald-400 text-sm">$${table.total.toLocaleString('es-CL')}</span>
+                        <div>
+                            <h3 class="font-bold text-base text-white">${table.tableId}</h3>
+                            ${estadoCocinaBadge}
+                        </div>
+                        <span class="font-bold text-emerald-400 text-base">$${table.total.toLocaleString('es-CL')}</span>
                     </div>
                     <p class="text-xs text-slate-400">Atendido por: <span class="text-white font-medium">${table.waiter || 'No especificado'}</span></p>
-                    <button onclick="window.liberarMesa('${table.tableId}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2 rounded-xl text-xs font-bold transition">
+                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800/80 space-y-1 my-2 max-h-32 overflow-y-auto">
+                        ${itemsList}
+                    </div>
+                    <button onclick="window.liberarMesa('${table.tableId}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 rounded-xl text-xs font-bold transition shadow-lg shadow-emerald-600/20">
                         Cobrar y Liberar Mesa
                     </button>
                 `;
@@ -638,12 +707,13 @@
                     .update({
                         estado: 'free',
                         items: [],
-                        garzon_actual: null
+                        garzon_actual: null,
+                        listo_cocina: false
                     })
                     .eq('numero_mesa', tableId);
 
                 if (error) throw error;
-                window.showToast(`¡${tableId} cobrada y liberada!`);
+                window.showToast(`¡${tableId} cobrada y liberada con éxito!`);
                 window.loadCloudData();
             } catch (err) {
                 console.error("Error liberando mesa:", err);
@@ -680,7 +750,7 @@
             try {
                 const { error } = await window.supabaseClient
                     .from('mesas')
-                    .insert([{ numero_mesa: newTableId, estado: 'free', items: [] }]);
+                    .insert([{ numero_mesa: newTableId, estado: 'free', items: [], listo_cocina: false }]);
 
                 if (error) throw error;
                 window.showToast(`¡${newTableId} creada!`);
