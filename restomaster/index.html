@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RestoMaster - Sistema de Atención Gastronómica (Supabase)</title>
+    <title>RestoMaster - Sistema de Atención Gastronómica</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome para iconos -->
@@ -25,7 +25,7 @@
     <!-- Toast Notification -->
     <div id="toast" class="fixed top-5 right-5 z-50 transform translate-x-full transition-transform duration-300 bg-emerald-600 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center space-x-3 pointer-events-none">
         <i class="fa-solid fa-circle-check text-xl"></i>
-        <span id="toast-message" class="font-medium">¡Sincronizado con Supabase!</span>
+        <span id="toast-message" class="font-medium">¡Sincronizado!</span>
     </div>
 
     <!-- Barra de Navegación -->
@@ -36,26 +36,16 @@
             </div>
             <div>
                 <h1 class="font-bold text-lg leading-tight flex items-center gap-2">
-                    RestoMaster <span class="text-xs font-semibold text-indigo-400 bg-indigo-950/80 border border-indigo-800 px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span> Supabase Realtime</span>
+                    RestoMaster <span class="text-xs font-semibold text-indigo-400 bg-indigo-950/80 border border-indigo-800 px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span> En Vivo</span>
                 </h1>
-                <p class="text-xs text-slate-400">Atención en vivo ultrarrápida</p>
+                <p class="text-xs text-slate-400">Atención rápida</p>
             </div>
         </div>
 
-        <!-- Identificador del Garzón actual y Botón Admin -->
+        <!-- Botón Acceso Panel Admin -->
         <div class="flex items-center space-x-2">
-            <div class="hidden sm:flex items-center space-x-2 bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-xl">
-                <i class="fa-solid fa-user-gear text-indigo-400 text-xs"></i>
-                <span class="text-xs text-slate-400">Garzón:</span>
-                <span id="header-waiter-name" class="text-xs font-bold text-white">Cargando...</span>
-                <button onclick="window.changeDeviceWaiterName()" class="text-slate-500 hover:text-indigo-400 text-xs ml-1" title="Cambiar Nombre">
-                    <i class="fa-solid fa-pen-to-square"></i>
-                </button>
-            </div>
-
-            <!-- Botón Acceso Panel Admin -->
             <button onclick="window.switchView('admin')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-2 rounded-xl border border-slate-700 transition" title="Administración del Local">
-                <i class="fa-solid fa-gear text-indigo-400"></i>
+                <i class="fa-solid fa-gear text-indigo-400 text-lg"></i>
             </button>
         </div>
 
@@ -92,13 +82,11 @@
                         <p class="text-xs text-slate-400">Selecciona una mesa para tomar un pedido o consultar la cuenta.</p>
                     </div>
                     <button onclick="window.loadCloudData()" class="bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 px-3 py-2 rounded-xl text-xs flex items-center gap-2 transition">
-                        <i class="fa-solid fa-rotate"></i> Recargar Datos
+                        <i class="fa-solid fa-rotate"></i> Recargar
                     </button>
                 </div>
 
-                <div id="tables-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    <!-- Generado dinámicamente según lo que tenga registrado Supabase -->
-                </div>
+                <div id="tables-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
             </div>
         </section>
 
@@ -112,7 +100,7 @@
                             <i class="fa-solid fa-chair text-lg"></i>
                         </div>
                         <div>
-                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Mesa en edición</span>
+                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Mesa seleccionada</span>
                             <span id="active-table-label" class="text-sm font-bold text-white">Mesa 1</span>
                         </div>
                     </div>
@@ -136,6 +124,12 @@
                 <div class="p-4 border-b border-slate-800 flex items-center justify-between">
                     <h3 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-receipt text-indigo-400"></i> Comanda Actual</h3>
                     <span id="cart-item-count" class="text-xs bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-full text-slate-300">0 ítems</span>
+                </div>
+
+                <!-- Campo rápido de Garzón -->
+                <div class="px-4 pt-3">
+                    <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Atendido por (Garzón):</label>
+                    <input type="text" id="input-waiter-name" placeholder="Ej: Juan" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
                 </div>
 
                 <div id="cart-container" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
@@ -164,7 +158,7 @@
                 <div class="border-b border-slate-800 pb-4 flex justify-between items-center">
                     <div>
                         <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-fire-burner text-rose-500"></i> Pantalla KDS de Cocina</h2>
-                        <p class="text-xs text-slate-400">Comandas recibidas en tiempo real desde Supabase.</p>
+                        <p class="text-xs text-slate-400">Comandas en tiempo real.</p>
                     </div>
                 </div>
 
@@ -178,7 +172,7 @@
                 <div class="border-b border-slate-800 pb-4 flex justify-between items-center">
                     <div>
                         <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-cash-register text-emerald-400"></i> Panel de Caja y Cobro</h2>
-                        <p class="text-xs text-slate-400">Cierre de mesas y liberación instantánea.</p>
+                        <p class="text-xs text-slate-400">Cierre y cobro de cuentas.</p>
                     </div>
                 </div>
 
@@ -193,30 +187,29 @@
                     <h2 class="text-xl font-bold text-white flex items-center gap-2">
                         <i class="fa-solid fa-sliders text-indigo-400"></i> Panel de Configuración del Local
                     </h2>
-                    <p class="text-xs text-slate-400">Agrega mesas o edita la carta/menú del restaurante directamente a Supabase.</p>
+                    <p class="text-xs text-slate-400">Agrega mesas o productos al menú en tiempo real.</p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <!-- 1. Gestión de Mesas -->
                     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
                         <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                            <h3 class="font-bold text-base text-white flex items-center gap-2"><i class="fa-solid fa-chair text-indigo-400"></i> Gestión de Mesas</h3>
+                            <h3 class="font-bold text-base text-white flex items-center gap-2"><i class="fa-solid fa-chair text-indigo-400"></i> Mesas del Local</h3>
                             <button onclick="window.createNewTableInSupabase()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition">
                                 + Agregar Mesa
                             </button>
                         </div>
-                        <p class="text-xs text-slate-400">Mesas configuradas actualmente en el local:</p>
                         <div id="admin-tables-list" class="space-y-2 max-h-60 overflow-y-auto"></div>
                     </div>
 
                     <!-- 2. Gestión de Menú -->
                     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
-                        <h3 class="font-bold text-base text-white border-b border-slate-800 pb-3 flex items-center gap-2"><i class="fa-solid fa-utensils text-indigo-400"></i> Agregar Nuevo Producto al Menú</h3>
+                        <h3 class="font-bold text-base text-white border-b border-slate-800 pb-3 flex items-center gap-2"><i class="fa-solid fa-utensils text-indigo-400"></i> Agregar Producto al Menú</h3>
                         
                         <form onsubmit="window.createNewMenuItemInSupabase(event)" class="space-y-3">
                             <div>
-                                <label class="block text-xs text-slate-400 mb-1">Nombre del Plato/Bebida</label>
-                                <input type="text" id="admin-item-name" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="Ej: Pisco Sour Cathedral">
+                                <label class="block text-xs text-slate-400 mb-1">Nombre</label>
+                                <input type="text" id="admin-item-name" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="Ej: Pisco Sour">
                             </div>
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
@@ -230,25 +223,24 @@
                                 </div>
                                 <div>
                                     <label class="block text-xs text-slate-400 mb-1">Precio ($)</label>
-                                    <input type="number" id="admin-item-price" required min="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="5500">
+                                    <input type="number" id="admin-item-price" required min="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="5000">
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-xs text-slate-400 mb-1">Descripción</label>
-                                <input type="text" id="admin-item-desc" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="Ej: Con limón de Pica">
+                                <input type="text" id="admin-item-desc" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="Ej: Preparado tradicional">
                             </div>
                             <div>
-                                <label class="block text-xs text-slate-400 mb-1">Icono (FontAwesome)</label>
+                                <label class="block text-xs text-slate-400 mb-1">Icono</label>
                                 <select id="admin-item-icon" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
-                                    <option value="fa-utensils">Plato / General</option>
-                                    <option value="fa-glass-water">Bebida / Trago</option>
+                                    <option value="fa-utensils">Plato</option>
+                                    <option value="fa-glass-water">Bebida</option>
                                     <option value="fa-burger">Comida Rápida</option>
                                     <option value="fa-cake-candles">Postre</option>
-                                    <option value="fa-mug-hot">Café / Té</option>
                                 </select>
                             </div>
                             <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-lg shadow-indigo-600/30">
-                                Guardar Producto en Supabase
+                                Guardar Producto
                             </button>
                         </form>
                     </div>
@@ -258,28 +250,489 @@
 
     </main>
 
-    <!-- Modal para Configurar Nombre del Garzón -->
-    <div id="modal-waiter-config" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-2xl p-6 space-y-4 text-center">
-            <div class="bg-indigo-600/20 text-indigo-400 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto border border-indigo-500/30">
-                <i class="fa-solid fa-mobile-screen-button text-2xl"></i>
-            </div>
-            <div>
-                <h3 class="font-bold text-lg text-white">Identifica este Teléfono</h3>
-                <p class="text-xs text-slate-400 mt-1">Ingresa tu nombre para asociarlo a las comandas enviadas desde este celular.</p>
-            </div>
-            <input type="text" id="device-waiter-input" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-center text-white focus:outline-none focus:border-indigo-500" placeholder="Ej: Juan Pérez">
-            <button onclick="window.saveDeviceWaiterName()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-indigo-600/30">
-                Guardar e Iniciar Turno
-            </button>
-        </div>
-    </div>
-
     <!-- LÓGICA DE CONEXIÓN CON SUPABASE -->
     <script>
-        // 1. Credenciales de Supabase
         const SUPABASE_URL = 'https://kosyaamaocsslumanzrm.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_JwZ4ND6W9nMsqsOME-bc0A_JZYisN-4';
 
-        // Inicializar cliente asignándolo a window.supabaseClient
-        window.supabaseClient =
+        window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        window.appState = {
+            selectedTable: "Mesa 1",
+            selectedCategory: "all",
+            searchQuery: "",
+            currentCart: [],
+            tablesData: {},
+            menuData: []
+        };
+
+        window.showToast = function(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = msg;
+            toast.classList.remove('translate-x-full');
+            setTimeout(() => toast.classList.add('translate-x-full'), 3000);
+        };
+
+        window.switchView = function(viewName) {
+            ['tables', 'pos', 'kitchen', 'cashier', 'admin'].forEach(v => {
+                const el = document.getElementById(`view-${v}`);
+                if (el) el.classList.add('hidden');
+                
+                const nav = document.getElementById(`nav-${v}`);
+                if (nav) {
+                    nav.classList.remove('bg-indigo-600', 'text-white');
+                    nav.classList.add('text-slate-400');
+                }
+            });
+            const activeView = document.getElementById(`view-${viewName}`);
+            if (activeView) activeView.classList.remove('hidden');
+
+            const activeNav = document.getElementById(`nav-${viewName}`);
+            if (activeNav) {
+                activeNav.classList.add('bg-indigo-600', 'text-white');
+                activeNav.classList.remove('text-slate-400');
+            }
+        };
+
+        window.loadCloudData = async function() {
+            try {
+                // 1. Cargar Mesas
+                const { data: tables, error: errTables } = await window.supabaseClient.from('mesas').select('*');
+                if (errTables) throw errTables;
+
+                const tablesObj = {};
+                if (tables) {
+                    tables.forEach(row => {
+                        const itemsArr = row.items || [];
+                        const calculatedTotal = itemsArr.reduce((acc, curr) => acc + (curr.price * curr.quantity), 0);
+                        
+                        tablesObj[row.numero_mesa] = {
+                            tableId: row.numero_mesa,
+                            status: row.estado || 'free',
+                            items: itemsArr,
+                            total: calculatedTotal,
+                            waiter: row.garzon_actual || ''
+                        };
+                    });
+                }
+                window.appState.tablesData = tablesObj;
+
+                // 2. Cargar Menú
+                const { data: menu, error: errMenu } = await window.supabaseClient.from('menu').select('*').eq('disponible', true);
+                if (errMenu) throw errMenu;
+
+                if (menu) {
+                    window.appState.menuData = menu.map(item => ({
+                        id: item.id,
+                        name: item.nombre,
+                        category: item.categoria,
+                        price: Number(item.precio) || 0,
+                        desc: item.descripcion || '',
+                        icon: item.icono || 'fa-utensils'
+                    }));
+                }
+
+                window.renderTablesGrid();
+                window.renderKitchenView();
+                window.renderCashierView();
+                window.renderAdminTables();
+                window.initCategories();
+                window.renderMenu();
+
+            } catch (err) {
+                console.error("Error al conectar con Supabase:", err);
+                window.showToast("Error de conexión");
+            }
+        };
+
+        window.setupRealtime = function() {
+            window.supabaseClient
+                .channel('escucha-resto')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'mesas' }, () => window.loadCloudData())
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'menu' }, () => window.loadCloudData())
+                .subscribe();
+        };
+
+        window.sendOrderToSupabase = async function() {
+            if (window.appState.currentCart.length === 0) return;
+            const tableId = window.appState.selectedTable;
+            
+            // Capturar garzon del input y guardarlo en localStorage para recordarlo
+            const waiterInput = document.getElementById('input-waiter-name');
+            const waiterName = waiterInput ? waiterInput.value.trim() : '';
+            if (waiterName) {
+                localStorage.setItem('restomaster_last_waiter', waiterName);
+            }
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('mesas')
+                    .upsert({
+                        numero_mesa: tableId,
+                        estado: 'occupied',
+                        items: window.appState.currentCart,
+                        garzon_actual: waiterName
+                    }, { onConflict: 'numero_mesa' });
+
+                if (error) throw error;
+
+                window.showToast(`¡Pedido de ${tableId} enviado!`);
+                window.switchView('tables');
+            } catch (err) {
+                console.error("Error enviando pedido:", err);
+                window.showToast("Error al guardar pedido");
+            }
+        };
+
+        window.renderTablesGrid = function() {
+            const grid = document.getElementById('tables-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            const keys = Object.keys(window.appState.tablesData);
+            if (keys.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-500 text-xs">No hay mesas. Agrégalas desde el botón de configuración (⚙️).</div>`;
+                return;
+            }
+
+            keys.forEach(tableId => {
+                const tableData = window.appState.tablesData[tableId];
+                const totalItems = (tableData.items || []).reduce((acc, curr) => acc + curr.quantity, 0);
+                const estaOcupada = totalItems > 0;
+                
+                let statusColor = "border-slate-800 bg-slate-900/60";
+                let statusBadge = `<span class="text-slate-500 text-[10px] font-bold">DISPONIBLE</span>`;
+
+                if (estaOcupada) {
+                    statusColor = "border-amber-500/50 bg-amber-950/20";
+                    statusBadge = `<span class="text-amber-400 text-[10px] font-bold">EN ATENCIÓN ($${tableData.total.toLocaleString('es-CL')})</span>`;
+                }
+
+                const waiterInfo = tableData.waiter && estaOcupada ? `<span class="text-[10px] text-indigo-400 block font-semibold mt-1"><i class="fa-solid fa-user text-[9px]"></i> ${tableData.waiter}</span>` : '';
+
+                const card = document.createElement('div');
+                card.className = `border ${statusColor} rounded-2xl p-4 flex flex-col justify-between space-y-3 cursor-pointer hover:border-indigo-500 transition shadow-md`;
+                card.onclick = () => window.selectTableAndOpenPos(tableId);
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-bold text-base text-white">${tableId}</h3>
+                            ${statusBadge}
+                            ${waiterInfo}
+                        </div>
+                        <i class="fa-solid fa-chair text-slate-700 text-xl"></i>
+                    </div>
+                    <div class="text-xs text-slate-400">
+                        <span>${totalItems} productos</span>
+                    </div>
+                    <button class="w-full bg-slate-800 hover:bg-indigo-600 text-white text-xs font-semibold py-1.5 rounded-xl transition">
+                        ${estaOcupada ? 'Ver / Editar Cuenta' : 'Abrir Mesa'}
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        };
+
+        window.selectTableAndOpenPos = function(tableId) {
+            window.appState.selectedTable = tableId;
+            document.getElementById('active-table-label').textContent = tableId;
+            
+            const tableData = window.appState.tablesData[tableId];
+            window.appState.currentCart = tableData && tableData.items ? [...tableData.items] : [];
+
+            // Rellenar garzón si ya está registrado o guardado en este dispositivo
+            const waiterInput = document.getElementById('input-waiter-name');
+            if (waiterInput) {
+                waiterInput.value = (tableData && tableData.waiter) ? tableData.waiter : (localStorage.getItem('restomaster_last_waiter') || '');
+            }
+
+            window.renderCart();
+            window.switchView('pos');
+        };
+
+        window.initCategories = function() {
+            const categories = [
+                { id: "all", name: "Todos" },
+                { id: "entradas", name: "Entradas" },
+                { id: "fondos", name: "Fondos" },
+                { id: "bebidas", name: "Bebidas" },
+                { id: "postres", name: "Postres" }
+            ];
+            const container = document.getElementById('category-tabs');
+            if (!container) return;
+            container.innerHTML = '';
+
+            categories.forEach(cat => {
+                const btn = document.createElement('button');
+                const active = window.appState.selectedCategory === cat.id;
+                btn.className = `px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                    active ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-800'
+                }`;
+                btn.textContent = cat.name;
+                btn.onclick = () => {
+                    window.appState.selectedCategory = cat.id;
+                    window.initCategories();
+                    window.renderMenu();
+                };
+                container.appendChild(btn);
+            });
+        };
+
+        window.filterMenu = function() {
+            window.appState.searchQuery = document.getElementById('search-input').value.toLowerCase();
+            window.renderMenu();
+        };
+
+        window.renderMenu = function() {
+            const grid = document.getElementById('menu-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            const items = window.appState.menuData.filter(i => {
+                const catMatch = window.appState.selectedCategory === 'all' || i.category === window.appState.selectedCategory;
+                const searchMatch = i.name.toLowerCase().includes(window.appState.searchQuery);
+                return catMatch && searchMatch;
+            });
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-3.5 flex flex-col justify-between";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <i class="fa-solid ${item.icon} text-indigo-400 text-lg"></i>
+                            <span class="font-bold text-sm text-indigo-400">$${item.price.toLocaleString('es-CL')}</span>
+                        </div>
+                        <h4 class="font-bold text-xs text-white mb-1">${item.name}</h4>
+                        <p class="text-[11px] text-slate-400 leading-tight mb-3">${item.desc}</p>
+                    </div>
+                    <button onclick="window.addToCart('${item.id}')" class="w-full bg-slate-800 hover:bg-indigo-600 text-white text-xs py-1.5 rounded-xl font-medium transition">
+                        + Agregar
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        };
+
+        window.addToCart = function(menuItemId) {
+            const menuItem = window.appState.menuData.find(i => i.id == menuItemId);
+            if (!menuItem) return;
+
+            const existing = window.appState.currentCart.find(i => i.id == menuItemId);
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                window.appState.currentCart.push({
+                    cartId: Date.now() + Math.random(),
+                    id: menuItem.id,
+                    name: menuItem.name,
+                    price: menuItem.price,
+                    quantity: 1
+                });
+            }
+            window.renderCart();
+        };
+
+        window.renderCart = function() {
+            const container = document.getElementById('cart-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (window.appState.currentCart.length === 0) {
+                container.innerHTML = `<div class="text-center py-10 text-xs text-slate-500">Mesa sin productos</div>`;
+            } else {
+                window.appState.currentCart.forEach(item => {
+                    const el = document.createElement('div');
+                    el.className = "bg-slate-950 border border-slate-800 p-2.5 rounded-xl space-y-2";
+                    el.innerHTML = `
+                        <div class="flex justify-between items-start text-xs">
+                            <span class="font-semibold text-white">${item.name}</span>
+                            <span class="font-bold text-indigo-400">$${(item.price * item.quantity).toLocaleString('es-CL')}</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-1">
+                            <div class="flex items-center space-x-2 bg-slate-900 border border-slate-800 rounded-lg px-2 py-0.5">
+                                <button onclick="window.updateQty(${item.cartId}, -1)" class="text-xs text-slate-400 hover:text-white">-</button>
+                                <span class="text-xs font-bold text-white">${item.quantity}</span>
+                                <button onclick="window.updateQty(${item.cartId}, 1)" class="text-xs text-slate-400 hover:text-white">+</button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(el);
+                });
+            }
+
+            const total = window.appState.currentCart.reduce((acc, i) => acc + (i.price * i.quantity), 0);
+            document.getElementById('pos-subtotal').textContent = `$${total.toLocaleString('es-CL')}`;
+            document.getElementById('pos-total').textContent = `$${total.toLocaleString('es-CL')}`;
+            document.getElementById('cart-item-count').textContent = `${window.appState.currentCart.length} ítems`;
+        };
+
+        window.updateQty = function(cartId, delta) {
+            const idx = window.appState.currentCart.findIndex(i => i.cartId === cartId);
+            if (idx > -1) {
+                window.appState.currentCart[idx].quantity += delta;
+                if (window.appState.currentCart[idx].quantity <= 0) {
+                    window.appState.currentCart.splice(idx, 1);
+                }
+                window.renderCart();
+            }
+        };
+
+        window.clearCurrentCart = function() {
+            window.appState.currentCart = [];
+            window.renderCart();
+        };
+
+        window.renderKitchenView = function() {
+            const container = document.getElementById('kitchen-orders-grid');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const occupiedTables = Object.values(window.appState.tablesData).filter(t => t.items && t.items.length > 0);
+
+            if (occupiedTables.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-20 text-slate-500 text-sm">Sin comandas en cocina</div>`;
+                return;
+            }
+
+            occupiedTables.forEach(table => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3";
+                
+                let itemsList = table.items.map(i => `
+                    <div class="py-1 border-b border-slate-800/60 last:border-0 flex justify-between items-center text-xs">
+                        <div><span class="font-bold text-white">${i.quantity}x</span> ${i.name}</div>
+                    </div>
+                `).join('');
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                        <h3 class="font-bold text-base text-white">${table.tableId}</h3>
+                        <span class="text-xs text-indigo-400 font-semibold">${table.waiter || 'Sin garzón'}</span>
+                    </div>
+                    <div class="space-y-1">${itemsList}</div>
+                `;
+                container.appendChild(card);
+            });
+        };
+
+        window.renderCashierView = function() {
+            const container = document.getElementById('cashier-tables-grid');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const activeTables = Object.values(window.appState.tablesData).filter(t => t.items && t.items.length > 0);
+
+            if (activeTables.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-20 text-slate-500 text-sm">Sin cuentas pendientes</div>`;
+                return;
+            }
+
+            activeTables.forEach(table => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3";
+                card.innerHTML = `
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                        <h3 class="font-bold text-base text-white">${table.tableId}</h3>
+                        <span class="font-bold text-emerald-400 text-sm">$${table.total.toLocaleString('es-CL')}</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Atendido por: <span class="text-white font-medium">${table.waiter || 'No especificado'}</span></p>
+                    <button onclick="window.liberarMesa('${table.tableId}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2 rounded-xl text-xs font-bold transition">
+                        Cobrar y Liberar Mesa
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        };
+
+        window.liberarMesa = async function(tableId) {
+            try {
+                const { error } = await window.supabaseClient
+                    .from('mesas')
+                    .upsert({
+                        numero_mesa: tableId,
+                        estado: 'free',
+                        items: [],
+                        garzon_actual: null
+                    }, { onConflict: 'numero_mesa' });
+
+                if (error) throw error;
+                window.showToast(`¡${tableId} cobrada y liberada!`);
+                window.loadCloudData();
+            } catch (err) {
+                console.error("Error liberando mesa:", err);
+                window.showToast("Error al cobrar mesa");
+            }
+        };
+
+        window.renderAdminTables = function() {
+            const container = document.getElementById('admin-tables-list');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const keys = Object.keys(window.appState.tablesData);
+            if (keys.length === 0) {
+                container.innerHTML = `<div class="text-xs text-slate-500 italic">No hay mesas creadas.</div>`;
+                return;
+            }
+
+            keys.forEach(tableId => {
+                const item = document.createElement('div');
+                item.className = "bg-slate-950 border border-slate-800 p-2.5 rounded-xl flex justify-between items-center text-xs";
+                item.innerHTML = `
+                    <span class="font-bold text-white">${tableId}</span>
+                    <span class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Activa</span>
+                `;
+                container.appendChild(item);
+            });
+        };
+
+        window.createNewTableInSupabase = async function() {
+            const currentCount = Object.keys(window.appState.tablesData).length;
+            const newTableId = `Mesa ${currentCount + 1}`;
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('mesas')
+                    .insert([{ numero_mesa: newTableId, estado: 'free', items: [] }]);
+
+                if (error) throw error;
+                window.showToast(`¡${newTableId} creada!`);
+                window.loadCloudData();
+            } catch (err) {
+                console.error("Error al crear mesa:", err);
+                window.showToast("Error al crear mesa");
+            }
+        };
+
+        window.createNewMenuItemInSupabase = async function(event) {
+            event.preventDefault();
+            const name = document.getElementById('admin-item-name').value.trim();
+            const category = document.getElementById('admin-item-category').value;
+            const price = Number(document.getElementById('admin-item-price').value);
+            const desc = document.getElementById('admin-item-desc').value.trim();
+            const icon = document.getElementById('admin-item-icon').value;
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('menu')
+                    .insert([{ nombre: name, categoria: category, precio: price, descripcion: desc, icono: icon, disponible: true }]);
+
+                if (error) throw error;
+                window.showToast(`¡${name} agregado al menú!`);
+                event.target.reset();
+                window.loadCloudData();
+            } catch (err) {
+                console.error("Error al guardar plato:", err);
+                window.showToast("Error al agregar producto");
+            }
+        };
+
+        window.onload = function() {
+            window.loadCloudData();
+            window.setupRealtime();
+        };
+    </script>
+</body>
+</html>
