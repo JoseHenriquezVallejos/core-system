@@ -379,23 +379,24 @@
                 const tableId = `Mesa ${i}`;
                 const tableData = window.appState.tablesData[tableId] || { status: 'free', items: [], waiter: '' };
                 
+                const totalItems = (tableData.items || []).reduce((acc, curr) => acc + curr.quantity, 0);
+                
+                // Validación inteligente: Si no hay productos, la mesa está libre sí o sí
+                const estaOcupada = totalItems > 0;
+                
                 let statusColor = "border-slate-800 bg-slate-900/60";
                 let statusBadge = `<span class="text-slate-500 text-[10px] font-bold">DISPONIBLE</span>`;
 
-                if (tableData.status === 'occupied') {
+                if (estaOcupada) {
                     statusColor = "border-amber-500/50 bg-amber-950/20";
                     statusBadge = `<span class="text-amber-400 text-[10px] font-bold">EN ATENCIÓN</span>`;
-                } else if (tableData.status === 'ready_to_pay') {
-                    statusColor = "border-emerald-500/50 bg-emerald-950/20";
-                    statusBadge = `<span class="text-emerald-400 text-[10px] font-bold">LISTO PARA COBRAR</span>`;
                 }
 
                 const card = document.createElement('div');
                 card.className = `border ${statusColor} rounded-2xl p-4 flex flex-col justify-between space-y-3 cursor-pointer hover:border-indigo-500 transition shadow-md`;
                 card.onclick = () => window.selectTableAndOpenPos(tableId);
 
-                const totalItems = (tableData.items || []).reduce((acc, curr) => acc + curr.quantity, 0);
-                const waiterInfo = tableData.waiter ? `<span class="text-[10px] text-indigo-400 block font-semibold"><i class="fa-solid fa-user text-[9px]"></i> ${tableData.waiter}</span>` : '';
+                const waiterInfo = tableData.waiter && estaOcupada ? `<span class="text-[10px] text-indigo-400 block font-semibold"><i class="fa-solid fa-user text-[9px]"></i> ${tableData.waiter}</span>` : '';
 
                 card.innerHTML = `
                     <div class="flex justify-between items-start">
@@ -410,7 +411,7 @@
                         <span>${totalItems} productos</span>
                     </div>
                     <button class="w-full bg-slate-800 hover:bg-indigo-600 text-white text-xs font-semibold py-1.5 rounded-xl transition">
-                        ${totalItems > 0 ? 'Editar Pedido' : 'Abrir Mesa'}
+                        ${estaOcupada ? 'Editar Pedido' : 'Abrir Mesa'}
                     </button>
                 `;
                 grid.appendChild(card);
