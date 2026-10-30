@@ -10,12 +10,12 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
 
-    <!-- Notificación Toast -->
+    <!-- Toast Notification -->
     <div id="toast" class="fixed top-5 right-5 z-50 transform translate-x-full transition-transform duration-300 bg-emerald-600 text-white px-5 py-2.5 rounded-xl shadow-xl text-xs font-semibold flex items-center gap-2 pointer-events-none">
-        <i class="fa-solid fa-circle-check"></i> <span id="toast-msg">Actualizado</span>
+        <i class="fa-solid fa-circle-check"></i> <span id="toast-msg">Sincronizado</span>
     </div>
 
-    <!-- Encabezado con 4 Etapas Dinámicas -->
+    <!-- Header Dinámico -->
     <header class="bg-slate-900 border-b border-slate-800 px-4 py-3 sticky top-0 z-30 flex items-center justify-between shadow-md">
         <div class="flex items-center space-x-3">
             <div class="bg-indigo-600 text-white p-2 rounded-xl shadow">
@@ -27,24 +27,30 @@
             </div>
         </div>
 
-        <nav class="flex items-center space-x-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
-            <button onclick="window.switchStep(1)" id="btn-step1" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white">Etapa 1</button>
-            <button onclick="window.switchStep(2)" id="btn-step2" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">Etapa 2</button>
-            <button onclick="window.switchStep(3)" id="btn-step3" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">Etapa 3</button>
-            <button onclick="window.switchStep(4)" id="btn-step4" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">Etapa 4</button>
-        </nav>
+        <div class="flex items-center space-x-2">
+            <button onclick="window.switchStep('admin')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-2 rounded-xl border border-slate-700 transition" title="Configuración">
+                <i class="fa-solid fa-gear text-indigo-400 text-base"></i>
+            </button>
+
+            <nav class="flex items-center space-x-1 bg-slate-950 p-1 rounded-xl border border-slate-800" id="nav-steps">
+                <button onclick="window.switchStep(1)" id="btn-step1" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white">Etapa 1</button>
+                <button onclick="window.switchStep(2)" id="btn-step2" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">Etapa 2</button>
+                <button onclick="window.switchStep(3)" id="btn-step3" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">Etapa 3</button>
+                <button onclick="window.switchStep(4)" id="btn-step4" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">Etapa 4</button>
+            </nav>
+        </div>
     </header>
 
-    <!-- Contenedor Principal de las 4 Vistas -->
+    <!-- Contenedor Principal -->
     <main class="flex-1 flex flex-col overflow-hidden p-4 md:p-6 max-w-7xl mx-auto w-full">
 
-        <!-- ETAPA 1: Estado General de Unidades -->
+        <!-- ETAPA 1 -->
         <section id="view-step1" class="flex-1 space-y-4">
             <h2 id="title-step1" class="text-lg font-bold border-b border-slate-800 pb-3 text-white">Unidades</h2>
             <div id="grid-step1" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
         </section>
 
-        <!-- ETAPA 2: Toma de Datos / Selección de Servicios e Ítems -->
+        <!-- ETAPA 2 -->
         <section id="view-step2" class="flex-1 flex flex-col md:flex-row gap-4 hidden">
             <div class="flex-1 space-y-3">
                 <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl flex justify-between items-center">
@@ -66,17 +72,56 @@
             </aside>
         </section>
 
-        <!-- ETAPA 3: Ejecución u Operación (Ej: Cocina / Taller) -->
+        <!-- ETAPA 3 -->
         <section id="view-step3" class="flex-1 space-y-4 hidden">
             <h2 id="title-step3" class="text-lg font-bold border-b border-slate-800 pb-3 text-amber-400">En Proceso</h2>
             <div id="grid-step3" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         </section>
 
-        <!-- ETAPA 4: Cierre y Cobro (Ej: Caja / Entrega) -->
+        <!-- ETAPA 4 -->
         <section id="view-step4" class="flex-1 space-y-4 hidden">
             <h2 id="title-step4" class="text-lg font-bold border-b border-slate-800 pb-3 text-emerald-400">Listos para Cierre</h2>
             <div id="grid-step4" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         </section>
+
+        <!-- PANEL DE CONFIGURACIÓN (⚙️ AGREGAR UNIDADES E ÍTEMS) -->
+        <section id="view-admin" class="flex-1 space-y-6 overflow-y-auto hidden">
+            <h2 class="text-lg font-bold border-b border-slate-800 pb-3 text-indigo-400 flex items-center gap-2">
+                <i class="fa-solid fa-sliders"></i> Configuración General
+            </h2>
+
+            <!-- Gestión de Unidades -->
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-sm text-white">Unidades Registradas</h3>
+                    <button onclick="window.addUnitPrompt()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">+ Agregar Unidad</button>
+                </div>
+                <div id="admin-units-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
+            </div>
+
+            <hr class="border-slate-800">
+
+            <!-- Gestión de Catálogo -->
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-sm text-white">Catálogo de Servicios / Productos</h3>
+                    <button onclick="document.getElementById('form-add-item').classList.toggle('hidden')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">+ Agregar Ítem</button>
+                </div>
+
+                <!-- Formulario Agregar Ítem -->
+                <form id="form-add-item" onsubmit="window.saveCatalogItem(event)" class="hidden bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-3 max-w-md">
+                    <input type="text" id="item-name" placeholder="Nombre del Servicio / Producto" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                    <input type="number" id="item-price" placeholder="Precio ($)" required min="0" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                    <div class="flex justify-end space-x-2">
+                        <button type="button" onclick="document.getElementById('form-add-item').classList.add('hidden')" class="bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold">Cancelar</button>
+                        <button type="submit" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Guardar</button>
+                    </div>
+                </form>
+
+                <div id="admin-catalog-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
+            </div>
+        </section>
+
     </main>
 
     <script>
@@ -96,24 +141,28 @@
         }
 
         window.switchStep = function(step) {
+            ['1', '2', '3', '4', 'admin'].forEach(s => {
+                const el = document.getElementById(`view-step${s}`) || document.getElementById(`view-${s}`);
+                if (el) el.classList.toggle('hidden', s !== String(step));
+            });
+
             [1, 2, 3, 4].forEach(s => {
-                document.getElementById(`view-step${s}`).classList.toggle('hidden', s !== step);
                 const btn = document.getElementById(`btn-step${s}`);
-                btn.className = s === step ? 
-                    "px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white" : 
-                    "px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white";
+                if (btn) {
+                    btn.className = s === step ? 
+                        "px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white" : 
+                        "px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white";
+                }
             });
         };
 
         async function initSaaS() {
-            // 1. Obtener etiquetas dinámicas del Tenant desde Supabase
             const { data: tenant } = await client.from('tenants').select('*').eq('id', tenantId).single();
             if (!tenant) return;
 
             document.getElementById('tenant-name').textContent = tenant.nombre_negocio;
             const labels = tenant.config_etiquetas?.etapas || {};
 
-            // Mapear nombres de botones
             document.getElementById('btn-step1').textContent = labels.step_1 || "Etapa 1";
             document.getElementById('btn-step2').textContent = labels.step_2 || "Etapa 2";
             document.getElementById('btn-step3').textContent = labels.step_3 || "Etapa 3";
@@ -123,16 +172,20 @@
             document.getElementById('title-step3').textContent = labels.step_3 || "En Proceso";
             document.getElementById('title-step4').textContent = labels.step_4 || "Cierre / Facturación";
 
-            // 2. Cargar Catálogo
+            await fetchCatalog();
+            await fetchUnits();
+
+            client.channel('saas-realtime')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'mesas' }, () => fetchUnits())
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'menu' }, () => fetchCatalog())
+                .subscribe();
+        }
+
+        async function fetchCatalog() {
             const { data: menu } = await client.from('menu').select('*').eq('tenant_id', tenantId);
             appState.catalog = menu || [];
             renderCatalog();
-
-            // 3. Cargar Unidades y suscribir a Realtime
-            await fetchUnits();
-            client.channel('saas-realtime')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'mesas' }, () => fetchUnits())
-                .subscribe();
+            renderAdminCatalog();
         }
 
         async function fetchUnits() {
@@ -142,6 +195,7 @@
             renderStep1();
             renderStep3();
             renderStep4();
+            renderAdminUnits();
         }
 
         // --- RENDERIZADO ETAPA 1 ---
@@ -172,7 +226,7 @@
             });
         }
 
-        // --- RENDERIZADO ETAPA 2 ---
+        // --- ETAPA 2 ---
         function selectUnit(id) {
             appState.activeUnit = id;
             document.getElementById('active-unit-id').textContent = id;
@@ -232,40 +286,40 @@
             renderCart();
         };
 
-        // --- MAQUINA DE ESTADOS (Mismo flujo que Resto) ---
+        // --- PASO DE ESTADOS ---
         window.saveAndAdvanceStep2 = async function() {
             if (!appState.activeUnit || appState.cart.length === 0) return;
             const resp = document.getElementById('input-responsible').value.trim();
 
             await client.from('mesas').update({
-                estado: 'occupied', // Pasa a Etapa 3
+                estado: 'occupied',
                 items: appState.cart,
                 garzon_actual: resp
             }).eq('numero_mesa', appState.activeUnit).eq('tenant_id', tenantId);
 
             toast("Avanzado a Proceso");
             await fetchUnits();
-            window.switchStep(3); // Salta a Etapa 3
+            window.switchStep(3);
         };
 
         window.advanceToStep4 = async function(id) {
             await client.from('mesas').update({ estado: 'ready' }).eq('numero_mesa', id).eq('tenant_id', tenantId);
             toast("Avanzado a Cierre");
             await fetchUnits();
-            window.switchStep(4); // Salta a Etapa 4
+            window.switchStep(4);
         };
 
         window.closeAndFreeUnit = async function(id) {
             if (!confirm(`¿Cobrar y liberar ${id}?`)) return;
             await client.from('mesas').update({
-                estado: 'free', // Vuelve a Etapa 1
+                estado: 'free',
                 items: [],
                 garzon_actual: ''
             }).eq('numero_mesa', id).eq('tenant_id', tenantId);
 
             toast("Unidad Finalizada y Liberada");
             await fetchUnits();
-            window.switchStep(1); // Vuelve a Etapa 1
+            window.switchStep(1);
         };
 
         // --- RENDERIZADO ETAPAS 3 Y 4 ---
@@ -307,6 +361,68 @@
                         <span class="text-sm text-emerald-400 font-bold">$${total.toLocaleString('es-CL')}</span>
                     </div>
                     <button onclick="closeAndFreeUnit('${u.numero_mesa}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2 rounded-lg transition">Cobrar y Liberar</button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // --- FUNCIONES DE ADMINISTRACIÓN / AGREGAR ---
+        window.addUnitPrompt = async function() {
+            const name = prompt("Nombre de la nueva unidad (Ej: Mesa 5 o Vehículo 3):");
+            if (!name) return;
+            await client.from('mesas').insert({ tenant_id: tenantId, numero_mesa: name.trim(), estado: 'free', items: [] });
+            toast("Unidad Agregada");
+            await fetchUnits();
+        };
+
+        window.deleteUnit = async function(id) {
+            if (!confirm(`¿Eliminar ${id}?`)) return;
+            await client.from('mesas').delete().eq('numero_mesa', id).eq('tenant_id', tenantId);
+            toast("Unidad Eliminada");
+            await fetchUnits();
+        };
+
+        window.saveCatalogItem = async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('item-name').value;
+            const price = document.getElementById('item-price').value;
+            await client.from('menu').insert({ tenant_id: tenantId, nombre: name, precio: Number(price) });
+            toast("Ítem Guardado");
+            document.getElementById('form-add-item').reset();
+            document.getElementById('form-add-item').classList.add('hidden');
+            await fetchCatalog();
+        };
+
+        window.deleteCatalogItem = async function(id) {
+            if (!confirm("¿Eliminar del catálogo?")) return;
+            await client.from('menu').delete().eq('id', id);
+            toast("Ítem Eliminado");
+            await fetchCatalog();
+        };
+
+        function renderAdminUnits() {
+            const grid = document.getElementById('admin-units-grid');
+            grid.innerHTML = '';
+            Object.keys(appState.units).sort().forEach(id => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 p-2.5 rounded-xl flex justify-between items-center text-xs";
+                card.innerHTML = `<span class="font-bold text-white">${id}</span><button onclick="deleteUnit('${id}')" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button>`;
+                grid.appendChild(card);
+            });
+        }
+
+        function renderAdminCatalog() {
+            const grid = document.getElementById('admin-catalog-grid');
+            grid.innerHTML = '';
+            appState.catalog.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 p-3 rounded-xl flex justify-between items-center text-xs";
+                card.innerHTML = `
+                    <div>
+                        <h4 class="font-bold text-white">${item.nombre}</h4>
+                        <span class="text-indigo-400 font-semibold">$${Number(item.precio).toLocaleString('es-CL')}</span>
+                    </div>
+                    <button onclick="deleteCatalogItem('${item.id}')" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button>
                 `;
                 grid.appendChild(card);
             });
