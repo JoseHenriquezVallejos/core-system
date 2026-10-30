@@ -281,13 +281,19 @@
 
         window.switchView = function(viewName) {
             ['tables', 'pos', 'kitchen', 'cashier', 'admin'].forEach(v => {
-                const el = document.getElementById(`view-${v}`); if (el) el.classList.add('hidden');  const nav = document.getElementById(`nav-${v}`);
+                const el = document.getElementById(`view-${v}`);
+                if (el) el.classList.add('hidden');
+                
+                const nav = document.getElementById(`nav-${v}`);
                 if (nav) {
                     nav.classList.remove('bg-indigo-600', 'text-white');
                     nav.classList.add('text-slate-400');
                 }
             });
-            const activeView = document.getElementById(`view-${viewName}`); if (activeView) activeView.classList.remove('hidden');  const activeNav = document.getElementById(`nav-${viewName}`);
+            const activeView = document.getElementById(`view-${viewName}`);
+            if (activeView) activeView.classList.remove('hidden');
+
+            const activeNav = document.getElementById(`nav-${viewName}`);
             if (activeNav) {
                 activeNav.classList.add('bg-indigo-600', 'text-white');
                 activeNav.classList.remove('text-slate-400');
@@ -298,41 +304,36 @@
             try {
                 const tenantId = window.appState.currentRestaurantId;
 
-                // 1. PRIMERA BÚSQUEDA: Buscar en la tabla de restaurantes
+                // 1. VALIDACIÓN ESTRICTA: Exigir que el restaurante exista obligatoriamente en la tabla maestra
                 const { data: tenant, error: errTenant } = await window.supabaseClient
                     .from('restaurantes')
                     .select('*')
                     .eq('id', tenantId)
-                    .maybeSingle();
+                    .single();
 
-                if (errTenant) throw errTenant;
-
-                // SI EL CLIENTE NO EXISTE EN LA BASE DE DATOS:
-                if (!tenant) {
-                    const grid = document.getElementById('tables-grid');
-                    if (grid) {
-                        grid.innerHTML = `
-                            <div class="col-span-full flex flex-col items-center justify-center py-20 text-center space-y-3">
-                                <div class="bg-rose-500/10 text-rose-500 p-4 rounded-full border border-rose-500/20">
-                                    <i class="fa-solid fa-store-slash text-3xl"></i>
-                                </div>
-                                <h3 class="text-lg font-bold text-white">Local no registrado</h3>
-                                <p class="text-xs text-slate-400 max-w-sm">
-                                    El identificador <span class="text-indigo-400 font-mono font-semibold">"${tenantId}"</span> no existe en la base de datos de RestoMaster.
-                                </p>
+                // SI NO EXISTE O DA ERROR EN SUPABASE, BLOQUEAR ACCESO
+                if (errTenant || !tenant) {
+                    document.querySelector('main').innerHTML = `
+                        <div class="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-4">
+                            <div class="bg-rose-500/10 text-rose-500 p-5 rounded-full border border-rose-500/20 shadow-2xl">
+                                <i class="fa-solid fa-store-slash text-4xl"></i>
                             </div>
-                        `;
-                    }
-                    return; // Detener la ejecución
+                            <h3 class="text-xl font-bold text-white">Local no registrado</h3>
+                            <p class="text-sm text-slate-400 max-w-md">
+                                El identificador <span class="text-indigo-400 font-mono font-semibold">"${tenantId}"</span> no se encuentra autorizado o no existe en la base de datos.
+                            </p>
+                        </div>
+                    `;
+                    return; // Detener ejecución por completo
                 }
 
-                // SI EL CLIENTE SÍ EXISTE: Actualizar subtítulo con su nombre
+                // SI EXISTE: Actualizar subtítulo con su nombre real
                 const label = document.getElementById('header-tenant-label');
                 if (label && tenant.nombre) {
                     label.textContent = tenant.nombre;
                 }
 
-                // 2. SEGUNDA BÚSQUEDA: Cargar Mesas del restaurante
+                // 2. CARGAR MESAS DEL RESTAURANTE
                 const { data: tables, error: errTables } = await window.supabaseClient
                     .from('mesas')
                     .select('*')
@@ -357,7 +358,7 @@
                 }
                 window.appState.tablesData = tablesObj;
 
-                // 3. TERCERA BÚSQUEDA: Cargar Menú del restaurante
+                // 3. CARGAR MENÚ DEL RESTAURANTE
                 const { data: menu, error: errMenu } = await window.supabaseClient
                     .from('menu')
                     .select('*')
@@ -376,7 +377,7 @@
                     window.appState.menuData = [];
                 }
 
-                // Renderizar todas las vistas del sistema
+                // Renderizar vistas
                 window.renderTablesGrid();
                 window.renderKitchenView();
                 window.renderCashierView();
@@ -386,8 +387,18 @@
                 window.renderMenu();
 
             } catch (err) {
-                console.error("Error al conectar con Supabase:", err);
-                window.showToast("Error de conexión");
+                console.error("Error de acceso:", err);
+                document.querySelector('main').innerHTML = `
+                    <div class="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-4">
+                        <div class="bg-rose-500/10 text-rose-500 p-5 rounded-full border border-rose-500/20 shadow-2xl">
+                            <i class="fa-solid fa-store-slash text-4xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white">Local no registrado</h3>
+                        <p class="text-sm text-slate-400 max-w-md">
+                            El identificador ingresado no existe en el sistema.
+                        </p>
+                    </div>
+                `;
             }
         };
 
@@ -461,14 +472,18 @@
                     statusBadge = `<span class="${esReady ? 'text-emerald-400' : 'text-amber-400'} text-[10px] font-bold">${estadoTexto} ($${tableData.total.toLocaleString('es-CL')})</span>`;
                 }
 
-                const waiterInfo = tableData.waiter && estaOcupada ? `<span class="text-[10px] text-indigo-400 block font-semibold mt-1"><i class="fa-solid fa-user text-[9px]"></i> ${tableData.waiter}</span>` : '';  const card = document.createElement('div'); card.className = `border ${statusColor} rounded-2xl p-4 flex flex-col justify-between space-y-3 cursor-pointer hover:border-indigo-500 transition shadow-md`;
+                const waiterInfo = tableData.waiter && estaOcupada ? `<span class="text-[10px] text-indigo-400 block font-semibold mt-1"><i class="fa-solid fa-user text-[9px]"></i> ${tableData.waiter}</span>` : '';
+
+                const card = document.createElement('div');
+                card.className = `border ${statusColor} rounded-2xl p-4 flex flex-col justify-between space-y-3 cursor-pointer hover:border-indigo-500 transition shadow-md`;
                 card.onclick = () => window.selectTableAndOpenPos(tableId);
 
                 card.innerHTML = `
                     <div class="flex justify-between items-start">
                         <div>
                             <h3 class="font-bold text-base text-white">${tableId}</h3>
-                            ${statusBadge}${waiterInfo}
+                            ${statusBadge}
+                            ${waiterInfo}
                         </div>
                         <i class="fa-solid fa-chair text-slate-700 text-xl"></i>
                     </div>
@@ -511,7 +526,48 @@
             categories.forEach(cat => {
                 const btn = document.createElement('button');
                 const active = window.appState.selectedCategory === cat.id;
-                btn.className = `px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${ active ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-800' }`; btn.textContent = cat.name; btn.onclick = () => { window.appState.selectedCategory = cat.id; window.initCategories(); window.renderMenu(); }; container.appendChild(btn); }); };  window.filterMenu = function() { window.appState.searchQuery = document.getElementById('search-input').value.toLowerCase(); window.renderMenu(); };  window.renderMenu = function() { const grid = document.getElementById('menu-grid'); if (!grid) return; grid.innerHTML = '';  const items = window.appState.menuData.filter(i => { const catMatch = window.appState.selectedCategory === 'all' \vert{}\vert{} i.category === window.appState.selectedCategory; const searchMatch = i.name.toLowerCase().includes(window.appState.searchQuery); return catMatch && searchMatch; });  if (items.length === 0) { grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-500 text-xs">No hay productos en esta categoría.</div>`; return; }  items.forEach(item => { const card = document.createElement('div'); card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-3.5 flex flex-col justify-between"; card.innerHTML = ` <div> <div class="flex justify-between items-start mb-2"> <i class="fa-solid fa-utensils text-indigo-400 text-lg"></i> <span class="font-bold text-sm text-indigo-400">$${item.price.toLocaleString('es-CL')}</span>
+                btn.className = `px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                    active ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-800'
+                }`;
+                btn.textContent = cat.name;
+                btn.onclick = () => {
+                    window.appState.selectedCategory = cat.id;
+                    window.initCategories();
+                    window.renderMenu();
+                };
+                container.appendChild(btn);
+            });
+        };
+
+        window.filterMenu = function() {
+            window.appState.searchQuery = document.getElementById('search-input').value.toLowerCase();
+            window.renderMenu();
+        };
+
+        window.renderMenu = function() {
+            const grid = document.getElementById('menu-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            const items = window.appState.menuData.filter(i => {
+                const catMatch = window.appState.selectedCategory === 'all' || i.category === window.appState.selectedCategory;
+                const searchMatch = i.name.toLowerCase().includes(window.appState.searchQuery);
+                return catMatch && searchMatch;
+            });
+
+            if (items.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-500 text-xs">No hay productos en esta categoría.</div>`;
+                return;
+            }
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-3.5 flex flex-col justify-between";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <i class="fa-solid fa-utensils text-indigo-400 text-lg"></i>
+                            <span class="font-bold text-sm text-indigo-400">$${item.price.toLocaleString('es-CL')}</span>
                         </div>
                         <h4 class="font-bold text-xs text-white mb-1">${item.name}</h4>
                         <span class="text-[10px] text-slate-500 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">${item.category}</span>
@@ -556,8 +612,371 @@
                     el.className = "bg-slate-950 border border-slate-800 p-2.5 rounded-xl space-y-2";
                     el.innerHTML = `
                         <div class="flex justify-between items-start text-xs">
-                            <span class="font-semibold text-white">${item.name}</span> <span class="font-bold text-indigo-400">$${(item.price * item.quantity).toLocaleString('es-CL')}</span>
+                            <span class="font-semibold text-white">${item.name}</span>
+                            <span class="font-bold text-indigo-400">$${(item.price * item.quantity).toLocaleString('es-CL')}</span>
                         </div>
                         <div class="flex justify-between items-center pt-1">
                             <div class="flex items-center space-x-2 bg-slate-900 border border-slate-800 rounded-lg px-2 py-0.5">
-                                <button onclick="window.updateQty(${item.cartId}, -1)" class="text-xs text-slate-400 hover:text
+                                <button onclick="window.updateQty(${item.cartId}, -1)" class="text-xs text-slate-400 hover:text-white">-</button>
+                                <span class="text-xs font-bold text-white px-1">${item.quantity}</span>
+                                <button onclick="window.updateQty(${item.cartId}, 1)" class="text-xs text-slate-400 hover:text-white">+</button>
+                            </div>
+                            <button onclick="window.removeFromCart(${item.cartId})" class="text-rose-500 hover:text-rose-400 text-xs"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    `;
+                    container.appendChild(el);
+                });
+            }
+
+            const total = window.appState.currentCart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+            const count = window.appState.currentCart.reduce((sum, i) => sum + i.quantity, 0);
+
+            document.getElementById('pos-subtotal').textContent = `$${total.toLocaleString('es-CL')}`;
+            document.getElementById('pos-total').textContent = `$${total.toLocaleString('es-CL')}`;
+            document.getElementById('cart-item-count').textContent = `${count} ítems`;
+        };
+
+        window.updateQty = function(cartId, delta) {
+            const item = window.appState.currentCart.find(i => i.cartId === cartId);
+            if (!item) return;
+            item.quantity += delta;
+            if (item.quantity <= 0) {
+                window.removeFromCart(cartId);
+            } else {
+                window.renderCart();
+            }
+        };
+
+        window.removeFromCart = function(cartId) {
+            window.appState.currentCart = window.appState.currentCart.filter(i => i.cartId !== cartId);
+            window.renderCart();
+        };
+
+        window.clearCurrentCart = function() {
+            window.appState.currentCart = [];
+            window.renderCart();
+        };
+
+        window.renderKitchenView = function() {
+            const grid = document.getElementById('kitchen-orders-grid');
+            const badge = document.getElementById('kitchen-badge');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            const occupiedTables = Object.values(window.appState.tablesData).filter(t => t.status === 'occupied');
+            
+            if (badge) {
+                if (occupiedTables.length > 0) {
+                    badge.textContent = occupiedTables.length;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            }
+
+            if (occupiedTables.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500 text-xs">No hay comandas pendientes en cocina.</div>`;
+                return;
+            }
+
+            occupiedTables.forEach(table => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between space-y-4 shadow-xl";
+                
+                const itemsHtml = table.items.map(i => `
+                    <li class="flex justify-between items-center text-xs py-1 border-b border-slate-800/50">
+                        <span class="text-white font-medium">${i.name}</span>
+                        <span class="bg-indigo-950 text-indigo-400 font-bold px-2 py-0.5 rounded-md border border-indigo-800/50">x${i.quantity}</span>
+                    </li>
+                `).join('');
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start border-b border-slate-800 pb-2 mb-3">
+                            <div>
+                                <h3 class="font-bold text-base text-white">${table.tableId}</h3>
+                                ${table.waiter ? `<span class="text-[10px] text-indigo-400"><i class="fa-solid fa-user"></i> Garzón: ${table.waiter}</span>` : ''}
+                            </div>
+                            <span class="bg-amber-500/10 text-amber-400 text-[10px] font-bold px-2.5 py-1 rounded-full border border-amber-500/20">PREPARANDO</span>
+                        </div>
+                        <ul class="space-y-1">${itemsHtml}</ul>
+                    </div>
+                    <button onclick="window.markOrderReady('${table.tableId}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2 rounded-xl transition shadow-lg shadow-emerald-600/20">
+                        <i class="fa-solid fa-check"></i> Marcar Pedido Listo
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        };
+
+        window.markOrderReady = async function(tableId) {
+            try {
+                const { error } = await window.supabaseClient
+                    .from('mesas')
+                    .update({ estado: 'ready' })
+                    .eq('numero_mesa', tableId)
+                    .eq('restaurant_id', window.appState.currentRestaurantId);
+
+                if (error) throw error;
+                window.showToast(`${tableId} enviada a Caja`);
+            } catch (err) {
+                console.error("Error al actualizar cocina:", err);
+            }
+        };
+
+        window.renderCashierView = function() {
+            const grid = document.getElementById('cashier-tables-grid');
+            const badge = document.getElementById('cashier-badge');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            const activeAccounts = Object.values(window.appState.tablesData).filter(t => t.status === 'occupied' || t.status === 'ready');
+            
+            if (badge) {
+                if (activeAccounts.length > 0) {
+                    badge.textContent = activeAccounts.length;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            }
+
+            if (activeAccounts.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500 text-xs">No hay cuentas pendientes por cobrar.</div>`;
+                return;
+            }
+
+            activeAccounts.forEach(table => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between space-y-4 shadow-xl";
+
+                const itemsHtml = table.items.map(i => `
+                    <li class="flex justify-between items-center text-xs py-1 border-b border-slate-800/50">
+                        <span class="text-slate-300">${i.quantity}x ${i.name}</span>
+                        <span class="text-slate-400 font-medium">$${(i.price * i.quantity).toLocaleString('es-CL')}</span>
+                    </li>
+                `).join('');
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start border-b border-slate-800 pb-2 mb-3">
+                            <div>
+                                <h3 class="font-bold text-base text-white">${table.tableId}</h3>
+                                ${table.waiter ? `<span class="text-[10px] text-indigo-400"><i class="fa-solid fa-user"></i> ${table.waiter}</span>` : ''}
+                            </div>
+                            <span class="text-emerald-400 font-bold text-sm">$${table.total.toLocaleString('es-CL')}</span>
+                        </div>
+                        <ul class="space-y-1 mb-3">${itemsHtml}</ul>
+                    </div>
+                    <button onclick="window.closeTableAccount('${table.tableId}')" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-2 rounded-xl transition shadow-lg shadow-indigo-600/20">
+                        <i class="fa-solid fa-receipt"></i> Cobrar y Liberar Mesa
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        };
+
+        window.closeTableAccount = async function(tableId) {
+            try {
+                const { error } = await window.supabaseClient
+                    .from('mesas')
+                    .update({ estado: 'free', items: [], garzon_actual: '' })
+                    .eq('numero_mesa', tableId)
+                    .eq('restaurant_id', window.appState.currentRestaurantId);
+
+                if (error) throw error;
+                window.showToast(`${tableId} cobrada y liberada`);
+            } catch (err) {
+                console.error("Error al cerrar cuenta:", err);
+            }
+        };
+
+        window.renderAdminTables = function() {
+            const grid = document.getElementById('admin-tables-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            const keys = Object.keys(window.appState.tablesData).sort((a, b) => {
+                const numA = parseInt(a.replace(/\D/g, '')) || 0;
+                const numB = parseInt(b.replace(/\D/g, '')) || 0;
+                return numA - numB;
+            });
+
+            if (keys.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-6 text-slate-500 text-xs">Sin mesas registradas.</div>`;
+                return;
+            }
+
+            keys.forEach(tableId => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 rounded-xl p-3 flex items-center justify-between";
+                card.innerHTML = `
+                    <div>
+                        <h4 class="font-bold text-xs text-white">${tableId}</h4>
+                        <span class="text-[10px] text-slate-500">Mesa activa</span>
+                    </div>
+                    <button onclick="window.deleteTableFromSupabase('${tableId}')" class="text-slate-500 hover:text-rose-500 transition p-1 text-xs">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        };
+
+        window.createNewTableInSupabase = async function() {
+            const keys = Object.keys(window.appState.tablesData);
+            const nextNum = keys.length + 1;
+            const newTableName = `Mesa ${nextNum}`;
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('mesas')
+                    .insert([{
+                        numero_mesa: newTableName,
+                        estado: 'free',
+                        items: [],
+                        restaurant_id: window.appState.currentRestaurantId
+                    }]);
+
+                if (error) throw error;
+                window.showToast(`¡${newTableName} agregada!`);
+            } catch (err) {
+                console.error("Error creando mesa:", err);
+            }
+        };
+
+        window.deleteTableFromSupabase = async function(tableId) {
+            if (!confirm(`¿Eliminar la ${tableId}?`)) return;
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('mesas')
+                    .delete()
+                    .eq('numero_mesa', tableId)
+                    .eq('restaurant_id', window.appState.currentRestaurantId);
+
+                if (error) throw error;
+                window.showToast(`${tableId} eliminada`);
+            } catch (err) {
+                console.error("Error eliminando mesa:", err);
+            }
+        };
+
+        window.renderAdminMenu = function() {
+            const grid = document.getElementById('admin-menu-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            if (window.appState.menuData.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-6 text-slate-500 text-xs">Sin productos en el menú.</div>`;
+                return;
+            }
+
+            window.appState.menuData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 rounded-xl p-3 flex items-center justify-between";
+                card.innerHTML = `
+                    <div>
+                        <h4 class="font-bold text-xs text-white">${item.name}</h4>
+                        <span class="text-[10px] bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800 text-slate-400">$${item.price.toLocaleString('es-CL')}</span>
+                        <span class="text-[10px] text-slate-500 block">${item.category}</span>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <button onclick="window.openMenuForm('${item.id}')" class="text-slate-500 hover:text-indigo-400 transition p-1 text-xs">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button onclick="window.deleteMenuItem('${item.id}')" class="text-slate-500 hover:text-rose-500 transition p-1 text-xs">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        };
+
+        window.openMenuForm = function(itemId = null) {
+            const card = document.getElementById('menu-form-card');
+            const title = document.getElementById('menu-form-title');
+            card.classList.remove('hidden');
+
+            if (itemId) {
+                const item = window.appState.menuData.find(i => i.id == itemId);
+                if (item) {
+                    title.textContent = "Editar Producto";
+                    document.getElementById('admin-item-id').value = item.id;
+                    document.getElementById('admin-item-name').value = item.name;
+                    document.getElementById('admin-item-category').value = item.category;
+                    document.getElementById('admin-item-price').value = item.price;
+                }
+            } else {
+                title.textContent = "Nuevo Producto";
+                document.getElementById('admin-item-id').value = '';
+                document.getElementById('admin-item-name').value = '';
+                document.getElementById('admin-item-category').value = '';
+                document.getElementById('admin-item-price').value = '';
+            }
+        };
+
+        window.closeMenuForm = function() {
+            document.getElementById('menu-form-card').classList.add('hidden');
+        };
+
+        window.saveMenuItem = async function(event) {
+            event.preventDefault();
+            const id = document.getElementById('admin-item-id').value;
+            const name = document.getElementById('admin-item-name').value.trim();
+            const category = document.getElementById('admin-item-category').value.trim();
+            const price = Number(document.getElementById('admin-item-price').value);
+
+            try {
+                if (id) {
+                    const { error } = await window.supabaseClient
+                        .from('menu')
+                        .update({ nombre: name, categoria: category, precio: price })
+                        .eq('id', id)
+                        .eq('restaurant_id', window.appState.currentRestaurantId);
+                    if (error) throw error;
+                    window.showToast("Producto actualizado");
+                } else {
+                    const { error } = await window.supabaseClient
+                        .from('menu')
+                        .insert([{
+                            nombre: name,
+                            categoria: category,
+                            precio: price,
+                            restaurant_id: window.appState.currentRestaurantId
+                        }]);
+                    if (error) throw error;
+                    window.showToast("Producto creado");
+                }
+                window.closeMenuForm();
+            } catch (err) {
+                console.error("Error guardando producto:", err);
+            }
+        };
+
+        window.deleteMenuItem = async function(itemId) {
+            if (!confirm("¿Eliminar este producto del menú?")) return;
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('menu')
+                    .delete()
+                    .eq('id', itemId)
+                    .eq('restaurant_id', window.appState.currentRestaurantId);
+
+                if (error) throw error;
+                window.showToast("Producto eliminado");
+            } catch (err) {
+                console.error("Error eliminando producto:", err);
+            }
+        };
+
+        // INICIALIZACIÓN
+        document.addEventListener('DOMContentLoaded', () => {
+            window.loadCloudData();
+            window.setupRealtime();
+        });
+    </script>
+</body>
+</html>
