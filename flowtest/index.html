@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CoreFlow SaaS Engine</title>
-  <!-- Supabase CDN Versión Fija -->
+  <title>CoreFlow SaaS Engine - Test</title>
+  <!-- Supabase CDN Moderno compatible con Publishable Keys -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
@@ -84,21 +83,21 @@
     <div class="brand">
       <div class="brand-icon"><i data-lucide="zap" style="color: white;"></i></div>
       <div class="brand-title">
-        <h1>CoreFlow</h1>
+        <h1>CoreFlow <span style="font-size:0.7rem; background:var(--accent); padding:2px 6px; border-radius:4px;">TEST</span></h1>
         <p id="tenant-subtitle">Cargando negocio...</p>
       </div>
     </div>
 
     <!-- Navigation / Modules -->
     <nav class="steps-nav" id="steps-container">
-      <!-- Generated via Config etiquetas JSON -->
+      <!-- Generado dinámicamente -->
     </nav>
 
     <button class="btn-action"><i data-lucide="settings"></i></button>
   </header>
 
-  <!-- Configuration View (Vista Principal Inicial) -->
-  <main class="config-container" id="config-view">
+  <!-- Configuration View -->
+  <main class="config-container">
     <div style="display: flex; align-items: center; gap: 8px; font-size: 1.1rem; font-weight: bold; margin-bottom: 8px;">
       <i data-lucide="sliders"></i> Configuración General
     </div>
@@ -147,20 +146,19 @@
   </div>
 
   <script>
-    // 1. Supabase Initialization - EVITA ERROR DE DOBLE DECLARACIÓN
+    // Configuración de Supabase para Entorno de Pruebas
     const SUPABASE_URL = 'https://kosyaamaocsslumanzrm.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_JwZ4ND6W9nMsqOSME-bc0A_JZYIsN-4';
     
-    window.dbSupabase = window.dbSupabase || window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    var supabase = window.dbSupabase;
+    // Inicialización limpia con el SDK moderno v2
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Get current Tenant ID from URL
+    // Obtener Tenant ID de la URL
     const urlParams = new URLSearchParams(window.location.search);
     const tenantId = urlParams.get('id') || 'consulta-psicologia';
 
     let currentTenantConfig = null;
 
-    // Load App Data
     async function initApp() {
       try {
         await cargarConfiguracionTenant();
@@ -168,13 +166,13 @@
         await cargarCatalogo();
         lucide.createIcons();
       } catch(e) {
-        console.error("Error al inicializar la app:", e);
+        console.error("Error al inicializar la app en test:", e);
       }
     }
 
-    // 2. Fetch Tenant Config & UI Labels
+    // 1. Cargar datos del Tenant y Etiquetas Dinámicas
     async function cargarConfiguracionTenant() {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseClient
         .from('tenants')
         .select('*')
         .eq('id', tenantId)
@@ -202,9 +200,9 @@
       `;
     }
 
-    // 3. Load Units (mesas)
+    // 2. Cargar Unidades (tabla mesas)
     async function cargarUnidades() {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseClient
         .from('mesas')
         .select('*')
         .eq('tenant_id', tenantId)
@@ -233,9 +231,9 @@
       lucide.createIcons();
     }
 
-    // 4. Load Menu Catalog
+    // 3. Cargar Catálogo (tabla menu)
     async function cargarCatalogo() {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseClient
         .from('menu')
         .select('*')
         .eq('tenant_id', tenantId)
@@ -264,7 +262,7 @@
       lucide.createIcons();
     }
 
-    // 5. Modal Control Functions
+    // 4. Control del Modal Textarea
     function abrirModalUnidad() {
       document.getElementById('textarea-nueva-unidad').value = '';
       document.getElementById('modal-unidad').style.display = 'flex';
@@ -275,21 +273,13 @@
       document.getElementById('modal-unidad').style.display = 'none';
     }
 
-    // Create New Unit
     async function confirmarCrearUnidad() {
       const textoUnidad = document.getElementById('textarea-nueva-unidad').value.trim();
       if (!textoUnidad) return alert("Por favor ingresa una descripción para la unidad.");
 
-      const { data, error } = await supabase
+      const { error } = await supabaseClient
         .from('mesas')
-        .insert([
-          { 
-            tenant_id: tenantId, 
-            numero_mesa: textoUnidad, 
-            estado: 'free', 
-            items: [] 
-          }
-        ]);
+        .insert([{ tenant_id: tenantId, numero_mesa: textoUnidad, estado: 'free', items: [] }]);
 
       if (error) {
         alert("Error al guardar: " + error.message);
@@ -299,30 +289,22 @@
       }
     }
 
-    // Delete Unit
     async function eliminarUnidad(id) {
       if (!confirm("¿Deseas eliminar esta unidad?")) return;
 
-      const { error } = await supabase
-        .from('mesas')
-        .delete()
-        .eq('id', id);
-
+      const { error } = await supabaseClient.from('mesas').delete().eq('id', id);
       if (error) alert("Error al eliminar: " + error.message);
       else await cargarUnidades();
     }
 
-    // Add Menu Item
     async function agregarItemMenu() {
       const nombre = prompt("Nombre del servicio o producto:");
       if (!nombre) return;
-      
       const precioStr = prompt("Precio ($):");
       if (!precioStr) return;
-
       const precio = parseInt(precioStr, 10) || 0;
 
-      const { error } = await supabase
+      const { error } = await supabaseClient
         .from('menu')
         .insert([{ tenant_id: tenantId, nombre: nombre, precio: precio }]);
 
@@ -330,31 +312,19 @@
       else await cargarCatalogo();
     }
 
-    // Delete Menu Item
     async function eliminarItemCatalog(id) {
       if (!confirm("¿Deseas eliminar este servicio del catálogo?")) return;
 
-      const { error } = await supabase
-        .from('menu')
-        .delete()
-        .eq('id', id);
-
+      const { error } = await supabaseClient.from('menu').delete().eq('id', id);
       if (error) alert("Error al eliminar: " + error.message);
       else await cargarCatalogo();
     }
 
-    // Utility: Escape HTML
     function escapeHtml(text) {
       if (!text) return '';
-      return text
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
-    // Run on Load
     window.onload = initApp;
   </script>
 </body>
