@@ -606,34 +606,153 @@
             const grid = document.getElementById('kitchen-orders-grid');
             if (!grid) return;
             grid.innerHTML = '';
-            // Renderizado dinámico de la etapa 3
         };
 
         window.renderCashierView = function() {
             const grid = document.getElementById('cashier-tables-grid');
             if (!grid) return;
             grid.innerHTML = '';
-            // Renderizado dinámico de la etapa 4
         };
 
         window.renderAdminTables = function() {
             const grid = document.getElementById('admin-tables-grid');
             if (!grid) return;
             grid.innerHTML = '';
-            // Renderizado de administración de mesas/unidades
+
+            const keys = Object.keys(window.appState.tablesData).sort();
+            if (keys.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-6 text-slate-500 text-xs">No hay unidades registradas.</div>`;
+                return;
+            }
+
+            keys.forEach(tableId => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-950 border border-slate-800 rounded-2xl p-3 flex justify-between items-center";
+                card.innerHTML = `
+                    <span class="font-bold text-xs text-white">${tableId}</span>
+                    <button onclick="window.deleteTableFromSupabase('${tableId}')" class="text-rose-400 hover:text-rose-300 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
+                `;
+                grid.appendChild(card);
+            });
         };
 
         window.renderAdminMenu = function() {
             const grid = document.getElementById('admin-menu-grid');
             if (!grid) return;
             grid.innerHTML = '';
-            // Renderizado de administración del menú
+
+            if (window.appState.menuData.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-6 text-slate-500 text-xs">No hay ítems en el catálogo.</div>`;
+                return;
+            }
+
+            window.appState.menuData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-950 border border-slate-800 rounded-2xl p-3.5 flex flex-col justify-between space-y-2";
+                card.innerHTML = `
+                    <div>
+                        <h4 class="font-bold text-xs text-white">${item.name}</h4>
+                        <span class="text-[10px] text-indigo-400 font-semibold">$${item.price.toLocaleString('es-CL')}</span>
+                        <span class="block text-[9px] text-slate-400">Cat: ${item.category}</span>
+                    </div>
+                    <button onclick="window.deleteMenuItem('${item.id}')" class="w-full bg-slate-900 hover:bg-rose-950/50 text-rose-400 border border-slate-800 text-[10px] font-semibold py-1 rounded-lg transition">Eliminar Ítem</button>
+                `;
+                grid.appendChild(card);
+            });
         };
 
-        window.createNewTableInSupabase = function() {};
-        window.openMenuForm = function() {};
-        window.closeMenuForm = function() {};
-        window.saveMenuItem = function(e) { e.preventDefault(); };
+        window.openMenuForm = function() {
+            const formCard = document.getElementById('menu-form-card');
+            if (formCard) formCard.classList.remove('hidden');
+        };
+
+        window.closeMenuForm = function() {
+            const formCard = document.getElementById('menu-form-card');
+            if (formCard) formCard.classList.add('hidden');
+        };
+
+        window.createNewTableInSupabase = async function() {
+            const newName = prompt("Ingresa el nombre de la nueva unidad (Ej: Vehículo 3 o Box 1):");
+            if (!newName) return;
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('mesas')
+                    .insert({
+                        restaurant_id: window.appState.currentRestaurantId,
+                        numero_mesa: newName.trim(),
+                        estado: 'free',
+                        items: [],
+                        garzon_actual: ''
+                    });
+
+                if (error) throw error;
+                window.showToast("¡Unidad creada con éxito!");
+                window.loadCloudData();
+            } catch (err) {
+                console.error("Error creando unidad:", err);
+                window.showToast("Error al crear unidad");
+            }
+        };
+
+        window.saveMenuItem = async function(event) {
+            event.preventDefault();
+            const name = document.getElementById('admin-item-name').value;
+            const category = document.getElementById('admin-item-category').value;
+            const price = document.getElementById('admin-item-price').value;
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('menu')
+                    .insert({
+                        restaurant_id: window.appState.currentRestaurantId,
+                        nombre: name,
+                        categoria: category,
+                        precio: Number(price)
+                    });
+
+                if (error) throw error;
+
+                window.showToast("¡Ítem guardado con éxito!");
+                window.closeMenuForm();
+                document.getElementById('admin-item-name').value = '';
+                document.getElementById('admin-item-category').value = '';
+                document.getElementById('admin-item-price').value = '';
+                window.loadCloudData();
+            } catch (err) {
+                console.error("Error guardando ítem:", err);
+                window.showToast("Error al guardar ítem");
+            }
+        };
+
+        window.deleteTableFromSupabase = async function(tableId) {
+            if (!confirm(`¿Eliminar la unidad ${tableId}?`)) return;
+            try {
+                await window.supabaseClient
+                    .from('mesas')
+                    .delete()
+                    .eq('numero_mesa', tableId)
+                    .eq('restaurant_id', window.appState.currentRestaurantId);
+                window.showToast("Unidad eliminada");
+                window.loadCloudData();
+            } catch (err) {
+                console.error("Error eliminando:", err);
+            }
+        };
+
+        window.deleteMenuItem = async function(itemId) {
+            if (!confirm("¿Eliminar este ítem del catálogo?")) return;
+            try {
+                await window.supabaseClient
+                    .from('menu')
+                    .delete()
+                    .eq('id', itemId);
+                window.showToast("Ítem eliminado");
+                window.loadCloudData();
+            } catch (err) {
+                console.error("Error eliminando ítem:", err);
+            }
+        };
 
         document.addEventListener('DOMContentLoaded', () => {
             window.loadCloudData();
