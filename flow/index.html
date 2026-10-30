@@ -4,9 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CoreFlow SaaS Engine</title>
-  <!-- Supabase CDN -->
+  <!-- Supabase CDN Versión Fija -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
-  
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
@@ -53,7 +52,7 @@
     .btn-delete { background: transparent; border: none; color: #ef4444; cursor: pointer; padding: 4px; border-radius: 4px; }
     .btn-delete:hover { background: rgba(239,68,68,0.1); }
 
-    /* Custom Textarea Modal Overlay - INICIA OCULTO RIGUROSO (display: none) */
+    /* Modal Textarea Overlay */
     .modal-overlay { 
       display: none; 
       position: fixed; 
@@ -97,7 +96,7 @@
     <button class="btn-action"><i data-lucide="settings"></i></button>
   </header>
 
-  <!-- Configuration View -->
+  <!-- Configuration View (Vista Principal Inicial) -->
   <main class="config-container" id="config-view">
     <div style="display: flex; align-items: center; gap: 8px; font-size: 1.1rem; font-weight: bold; margin-bottom: 8px;">
       <i data-lucide="sliders"></i> Configuración General
@@ -149,9 +148,8 @@
   <script>
     // 1. Supabase Initialization - EVITA ERROR DE DOBLE DECLARACIÓN
     const SUPABASE_URL = 'https://kosyaamaocsslumanzrm.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_JwZ4ND6W9nMsqsOME-bc0A_JZYisN-4';
-  
-    // Asignación segura en objeto global
+    const SUPABASE_ANON_KEY = 'sb_publishable_JwZ4ND6W9nMsqOSME-bc0A_JZYIsN-4';
+    
     window.dbSupabase = window.dbSupabase || window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     var supabase = window.dbSupabase;
 
