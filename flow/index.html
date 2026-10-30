@@ -10,12 +10,12 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
 
-    <!-- Toast Notification -->
+    <!-- Notificación Toast -->
     <div id="toast" class="fixed top-5 right-5 z-50 transform translate-x-full transition-transform duration-300 bg-emerald-600 text-white px-5 py-2.5 rounded-xl shadow-xl text-xs font-semibold flex items-center gap-2 pointer-events-none">
-        <i class="fa-solid fa-check-circle"></i> <span id="toast-msg">Sincronizado</span>
+        <i class="fa-solid fa-circle-check"></i> <span id="toast-msg">Actualizado</span>
     </div>
 
-    <!-- Header Dinámico -->
+    <!-- Encabezado con 4 Etapas Dinámicas -->
     <header class="bg-slate-900 border-b border-slate-800 px-4 py-3 sticky top-0 z-30 flex items-center justify-between shadow-md">
         <div class="flex items-center space-x-3">
             <div class="bg-indigo-600 text-white p-2 rounded-xl shadow">
@@ -23,12 +23,11 @@
             </div>
             <div>
                 <h1 id="app-title" class="font-bold text-base leading-none">CoreFlow</h1>
-                <p id="tenant-name" class="text-[11px] text-slate-400 mt-1">Cargando tenant...</p>
+                <p id="tenant-name" class="text-[11px] text-slate-400 mt-1">Cargando...</p>
             </div>
         </div>
 
-        <!-- Navegación de 4 Etapas -->
-        <nav class="flex items-center space-x-1 bg-slate-950 p-1 rounded-xl border border-slate-800" id="nav-steps">
+        <nav class="flex items-center space-x-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
             <button onclick="window.switchStep(1)" id="btn-step1" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white">Etapa 1</button>
             <button onclick="window.switchStep(2)" id="btn-step2" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">Etapa 2</button>
             <button onclick="window.switchStep(3)" id="btn-step3" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">Etapa 3</button>
@@ -36,20 +35,20 @@
         </nav>
     </header>
 
-    <!-- Contenedor Principal -->
+    <!-- Contenedor Principal de las 4 Vistas -->
     <main class="flex-1 flex flex-col overflow-hidden p-4 md:p-6 max-w-7xl mx-auto w-full">
 
-        <!-- VISTA ETAPA 1: TABLERO GENERAL DE UNIDADES -->
+        <!-- ETAPA 1: Estado General de Unidades -->
         <section id="view-step1" class="flex-1 space-y-4">
-            <h2 id="title-step1" class="text-lg font-bold border-b border-slate-800 pb-3 text-white">Unidades Disponibles</h2>
+            <h2 id="title-step1" class="text-lg font-bold border-b border-slate-800 pb-3 text-white">Unidades</h2>
             <div id="grid-step1" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
         </section>
 
-        <!-- VISTA ETAPA 2: REGISTRO / CAPTURA DE ÍTEMS -->
+        <!-- ETAPA 2: Toma de Datos / Selección de Servicios e Ítems -->
         <section id="view-step2" class="flex-1 flex flex-col md:flex-row gap-4 hidden">
             <div class="flex-1 space-y-3">
                 <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl flex justify-between items-center">
-                    <span class="text-xs text-slate-400 font-bold uppercase">Unidad Seleccionada: <strong id="active-unit-id" class="text-white text-sm ml-1">---</strong></span>
+                    <span class="text-xs text-slate-400 font-bold uppercase">Unidad Activa: <strong id="active-unit-id" class="text-white text-sm ml-1">---</strong></span>
                     <button onclick="window.switchStep(1)" class="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-lg border border-slate-700">Cambiar</button>
                 </div>
                 <div id="grid-catalog" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
@@ -57,7 +56,7 @@
             <aside class="w-full md:w-80 bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
                 <div>
                     <h3 class="text-sm font-bold border-b border-slate-800 pb-2 mb-3">Detalle del Registro</h3>
-                    <input type="text" id="input-responsible" placeholder="Responsable / Técnico / Operador" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-white mb-3 focus:outline-none focus:border-indigo-500">
+                    <input type="text" id="input-responsible" placeholder="Responsable / Atendió" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-white mb-3 focus:outline-none focus:border-indigo-500">
                     <div id="cart-list" class="space-y-2 max-h-60 overflow-y-auto"></div>
                 </div>
                 <div class="border-t border-slate-800 pt-3 mt-4 space-y-3">
@@ -67,13 +66,13 @@
             </aside>
         </section>
 
-        <!-- VISTA ETAPA 3: EJECUCIÓN / PROCESO -->
+        <!-- ETAPA 3: Ejecución u Operación (Ej: Cocina / Taller) -->
         <section id="view-step3" class="flex-1 space-y-4 hidden">
             <h2 id="title-step3" class="text-lg font-bold border-b border-slate-800 pb-3 text-amber-400">En Proceso</h2>
             <div id="grid-step3" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         </section>
 
-        <!-- VISTA ETAPA 4: CIERRE / FACTURACIÓN -->
+        <!-- ETAPA 4: Cierre y Cobro (Ej: Caja / Entrega) -->
         <section id="view-step4" class="flex-1 space-y-4 hidden">
             <h2 id="title-step4" class="text-lg font-bold border-b border-slate-800 pb-3 text-emerald-400">Listos para Cierre</h2>
             <div id="grid-step4" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
@@ -87,13 +86,7 @@
 
         const tenantId = new URLSearchParams(window.location.search).get('id') || 'don-pepe';
 
-        let appState = {
-            units: {},
-            catalog: [],
-            activeUnit: null,
-            cart: [],
-            labels: {}
-        };
+        let appState = { units: {}, catalog: [], activeUnit: null, cart: [] };
 
         function toast(msg) {
             document.getElementById('toast-msg').textContent = msg;
@@ -113,32 +106,30 @@
         };
 
         async function initSaaS() {
-            // 1. Cargar Configuración del Tenant
+            // 1. Obtener etiquetas dinámicas del Tenant desde Supabase
             const { data: tenant } = await client.from('tenants').select('*').eq('id', tenantId).single();
-            if (!tenant) return alert("Tenant no encontrado");
+            if (!tenant) return;
 
             document.getElementById('tenant-name').textContent = tenant.nombre_negocio;
-            appState.labels = tenant.config_etiquetas?.etapas || {};
+            const labels = tenant.config_etiquetas?.etapas || {};
 
-            // Mapear etiquetas de la barra superior
-            document.getElementById('btn-step1').textContent = appState.labels.step_1 || "Etapa 1";
-            document.getElementById('btn-step2').textContent = appState.labels.step_2 || "Etapa 2";
-            document.getElementById('btn-step3').textContent = appState.labels.step_3 || "Etapa 3";
-            document.getElementById('btn-step4').textContent = appState.labels.step_4 || "Etapa 4";
+            // Mapear nombres de botones
+            document.getElementById('btn-step1').textContent = labels.step_1 || "Etapa 1";
+            document.getElementById('btn-step2').textContent = labels.step_2 || "Etapa 2";
+            document.getElementById('btn-step3').textContent = labels.step_3 || "Etapa 3";
+            document.getElementById('btn-step4').textContent = labels.step_4 || "Etapa 4";
 
-            document.getElementById('title-step1').textContent = appState.labels.step_1 || "Unidades";
-            document.getElementById('title-step3').textContent = appState.labels.step_3 || "En Proceso";
-            document.getElementById('title-step4').textContent = appState.labels.step_4 || "Cierre / Facturación";
+            document.getElementById('title-step1').textContent = labels.step_1 || "Unidades";
+            document.getElementById('title-step3').textContent = labels.step_3 || "En Proceso";
+            document.getElementById('title-step4').textContent = labels.step_4 || "Cierre / Facturación";
 
-            // 2. Cargar Catálogo de Servicios/Productos
+            // 2. Cargar Catálogo
             const { data: menu } = await client.from('menu').select('*').eq('tenant_id', tenantId);
             appState.catalog = menu || [];
             renderCatalog();
 
-            // 3. Cargar Unidades
+            // 3. Cargar Unidades y suscribir a Realtime
             await fetchUnits();
-
-            // 4. Suscribir Realtime
             client.channel('saas-realtime')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'mesas' }, () => fetchUnits())
                 .subscribe();
@@ -148,10 +139,6 @@
             const { data: units } = await client.from('mesas').select('*').eq('tenant_id', tenantId);
             appState.units = {};
             (units || []).forEach(u => appState.units[u.numero_mesa] = u);
-            renderAllViews();
-        }
-
-        function renderAllViews() {
             renderStep1();
             renderStep3();
             renderStep4();
@@ -185,7 +172,7 @@
             });
         }
 
-        // --- RENDERIZADO ETAPA 2 (Catálogo + Carrito) ---
+        // --- RENDERIZADO ETAPA 2 ---
         function selectUnit(id) {
             appState.activeUnit = id;
             document.getElementById('active-unit-id').textContent = id;
@@ -245,13 +232,13 @@
             renderCart();
         };
 
-        // --- AVANCE DE ETAPAS (MAQUINA DE ESTADOS UNIFICADA) ---
+        // --- MAQUINA DE ESTADOS (Mismo flujo que Resto) ---
         window.saveAndAdvanceStep2 = async function() {
-            if (!appState.activeUnit || appState.cart.length === 0) return alert("Agrega al menos un ítem");
+            if (!appState.activeUnit || appState.cart.length === 0) return;
             const resp = document.getElementById('input-responsible').value.trim();
 
             await client.from('mesas').update({
-                estado: 'occupied', // Estado -> Etapa 3
+                estado: 'occupied', // Pasa a Etapa 3
                 items: appState.cart,
                 garzon_actual: resp
             }).eq('numero_mesa', appState.activeUnit).eq('tenant_id', tenantId);
@@ -271,7 +258,7 @@
         window.closeAndFreeUnit = async function(id) {
             if (!confirm(`¿Cobrar y liberar ${id}?`)) return;
             await client.from('mesas').update({
-                estado: 'free', // Estado -> Etapa 1
+                estado: 'free', // Vuelve a Etapa 1
                 items: [],
                 garzon_actual: ''
             }).eq('numero_mesa', id).eq('tenant_id', tenantId);
@@ -281,12 +268,12 @@
             window.switchStep(1); // Vuelve a Etapa 1
         };
 
-        // --- RENDERIZADO ETAPA 3 Y ETAPA 4 ---
+        // --- RENDERIZADO ETAPAS 3 Y 4 ---
         function renderStep3() {
             const grid = document.getElementById('grid-step3');
             grid.innerHTML = '';
             const active = Object.values(appState.units).filter(u => u.estado === 'occupied');
-            if (active.length === 0) return grid.innerHTML = `<p class="col-span-full text-xs text-slate-500 py-6 text-center">Sin trabajos en ejecución.</p>`;
+            if (active.length === 0) return grid.innerHTML = `<p class="col-span-full text-xs text-slate-500 py-6 text-center">Sin elementos en proceso.</p>`;
 
             active.forEach(u => {
                 const total = (u.items || []).reduce((acc, i) => acc + (i.price * i.quantity), 0);
@@ -297,7 +284,7 @@
                         <span class="font-bold text-white text-sm">${u.numero_mesa}</span>
                         <span class="text-xs text-amber-400 font-bold">$${total.toLocaleString('es-CL')}</span>
                     </div>
-                    <p class="text-[11px] text-slate-400">Resp: ${u.garzon_actual || 'Sin asignar'}</p>
+                    <p class="text-[11px] text-slate-400">Atendió/Resp: ${u.garzon_actual || 'Sin asignar'}</p>
                     <button onclick="advanceToStep4('${u.numero_mesa}')" class="w-full bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold py-2 rounded-lg transition">Finalizar Proceso ➔</button>
                 `;
                 grid.appendChild(card);
@@ -308,7 +295,7 @@
             const grid = document.getElementById('grid-step4');
             grid.innerHTML = '';
             const ready = Object.values(appState.units).filter(u => u.estado === 'ready');
-            if (ready.length === 0) return grid.innerHTML = `<p class="col-span-full text-xs text-slate-500 py-6 text-center">Sin unidades pendientes de cobro.</p>`;
+            if (ready.length === 0) return grid.innerHTML = `<p class="col-span-full text-xs text-slate-500 py-6 text-center">Sin elementos pendientes de cierre.</p>`;
 
             ready.forEach(u => {
                 const total = (u.items || []).reduce((acc, i) => acc + (i.price * i.quantity), 0);
