@@ -137,7 +137,10 @@
     // 1. Supabase Initialization
     const SUPABASE_URL = 'https://kosyaamaocsslumanzrm.supabase.co'; // <--- Reemplazar con tu URL de Supabase
     const SUPABASE_ANON_KEY = 'sb_publishable_JwZ4ND6W9nMsqsOME-bc0A_JZYisN-4';           // <--- Reemplazar con tu Anon Key de Supabase
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // Inicialización segura para evitar que se declare dos veces
+    window.miSupabase = window.miSupabase || window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = window.miSupabase;
 
     // Get current Tenant ID from URL (?id=consulta-psicologia)
     const urlParams = new URLSearchParams(window.location.search);
