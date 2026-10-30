@@ -152,8 +152,8 @@
     const SUPABASE_URL = 'https://kosyaamaocsslumanzrm.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_JwZ4ND6W9nMsqOSME-bc0A_JZYIsN-4';
     
-    // Inicialización limpia con el SDK moderno v2
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Inicialización blindada usando el objeto global limpio
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Obtener Tenant ID de la URL
     const urlParams = new URLSearchParams(window.location.search);
