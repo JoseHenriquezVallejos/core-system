@@ -84,7 +84,7 @@
             <div id="grid-step4" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         </section>
 
-        <!-- PANEL DE CONFIGURACIÓN (⚙️ AGREGAR UNIDADES E ÍTEMS) -->
+        <!-- PANEL DE CONFIGURACIÓN (⚙️) -->
         <section id="view-admin" class="flex-1 space-y-6 overflow-y-auto hidden">
             <h2 class="text-lg font-bold border-b border-slate-800 pb-3 text-indigo-400 flex items-center gap-2">
                 <i class="fa-solid fa-sliders"></i> Configuración General
@@ -108,7 +108,6 @@
                     <button onclick="document.getElementById('form-add-item').classList.toggle('hidden')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">+ Agregar Ítem</button>
                 </div>
 
-                <!-- Formulario Agregar Ítem -->
                 <form id="form-add-item" onsubmit="window.saveCatalogItem(event)" class="hidden bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-3 max-w-md">
                     <input type="text" id="item-name" placeholder="Nombre del Servicio / Producto" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-indigo-500">
                     <input type="number" id="item-price" placeholder="Precio ($)" required min="0" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-indigo-500">
@@ -198,7 +197,7 @@
             renderAdminUnits();
         }
 
-        // --- RENDERIZADO ETAPA 1 ---
+        // --- RENDERIZADO ETAPA 1 (MARCADO EN TIEMPO REAL) ---
         function renderStep1() {
             const grid = document.getElementById('grid-step1');
             grid.innerHTML = '';
@@ -207,27 +206,42 @@
                 const state = u.estado || 'free';
                 const total = (u.items || []).reduce((acc, i) => acc + (i.price * i.quantity), 0);
                 
-                let badge = `<span class="text-[10px] text-slate-500 font-bold">DISPONIBLE</span>`;
-                let border = "border-slate-800";
-                if (state === 'occupied') { badge = `<span class="text-[10px] text-amber-400 font-bold">EN PROCESO ($${total.toLocaleString('es-CL')})</span>`; border = "border-amber-500/50 bg-amber-950/10"; }
-                if (state === 'ready') { badge = `<span class="text-[10px] text-emerald-400 font-bold">POR COBRAR ($${total.toLocaleString('es-CL')})</span>`; border = "border-emerald-500/50 bg-emerald-950/10"; }
+                let badge = `<span class="text-[10px] text-slate-400 font-bold bg-slate-800 px-2 py-0.5 rounded">DISPONIBLE</span>`;
+                let border = "border-slate-800 bg-slate-900";
+                let btnStyle = "bg-slate-800 hover:bg-indigo-600 text-white";
+                let btnText = "Abrir Registro";
+
+                if (state === 'occupied') {
+                    badge = `<span class="text-[10px] text-amber-400 font-bold bg-amber-950/60 border border-amber-500/30 px-2 py-0.5 rounded">EN PROCESO ($${total.toLocaleString('es-CL')})</span>`;
+                    border = "border-amber-500/60 bg-amber-950/10";
+                    btnStyle = "bg-amber-600 hover:bg-amber-500 text-white font-bold shadow-lg shadow-amber-600/20";
+                    btnText = "Ver en Proceso ➔";
+                } else if (state === 'ready') {
+                    badge = `<span class="text-[10px] text-emerald-400 font-bold bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded">POR COBRAR ($${total.toLocaleString('es-CL')})</span>`;
+                    border = "border-emerald-500/60 bg-emerald-950/10";
+                    btnStyle = "bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-lg shadow-emerald-600/20";
+                    btnText = "Cobrar / Cerrar ➔";
+                }
 
                 const card = document.createElement('div');
-                card.className = `border ${border} bg-slate-900 rounded-xl p-3.5 cursor-pointer hover:border-indigo-500 transition flex flex-col justify-between`;
-                card.onclick = () => selectUnit(id);
+                card.className = `border ${border} rounded-xl p-4 flex flex-col justify-between space-y-3 transition shadow-md`;
                 card.innerHTML = `
-                    <div>
-                        <h3 class="font-bold text-sm text-white">${id}</h3>
-                        ${badge}
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-bold text-base text-white">${id}</h3>
+                            <p class="text-[11px] text-slate-400 mt-0.5">Resp: ${u.garzon_actual || 'Sin asignar'}</p>
+                        </div>
+                        <i class="fa-solid fa-cube text-slate-600 text-lg"></i>
                     </div>
-                    <button class="mt-3 w-full bg-slate-800 text-xs text-white py-1.5 rounded-lg font-semibold">Gestionar ➔</button>
+                    <div>${badge}</div>
+                    <button onclick="window.selectUnit('${id}')" class="w-full ${btnStyle} text-xs py-2 rounded-lg transition">${btnText}</button>
                 `;
                 grid.appendChild(card);
             });
         }
 
         // --- ETAPA 2 ---
-        function selectUnit(id) {
+        window.selectUnit = function(id) {
             appState.activeUnit = id;
             document.getElementById('active-unit-id').textContent = id;
             const u = appState.units[id];
@@ -235,7 +249,7 @@
             document.getElementById('input-responsible').value = u?.garzon_actual || '';
             renderCart();
             window.switchStep(2);
-        }
+        };
 
         function renderCatalog() {
             const grid = document.getElementById('grid-catalog');
@@ -248,7 +262,7 @@
                         <h4 class="font-bold text-xs text-white">${item.nombre}</h4>
                         <span class="text-xs text-indigo-400 font-semibold">$${Number(item.precio).toLocaleString('es-CL')}</span>
                     </div>
-                    <button onclick="addToCart('${item.id}', '${item.nombre}', ${item.precio})" class="bg-slate-800 hover:bg-indigo-600 text-white text-xs px-2.5 py-1.5 rounded-lg font-bold transition">+</button>
+                    <button onclick="window.addToCart('${item.id}', '${item.nombre}', ${item.precio})" class="bg-slate-800 hover:bg-indigo-600 text-white text-xs px-2.5 py-1.5 rounded-lg font-bold transition">+</button>
                 `;
                 grid.appendChild(card);
             });
@@ -273,7 +287,7 @@
                     <span>${item.quantity}x ${item.name}</span>
                     <div class="flex items-center gap-1">
                         <span class="font-bold text-slate-300">$${(item.price * item.quantity).toLocaleString('es-CL')}</span>
-                        <button onclick="removeCart(${idx})" class="text-rose-400 hover:text-rose-300 ml-1">✕</button>
+                        <button onclick="window.removeCart(${idx})" class="text-rose-400 hover:text-rose-300 ml-1">✕</button>
                     </div>
                 `;
                 list.appendChild(row);
@@ -339,7 +353,7 @@
                         <span class="text-xs text-amber-400 font-bold">$${total.toLocaleString('es-CL')}</span>
                     </div>
                     <p class="text-[11px] text-slate-400">Atendió/Resp: ${u.garzon_actual || 'Sin asignar'}</p>
-                    <button onclick="advanceToStep4('${u.numero_mesa}')" class="w-full bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold py-2 rounded-lg transition">Finalizar Proceso ➔</button>
+                    <button onclick="window.advanceToStep4('${u.numero_mesa}')" class="w-full bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold py-2 rounded-lg transition">Finalizar Proceso ➔</button>
                 `;
                 grid.appendChild(card);
             });
@@ -360,13 +374,13 @@
                         <span class="font-bold text-white text-sm">${u.numero_mesa}</span>
                         <span class="text-sm text-emerald-400 font-bold">$${total.toLocaleString('es-CL')}</span>
                     </div>
-                    <button onclick="closeAndFreeUnit('${u.numero_mesa}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2 rounded-lg transition">Cobrar y Liberar</button>
+                    <button onclick="window.closeAndFreeUnit('${u.numero_mesa}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2 rounded-lg transition">Cobrar y Liberar</button>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        // --- FUNCIONES DE ADMINISTRACIÓN / AGREGAR ---
+        // --- ADMINISTRACIÓN ---
         window.addUnitPrompt = async function() {
             const name = prompt("Nombre de la nueva unidad (Ej: Mesa 5 o Vehículo 3):");
             if (!name) return;
@@ -406,7 +420,7 @@
             Object.keys(appState.units).sort().forEach(id => {
                 const card = document.createElement('div');
                 card.className = "bg-slate-900 border border-slate-800 p-2.5 rounded-xl flex justify-between items-center text-xs";
-                card.innerHTML = `<span class="font-bold text-white">${id}</span><button onclick="deleteUnit('${id}')" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button>`;
+                card.innerHTML = `<span class="font-bold text-white">${id}</span><button onclick="window.deleteUnit('${id}')" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button>`;
                 grid.appendChild(card);
             });
         }
@@ -422,7 +436,7 @@
                         <h4 class="font-bold text-white">${item.nombre}</h4>
                         <span class="text-indigo-400 font-semibold">$${Number(item.precio).toLocaleString('es-CL')}</span>
                     </div>
-                    <button onclick="deleteCatalogItem('${item.id}')" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button>
+                    <button onclick="window.deleteCatalogItem('${item.id}')" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button>
                 `;
                 grid.appendChild(card);
             });
