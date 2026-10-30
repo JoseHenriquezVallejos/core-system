@@ -211,7 +211,7 @@
             currentCart: [],
             tablesData: {},
             menuData: [],
-            currentRestaurantId: activeTenantId
+            currentTenantId: activeTenantId
         };
 
         window.showToast = function(msg) {
@@ -232,7 +232,7 @@
 
         window.loadCloudData = async function() {
             try {
-                const tenantId = window.appState.currentRestaurantId;
+                const tenantId = window.appState.currentTenantId;
 
                 const { data: tenant, error: errTenant } = await window.supabaseClient
                     .from('tenants')
@@ -267,10 +267,11 @@
                     document.getElementById('section-main-title').textContent = config.titulos.panel_unidades;
                 }
 
+                // CONSULTA CON tenant_id ACTUALIZADO
                 const { data: tables, error: errTables } = await window.supabaseClient
                     .from('mesas')
                     .select('*')
-                    .eq('restaurant_id', tenantId);
+                    .eq('tenant_id', tenantId);
                 
                 if (errTables) throw errTables;
 
@@ -290,10 +291,11 @@
                 }
                 window.appState.tablesData = tablesObj;
 
+                // CONSULTA MENÚ CON tenant_id ACTUALIZADO
                 const { data: menu, error: errMenu } = await window.supabaseClient
                     .from('menu')
                     .select('*')
-                    .eq('restaurant_id', tenantId);
+                    .eq('tenant_id', tenantId);
                 
                 if (errMenu) throw errMenu;
 
@@ -342,7 +344,7 @@
                         garzon_actual: waiterName
                     })
                     .eq('numero_mesa', tableId)
-                    .eq('restaurant_id', window.appState.currentRestaurantId);
+                    .eq('tenant_id', window.appState.currentTenantId);
 
                 if (error) throw error;
                 window.showToast("¡Registro actualizado con éxito!");
@@ -587,7 +589,7 @@
             if (!newName) return;
             try {
                 const { error } = await window.supabaseClient.from('mesas').insert({
-                    restaurant_id: window.appState.currentRestaurantId,
+                    tenant_id: window.appState.currentTenantId,
                     numero_mesa: newName.trim(),
                     estado: 'free',
                     items: [],
@@ -609,7 +611,7 @@
             const price = document.getElementById('admin-item-price').value;
             try {
                 const { error } = await window.supabaseClient.from('menu').insert({
-                    restaurant_id: window.appState.currentRestaurantId,
+                    tenant_id: window.appState.currentTenantId,
                     nombre: name,
                     categoria: category,
                     precio: Number(price)
@@ -630,7 +632,7 @@
         window.deleteTableFromSupabase = async function(tableId) {
             if (!confirm(`¿Eliminar la unidad ${tableId}?`)) return;
             try {
-                await window.supabaseClient.from('mesas').delete().eq('numero_mesa', tableId).eq('restaurant_id', window.appState.currentRestaurantId);
+                await window.supabaseClient.from('mesas').delete().eq('numero_mesa', tableId).eq('tenant_id', window.appState.currentTenantId);
                 window.showToast("Unidad eliminada");
                 window.loadCloudData();
             } catch (err) {
