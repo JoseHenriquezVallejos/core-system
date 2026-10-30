@@ -1,1 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoreFlow SaaS Engine</title>
+  <!-- Supabase CDN Versión Fija -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --bg-dark: #0f111a;
+      --card-bg: #181b29;
+      --card-border: #282c40;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --danger: #ef4444;
+    }
 
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg-dark); color: var(--text-main); min-height: 100vh; padding: 20px; }
+
+    /* Header */
+    header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid var(--card-border); margin-bottom: 20px; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-icon { background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; }
+    .brand-title h1 { font-size: 1.2rem; font-weight: 700; }
+    .brand-title p { font-size: 0.8rem; color: var(--text-muted); }
+
+    /* Dynamic Steps Bar */
+    .steps-nav { display: flex; gap: 10px; background: #141622; padding: 6px; border-radius: 10px; border: 1px solid var(--card-border); }
+    .step-btn { background: transparent; border: none; color: var(--text-muted); padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
+    .step-btn.active { background: var(--accent); color: white; }
+    .step-badge { background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 10px; font-size: 0.75rem; }
+
+    /* Configuration Panel Layout */
+    .config-container { display: flex; flex-direction: column; gap: 24px; max-width: 1200px; margin: 0 auto; }
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .section-title { font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+
+    .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .unit-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 16px; display: flex; justify-content: space-between; align-items: flex-start; }
+    .unit-card-content { white-space: pre-wrap; word-break: break-word; font-size: 0.95rem; line-height: 1.4; color: var(--text-main); }
+    
+    .btn-action { background: #222638; border: 1px solid var(--card-border); color: var(--text-muted); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .btn-action:hover { background: var(--card-border); color: white; }
+    .btn-primary { background: var(--accent); border: none; color: white; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-delete { background: transparent; border: none; color: #ef4444; cursor: pointer; padding: 4px; border-radius: 4px; }
+    .btn-delete:hover { background: rgba(239,68,68,0.1); }
+
+    /* Modal Textarea Overlay */
+    .modal-overlay { 
+      display: none; 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      background: rgba(0,0,0,0.75); 
+      backdrop-filter: blur(4px); 
+      z-index: 9999; 
+      align-items: center; 
+      justify-content: center; 
+    }
+    .modal-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; width: 90%; max-width: 500px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
+    .modal-card h3 { font-size: 1.2rem; margin-bottom: 8px; font-weight: 600; }
+    .modal-card p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; }
+    
+    .custom-textarea { width: 100%; background: #10121d; border: 1px solid var(--card-border); border-radius: 8px; color: var(--text-main); padding: 12px; font-size: 0.95rem; line-height: 1.4; resize: vertical; box-sizing: border-box; outline: none; }
+    .custom-textarea:focus { border-color: var(--accent); }
+    
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon"><i data-lucide="zap" style="color: white;"></i></div>
+      <div class="brand-title">
+        <h1>CoreFlow</h1>
+        <p id="tenant-subtitle">Cargando negocio...</p>
+      </div>
+    </div>
+
+    <!-- Navigation / Modules -->
+    <nav class="steps-nav" id="steps-container">
+      <!-- Generated via Config etiquetas JSON -->
+    </nav>
+
+    <button class="btn-action"><i data-lucide="settings"></i></button>
+  </header>
+
+  <!-- Configuration View (Vista Principal Inicial) -->
+  <main class="config-container" id="config-view">
+    <div style="display: flex; align-items: center; gap: 8px; font-size: 1.1rem; font-weight: bold; margin-bottom: 8px;">
+      <i data-lucide="sliders"></i> Configuración General
+    </div>
+
+    <!-- Registered Units Section -->
+    <section>
+      <div class="section-header">
+        <span class="section-title">Unidades Registradas</span>
+        <button class="btn-action btn-primary" onclick="abrirModalUnidad()">+ Agregar Unidad</button>
+      </div>
+      <div class="grid-cards" id="units-list">
+        <!-- Rendered units -->
+      </div>
+    </section>
+
+    <!-- Catalog Section -->
+    <section>
+      <div class="section-header">
+        <span class="section-title">Catálogo de Servicios / Productos</span>
+        <button class="btn-action btn-primary" onclick="agregarItemMenu()">+ Agregar Ítem</button>
+      </div>
+      <div class="grid-cards" id="catalog-list">
+        <!-- Rendered catalog items -->
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL TEXTAREA AMPLIADO -->
+  <div class="modal-overlay" id="modal-unidad">
+    <div class="modal-card">
+      <h3>Registrar Nueva Unidad</h3>
+      <p>Ingresa los detalles de la unidad (soporta múltiples líneas):</p>
+      
+      <textarea 
+        id="textarea-nueva-unidad" 
+        class="custom-textarea" 
+        rows="5" 
+        placeholder="Ej: Box 3&#10;Atención Presencial&#10;Piso 2"
+      ></textarea>
+
+      <div class="modal-actions">
+        <button class="btn-action" onclick="cerrarModalUnidad()">Cancelar</button>
+        <button class="btn-action btn-primary" onclick="confirmarCrearUnidad()">Guardar Unidad</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 1. Supabase Initialization - EVITA ERROR DE DOBLE DECLARACIÓN
+    const SUPABASE_URL = 'https://kosyaamaocsslumanzrm.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_JwZ4ND6W9nMsqOSME-bc0A_JZYIsN-4';
+    
+    window.dbSupabase = window.dbSupabase || window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    var supabase = window.dbSupabase;
+
+    // Get current Tenant ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const tenantId = urlParams.get('id') || 'consulta-psicologia';
+
+    let currentTenantConfig = null;
+
+    // Load App Data
+    async function initApp() {
+      try {
+        await cargarConfiguracionTenant();
+        await cargarUnidades();
+        await cargarCatalogo();
+        lucide.createIcons();
+      } catch(e) {
+        console.error("Error al inicializar la app:", e);
+      }
+    }
+
+    // 2. Fetch Tenant Config & UI Labels
+    async function cargarConfiguracionTenant() {
+      const { data, error } = await supabase
+        .from('tenants')
+        .select('*')
+        .eq('id', tenantId)
+        .single();
+
+      if (error || !data) {
+        console.error("Error al obtener tenant:", error);
+        document.getElementById('tenant-subtitle').textContent = tenantId;
+        return;
+      }
+
+      document.getElementById('tenant-subtitle').textContent = data.nombre_negocio;
+      currentTenantConfig = data.config_etiquetas || {};
+
+      const etapas = currentTenantConfig.etapas || {
+        step_1: "Paso 1", step_2: "Paso 2", step_3: "Paso 3", step_4: "Paso 4"
+      };
+
+      const stepsContainer = document.getElementById('steps-container');
+      stepsContainer.innerHTML = `
+        <button class="step-btn active">${etapas.step_1} <span class="step-badge" id="badge-step1">0</span></button>
+        <button class="step-btn">${etapas.step_2}</button>
+        <button class="step-btn">${etapas.step_3} <span class="step-badge">0</span></button>
+        <button class="step-btn">${etapas.step_4} <span class="step-badge">0</span></button>
+      `;
+    }
+
+    // 3. Load Units (mesas)
+    async function cargarUnidades() {
+      const { data, error } = await supabase
+        .from('mesas')
+        .select('*')
+        .eq('tenant_id', tenantId)
+        .order('id', { ascending: true });
+
+      if (error) return console.error("Error cargando unidades:", error);
+
+      const listContainer = document.getElementById('units-list');
+      const badgeStep1 = document.getElementById('badge-step1');
+      if (badgeStep1) badgeStep1.textContent = data ? data.length : 0;
+
+      if (!data || data.length === 0) {
+        listContainer.innerHTML = '<p style="color:var(--text-muted);">No hay unidades registradas.</p>';
+        return;
+      }
+
+      listContainer.innerHTML = data.map(item => `
+        <div class="unit-card">
+          <div class="unit-card-content">${escapeHtml(item.numero_mesa)}</div>
+          <button class="btn-delete" onclick="eliminarUnidad(${item.id})" title="Eliminar">
+            <i data-lucide="trash-2"></i>
+          </button>
+        </div>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    // 4. Load Menu Catalog
+    async function cargarCatalogo() {
+      const { data, error } = await supabase
+        .from('menu')
+        .select('*')
+        .eq('tenant_id', tenantId)
+        .order('id', { ascending: true });
+
+      if (error) return console.error("Error cargando catálogo:", error);
+
+      const catalogContainer = document.getElementById('catalog-list');
+      if (!data || data.length === 0) {
+        catalogContainer.innerHTML = '<p style="color:var(--text-muted);">No hay ítems registrados.</p>';
+        return;
+      }
+
+      catalogContainer.innerHTML = data.map(item => `
+        <div class="unit-card">
+          <div>
+            <div style="font-weight: 600;">${escapeHtml(item.nombre)}</div>
+            <div style="color: var(--accent); font-size: 0.9rem; margin-top: 4px;">$${Number(item.precio).toLocaleString('es-CL')}</div>
+          </div>
+          <button class="btn-delete" onclick="eliminarItemCatalog(${item.id})" title="Eliminar">
+            <i data-lucide="trash-2"></i>
+          </button>
+        </div>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    // 5. Modal Control Functions
+    function abrirModalUnidad() {
+      document.getElementById('textarea-nueva-unidad').value = '';
+      document.getElementById('modal-unidad').style.display = 'flex';
+      document.getElementById('textarea-nueva-unidad').focus();
+    }
+
+    function cerrarModalUnidad() {
+      document.getElementById('modal-unidad').style.display = 'none';
+    }
+
+    // Create New Unit
+    async function confirmarCrearUnidad() {
+      const textoUnidad = document.getElementById('textarea-nueva-unidad').value.trim();
+      if (!textoUnidad) return alert("Por favor ingresa una descripción para la unidad.");
+
+      const { data, error } = await supabase
+        .from('mesas')
+        .insert([
+          { 
+            tenant_id: tenantId, 
+            numero_mesa: textoUnidad, 
+            estado: 'free', 
+            items: [] 
+          }
+        ]);
+
+      if (error) {
+        alert("Error al guardar: " + error.message);
+      } else {
+        cerrarModalUnidad();
+        await cargarUnidades();
+      }
+    }
+
+    // Delete Unit
+    async function eliminarUnidad(id) {
+      if (!confirm("¿Deseas eliminar esta unidad?")) return;
+
+      const { error } = await supabase
+        .from('mesas')
+        .delete()
+        .eq('id', id);
+
+      if (error) alert("Error al eliminar: " + error.message);
+      else await cargarUnidades();
+    }
+
+    // Add Menu Item
+    async function agregarItemMenu() {
+      const nombre = prompt("Nombre del servicio o producto:");
+      if (!nombre) return;
+      
+      const precioStr = prompt("Precio ($):");
+      if (!precioStr) return;
+
+      const precio = parseInt(precioStr, 10) || 0;
+
+      const { error } = await supabase
+        .from('menu')
+        .insert([{ tenant_id: tenantId, nombre: nombre, precio: precio }]);
+
+      if (error) alert("Error al guardar ítem: " + error.message);
+      else await cargarCatalogo();
+    }
+
+    // Delete Menu Item
+    async function eliminarItemCatalog(id) {
+      if (!confirm("¿Deseas eliminar este servicio del catálogo?")) return;
+
+      const { error } = await supabase
+        .from('menu')
+        .delete()
+        .eq('id', id);
+
+      if (error) alert("Error al eliminar: " + error.message);
+      else await cargarCatalogo();
+    }
+
+    // Utility: Escape HTML
+    function escapeHtml(text) {
+      if (!text) return '';
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // Run on Load
+    window.onload = initApp;
+  </script>
+</body>
+</html>
