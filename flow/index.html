@@ -202,7 +202,7 @@
         window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const urlParams = new URLSearchParams(window.location.search);
-        const activeTenantId = urlParams.get('id') || urlParams.get('cliente') || 'don-pepe';
+        const activeTenantId = urlParams.get('id')?.trim() || urlParams.get('cliente')?.trim() || 'don-pepe';
 
         window.appState = {
             selectedTable: "",
@@ -246,7 +246,7 @@
                             <div class="bg-rose-500/10 text-rose-500 p-5 rounded-full border border-rose-500/20 shadow-2xl">
                                 <i class="fa-solid fa-store-slash text-4xl"></i>
                             </div>
-                            <h3 class="text-xl font-bold text-white">Negocio no encontrado</h3>
+                            <h3 class="text-xl font-bold text-white">Negocio no encontrado (${tenantId})</h3>
                         </div>
                     `;
                     return;
