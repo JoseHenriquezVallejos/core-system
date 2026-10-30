@@ -184,31 +184,44 @@
 
         <!-- ================= VISTA 5: ADMINISTRACIÓN (CONFIGURACIÓN) ================= -->
         <section id="view-admin" class="flex-1 p-4 md:p-6 overflow-y-auto hidden">
-            <div class="max-w-5xl mx-auto space-y-8">
+            <div class="max-w-7xl mx-auto space-y-8">
                 <div class="border-b border-slate-800 pb-4">
                     <h2 class="text-xl font-bold text-white flex items-center gap-2">
                         <i class="fa-solid fa-sliders text-indigo-400"></i> Panel de Configuración del Local
                     </h2>
-                    <p class="text-xs text-slate-400">Agrega mesas o productos al menú en tiempo real.</p>
+                    <p class="text-xs text-slate-400">Administra las mesas y los productos del menú en tiempo real.</p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- 1. Gestión de Mesas -->
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
-                        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                            <h3 class="font-bold text-base text-white flex items-center gap-2"><i class="fa-solid fa-chair text-indigo-400"></i> Mesas del Local</h3>
-                            <button onclick="window.createNewTableInSupabase()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition">
-                                + Agregar Mesa
-                            </button>
-                        </div>
-                        <div id="admin-tables-list" class="space-y-2 max-h-60 overflow-y-auto"></div>
+                <!-- SECCIÓN 1: GESTIÓN DE MESAS -->
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-base text-white flex items-center gap-2"><i class="fa-solid fa-chair text-indigo-400"></i> Mesas del Local</h3>
+                        <button onclick="window.createNewTableInSupabase()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-2 rounded-xl transition shadow-lg shadow-indigo-600/20">
+                            + Agregar Mesa
+                        </button>
+                    </div>
+                    <div id="admin-tables-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+                </div>
+
+                <hr class="border-slate-800">
+
+                <!-- SECCIÓN 2: GESTIÓN DE MENÚ -->
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-base text-white flex items-center gap-2"><i class="fa-solid fa-utensils text-indigo-400"></i> Menú del Local</h3>
+                        <button onclick="window.openMenuForm()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-2 rounded-xl transition shadow-lg shadow-indigo-600/20">
+                            + Agregar Producto
+                        </button>
                     </div>
 
-                    <!-- 2. Gestión de Menú -->
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
-                        <h3 class="font-bold text-base text-white border-b border-slate-800 pb-3 flex items-center gap-2"><i class="fa-solid fa-utensils text-indigo-400"></i> Agregar Producto al Menú</h3>
-                        
-                        <form onsubmit="window.createNewMenuItemInSupabase(event)" class="space-y-3">
+                    <!-- Formulario Desplegable / Modal para Crear o Modificar Producto -->
+                    <div id="menu-form-card" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-xl mx-auto space-y-4 shadow-2xl">
+                        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                            <h4 id="menu-form-title" class="font-bold text-sm text-white">Nuevo Producto</h4>
+                            <button onclick="window.closeMenuForm()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <form onsubmit="window.saveMenuItem(event)" class="space-y-3">
+                            <input type="hidden" id="admin-item-id">
                             <div>
                                 <label class="block text-xs text-slate-400 mb-1">Nombre</label>
                                 <input type="text" id="admin-item-name" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="Ej: Lomo Saltado">
@@ -223,11 +236,15 @@
                                     <input type="number" id="admin-item-price" required min="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="12990">
                                 </div>
                             </div>
-                            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-lg shadow-indigo-600/30">
-                                Guardar Producto
-                            </button>
+                            <div class="flex justify-end space-x-2 pt-2">
+                                <button type="button" onclick="window.closeMenuForm()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-xl text-xs font-semibold transition">Cancelar</button>
+                                <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-xl text-xs transition shadow-lg shadow-indigo-600/30">Guardar Producto</button>
+                            </div>
                         </form>
                     </div>
+
+                    <!-- Cuadrícula de productos del menú en Admin -->
+                    <div id="admin-menu-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
                 </div>
             </div>
         </section>
@@ -281,8 +298,12 @@
 
         window.loadCloudData = async function() {
             try {
-                // 1. Cargar Mesas
-                const { data: tables, error: errTables } = await window.supabaseClient.from('mesas').select('*');
+                // 1. Cargar Mesas filtradas por restaurant_id
+                const { data: tables, error: errTables } = await window.supabaseClient
+                    .from('mesas')
+                    .select('*')
+                    .eq('restaurant_id', window.appState.currentRestaurantId);
+                
                 if (errTables) throw errTables;
 
                 const tablesObj = {};
@@ -293,7 +314,7 @@
                         
                         tablesObj[row.numero_mesa] = {
                             tableId: row.numero_mesa,
-                            status: row.estado || 'free', // 'free', 'occupied', 'ready'
+                            status: row.estado || 'free',
                             items: itemsArr,
                             total: calculatedTotal,
                             waiter: row.garzon_actual || ''
@@ -323,6 +344,7 @@
                 window.renderKitchenView();
                 window.renderCashierView();
                 window.renderAdminTables();
+                window.renderAdminMenu();
                 window.initCategories();
                 window.renderMenu();
 
@@ -351,7 +373,6 @@
             }
 
             try {
-                // Si agregan algo más, cambiamos a 'occupied' para que cocina lo vuelva a revisar si es necesario
                 const { error } = await window.supabaseClient
                     .from('mesas')
                     .update({
@@ -359,7 +380,8 @@
                         items: window.appState.currentCart,
                         garzon_actual: waiterName
                     })
-                    .eq('numero_mesa', tableId);
+                    .eq('numero_mesa', tableId)
+                    .eq('restaurant_id', window.appState.currentRestaurantId);
 
                 if (error) throw error;
 
@@ -376,9 +398,14 @@
             if (!grid) return;
             grid.innerHTML = '';
 
-            const keys = Object.keys(window.appState.tablesData);
+            const keys = Object.keys(window.appState.tablesData).sort((a, b) => {
+                const numA = parseInt(a.replace(/\D/g, '')) || 0;
+                const numB = parseInt(b.replace(/\D/g, '')) || 0;
+                return numA - numB;
+            });
+
             if (keys.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-500 text-xs">No hay mesas. Agrégalas desde el botón de configuración (⚙️).</div>`;
+                grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-500 text-xs">No hay mesas. Agrégalas con el botón superior.</div>`;
                 return;
             }
 
@@ -481,7 +508,7 @@
             });
 
             if (items.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-500 text-xs">No hay productos en esta categoría. Agrega algunos desde Administración (⚙️).</div>`;
+                grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-500 text-xs">No hay productos en esta categoría.</div>`;
                 return;
             }
 
@@ -574,136 +601,132 @@
             window.renderCart();
         };
 
+        // --- RENDERIZADO DE COCINA (KDS) ---
         window.renderKitchenView = function() {
             const container = document.getElementById('kitchen-orders-grid');
             const badge = document.getElementById('kitchen-badge');
             if (!container) return;
             container.innerHTML = '';
 
-            const occupiedTables = Object.values(window.appState.tablesData).filter(t => t.status === 'occupied' || t.status === 'ready');
+            const tables = window.appState.tablesData;
+            let activeOrdersCount = 0;
+
+            Object.keys(tables).forEach(tableId => {
+                const table = tables[tableId];
+                if (table.status === 'occupied' && table.items && table.items.length > 0) {
+                    activeOrdersCount++;
+                    const card = document.createElement('div');
+                    card.className = "bg-slate-900 border border-amber-500/40 rounded-2xl p-4 flex flex-col justify-between space-y-4 shadow-lg";
+                    
+                    let itemsHtml = '';
+                    table.items.forEach(i => {
+                        itemsHtml += `<li class="flex justify-between text-xs py-1 border-b border-slate-800"><span class="text-white font-medium">${i.name}</span><span class="text-indigo-400 font-bold">x${i.quantity}</span></li>`;
+                    });
+
+                    card.innerHTML = `
+                        <div>
+                            <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-3">
+                                <h3 class="font-bold text-base text-white">${tableId}</h3>
+                                <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full font-bold">PENDIENTE COCINA</span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mb-2">Garzón: <strong class="text-white">${table.waiter || 'General'}</strong></p>
+                            <ul class="space-y-1">${itemsHtml}</ul>
+                        </div>
+                        <button onclick="window.markTableReady('${tableId}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2 rounded-xl transition shadow-lg shadow-emerald-600/20">
+                            <i class="fa-solid fa-check"></i> Marcar como Listo / Enviar a Caja
+                        </button>
+                    `;
+                    container.appendChild(card);
+                }
+            });
 
             if (badge) {
-                const pendingKitchen = occupiedTables.filter(t => t.status === 'occupied');
-                if (pendingKitchen.length > 0) {
-                    badge.textContent = pendingKitchen.length;
+                if (activeOrdersCount > 0) {
+                    badge.textContent = activeOrdersCount;
                     badge.classList.remove('hidden');
                 } else {
                     badge.classList.add('hidden');
                 }
             }
 
-            if (occupiedTables.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-20 text-slate-500 text-sm">Sin comandas en cocina</div>`;
-                return;
+            if (activeOrdersCount === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500 text-xs">No hay pedidos pendientes en cocina en este momento.</div>`;
             }
-
-            occupiedTables.forEach(table => {
-                const card = document.createElement('div');
-                card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3 flex flex-col justify-between";
-                
-                let itemsList = table.items.map(i => `
-                    <div class="py-1 border-b border-slate-800/60 last:border-0 flex justify-between items-center text-xs">
-                        <div><span class="font-bold text-white">${i.quantity}x</span> ${i.name}</div>
-                        <span class="text-slate-400">$${(i.price * i.quantity).toLocaleString('es-CL')}</span>
-                    </div>
-                `).join('');
-
-                const isReady = table.status === 'ready';
-
-                card.innerHTML = `
-                    <div>
-                        <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-2">
-                            <h3 class="font-bold text-base text-white">${table.tableId}</h3>
-                            <span class="text-xs text-indigo-400 font-semibold">${table.waiter || 'Sin garzón'}</span>
-                        </div>
-                        <div class="space-y-1 mb-4">${itemsList}</div>
-                    </div>
-                    <button onclick="window.markOrderReady('${table.tableId}')" class="w-full ${isReady ? 'bg-slate-800 text-emerald-400 border border-emerald-500/30' : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/25'} py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-check"></i> ${isReady ? 'Pedido Ya en Caja (Marcar de nuevo)' : 'Marcar Listo (Avisa a Caja)'}
-                    </button>
-                `;
-                container.appendChild(card);
-            });
         };
 
-        window.markOrderReady = async function(tableId) {
+        window.markTableReady = async function(tableId) {
             try {
-                // Cambiamos el estado a 'ready' para notificar a caja manteniendo la mesa abierta
                 const { error } = await window.supabaseClient
                     .from('mesas')
                     .update({ estado: 'ready' })
-                    .eq('numero_mesa', tableId);
+                    .eq('numero_mesa', tableId)
+                    .eq('restaurant_id', window.appState.currentRestaurantId);
 
                 if (error) throw error;
-                window.showToast(`¡${tableId} lista! Notificada a caja.`);
+                window.showToast(`Mesa ${tableId} lista y enviada a caja`);
                 window.loadCloudData();
             } catch (err) {
-                console.error("Error marcando listo:", err);
+                console.error("Error al marcar listo:", err);
                 window.showToast("Error al actualizar estado");
             }
         };
 
+        // --- RENDERIZADO DE CAJA ---
         window.renderCashierView = function() {
             const container = document.getElementById('cashier-tables-grid');
             const badge = document.getElementById('cashier-badge');
             if (!container) return;
             container.innerHTML = '';
 
-            const activeTables = Object.values(window.appState.tablesData).filter(t => t.status === 'occupied' || t.status === 'ready');
+            const tables = window.appState.tablesData;
+            let readyOrdersCount = 0;
+
+            Object.keys(tables).forEach(tableId => {
+                const table = tables[tableId];
+                if ((table.status === 'occupied' || table.status === 'ready') && table.items && table.items.length > 0) {
+                    readyOrdersCount++;
+                    const card = document.createElement('div');
+                    card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between space-y-4 shadow-lg";
+
+                    let itemsHtml = '';
+                    table.items.forEach(i => {
+                        itemsHtml += `<li class="flex justify-between text-xs py-1 border-b border-slate-800"><span class="text-white">${i.name} (x${i.quantity})</span><span class="text-indigo-400 font-bold">$${(i.price * i.quantity).toLocaleString('es-CL')}</span></li>`;
+                    });
+
+                    card.innerHTML = `
+                        <div>
+                            <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-3">
+                                <h3 class="font-bold text-base text-white">${tableId}</h3>
+                                <span class="text-xs font-bold text-emerald-400">$${table.total.toLocaleString('es-CL')}</span>
+                            </div>
+                            <ul class="space-y-1 max-h-40 overflow-y-auto mb-3">${itemsHtml}</ul>
+                        </div>
+                        <button onclick="window.chargeTable('${tableId}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2 rounded-xl transition shadow-lg shadow-emerald-600/20">
+                            <i class="fa-solid fa-cash-register"></i> Cobrar y Liberar Mesa
+                        </button>
+                    `;
+                    container.appendChild(card);
+                }
+            });
 
             if (badge) {
-                if (activeTables.length > 0) {
-                    badge.textContent = activeTables.length;
+                if (readyOrdersCount > 0) {
+                    badge.textContent = readyOrdersCount;
                     badge.classList.remove('hidden');
                 } else {
                     badge.classList.add('hidden');
                 }
             }
 
-            if (activeTables.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-20 text-slate-500 text-sm">Sin cuentas activas en el local</div>`;
-                return;
+            if (readyOrdersCount === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500 text-xs">No hay cuentas activas para cobrar en este momento.</div>`;
             }
-
-            activeTables.forEach(table => {
-                const card = document.createElement('div');
-                card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3";
-                
-                let itemsList = table.items.map(i => `
-                    <div class="flex justify-between text-xs py-0.5 border-b border-slate-800/40">
-                        <span class="text-slate-300">${i.quantity}x ${i.name}</span>
-                        <span class="font-medium text-white">$${(i.price * i.quantity).toLocaleString('es-CL')}</span>
-                    </div>
-                `).join('');
-
-                const isReady = table.status === 'ready';
-                const estadoCocinaBadge = isReady 
-                    ? `<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] px-2 py-0.5 rounded font-bold">✔ Pedido Listo</span>` 
-                    : `<span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] px-2 py-0.5 rounded font-bold">⏳ En Preparación</span>`;
-
-                card.innerHTML = `
-                    <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                        <div>
-                            <h3 class="font-bold text-base text-white">${table.tableId}</h3>
-                            ${estadoCocinaBadge}
-                        </div>
-                        <span class="font-bold text-emerald-400 text-base">$${table.total.toLocaleString('es-CL')}</span>
-                    </div>
-                    <p class="text-xs text-slate-400">Atendido por: <span class="text-white font-medium">${table.waiter || 'No especificado'}</span></p>
-                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800/80 space-y-1 my-2 max-h-32 overflow-y-auto">
-                        ${itemsList}
-                    </div>
-                    <button onclick="window.liberarMesa('${table.tableId}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 rounded-xl text-xs font-bold transition shadow-lg shadow-emerald-600/20">
-                        Cobrar y Liberar Mesa
-                    </button>
-                `;
-                container.appendChild(card);
-            });
         };
 
-        window.liberarMesa = async function(tableId) {
+        window.chargeTable = async function(tableId) {
+            if (!confirm(`¿Estás seguro de cobrar la cuenta de ${tableId} y liberar la mesa?`)) return;
+
             try {
-                // Al cobrar, la mesa vuelve a quedar libre y vacía
                 const { error } = await window.supabaseClient
                     .from('mesas')
                     .update({
@@ -711,87 +734,208 @@
                         items: [],
                         garzon_actual: null
                     })
-                    .eq('numero_mesa', tableId);
+                    .eq('numero_mesa', tableId)
+                    .eq('restaurant_id', window.appState.currentRestaurantId);
 
                 if (error) throw error;
-                window.showToast(`¡${tableId} cobrada y liberada con éxito!`);
+                window.showToast(`Mesa ${tableId} cobrada y liberada con éxito`);
                 window.loadCloudData();
             } catch (err) {
-                console.error("Error liberando mesa:", err);
-                window.showToast("Error al cobrar mesa");
+                console.error("Error al cobrar mesa:", err);
+                window.showToast("Error al procesar cobro");
             }
         };
 
+        // --- RENDERIZADO DE ADMINISTRACIÓN (MESAS) ---
         window.renderAdminTables = function() {
-            const container = document.getElementById('admin-tables-list');
+            const container = document.getElementById('admin-tables-grid');
             if (!container) return;
             container.innerHTML = '';
 
-            const keys = Object.keys(window.appState.tablesData);
+            const tables = window.appState.tablesData;
+            const keys = Object.keys(tables).sort((a, b) => {
+                const numA = parseInt(a.replace(/\D/g, '')) || 0;
+                const numB = parseInt(b.replace(/\D/g, '')) || 0;
+                return numA - numB;
+            });
+
             if (keys.length === 0) {
-                container.innerHTML = `<div class="text-xs text-slate-500 italic">No hay mesas creadas.</div>`;
+                container.innerHTML = `<p class="text-xs text-slate-500 col-span-full">No hay mesas registradas.</p>`;
                 return;
             }
 
             keys.forEach(tableId => {
-                const item = document.createElement('div');
-                item.className = "bg-slate-950 border border-slate-800 p-2.5 rounded-xl flex justify-between items-center text-xs";
-                item.innerHTML = `
-                    <span class="font-bold text-white">${tableId}</span>
-                    <span class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Activa</span>
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-md relative group";
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-bold text-base text-white">${tableId}</h3>
+                            <span class="text-[10px] text-slate-500">Mesa activa</span>
+                        </div>
+                        <button onclick="window.deleteTable('${tableId}')" class="bg-slate-800 hover:bg-rose-600/20 text-slate-400 hover:text-rose-400 w-8 h-8 rounded-xl flex items-center justify-center transition" title="Eliminar Mesa">
+                            <i class="fa-solid fa-trash text-xs"></i>
+                        </button>
+                    </div>
                 `;
-                container.appendChild(item);
+                container.appendChild(card);
             });
         };
 
         window.createNewTableInSupabase = async function() {
-            const currentCount = Object.keys(window.appState.tablesData).length;
-            const newTableId = `Mesa ${currentCount + 1}`;
+            const nextNum = Object.keys(window.appState.tablesData).length + 1;
+            const newTableName = `Mesa ${nextNum}`;
 
             try {
                 const { error } = await window.supabaseClient
                     .from('mesas')
-                    .insert([{ numero_mesa: newTableId, estado: 'free', items: [] }]);
+                    .insert([{ numero_mesa: newTableName, estado: 'free', items: [], restaurant_id: window.appState.currentRestaurantId }]);
 
                 if (error) throw error;
-                window.showToast(`¡${newTableId} creada!`);
+                window.showToast(`¡${newTableName} creada con éxito!`);
                 window.loadCloudData();
             } catch (err) {
-                console.error("Error al crear mesa:", err);
+                console.error("Error creando mesa:", err);
                 window.showToast("Error al crear mesa");
             }
         };
 
-        window.createNewMenuItemInSupabase = async function(event) {
+        window.deleteTable = async function(tableId) {
+            if (!confirm(`¿Eliminar ${tableId}?`)) return;
+            try {
+                const { error } = await window.supabaseClient
+                    .from('mesas')
+                    .delete()
+                    .eq('numero_mesa', tableId)
+                    .eq('restaurant_id', window.appState.currentRestaurantId);
+
+                if (error) throw error;
+                window.showToast(`${tableId} eliminada`);
+                window.loadCloudData();
+            } catch (err) {
+                console.error("Error eliminando mesa:", err);
+                window.showToast("Error al eliminar mesa");
+            }
+        };
+
+        // --- RENDERIZADO DE ADMINISTRACIÓN (MENÚ CON MODIFICAR Y BASURERO) ---
+        window.renderAdminMenu = function() {
+            const container = document.getElementById('admin-menu-grid');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const items = window.appState.menuData;
+
+            if (items.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-500 col-span-full">No hay productos en el menú.</p>`;
+                return;
+            }
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-md";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-bold text-sm text-indigo-400">$${item.price.toLocaleString('es-CL')}</span>
+                            <div class="flex items-center space-x-1">
+                                <button onclick="window.openMenuForm('${item.id}', '${item.name}', '${item.category}', ${item.price})" class="bg-slate-800 hover:bg-indigo-600/20 text-slate-400 hover:text-indigo-400 w-7 h-7 rounded-lg flex items-center justify-center transition" title="Modificar">
+                                    <i class="fa-solid fa-pen text-[10px]"></i>
+                                </button>
+                                <button onclick="window.deleteMenuItem('${item.id}')" class="bg-slate-800 hover:bg-rose-600/20 text-slate-400 hover:text-rose-400 w-7 h-7 rounded-lg flex items-center justify-center transition" title="Eliminar">
+                                    <i class="fa-solid fa-trash text-[10px]"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <h4 class="font-bold text-xs text-white mb-1">${item.name}</h4>
+                        <span class="text-[10px] text-slate-500 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">${item.category}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        };
+
+        window.openMenuForm = function(id = '', name = '', category = '', price = '') {
+            const formCard = document.getElementById('menu-form-card');
+            const titleEl = document.getElementById('menu-form-title');
+            
+            document.getElementById('admin-item-id').value = id;
+            document.getElementById('admin-item-name').value = name;
+            document.getElementById('admin-item-category').value = category;
+            document.getElementById('admin-item-price').value = price;
+
+            if (id) {
+                titleEl.textContent = "Modificar Producto";
+            } else {
+                titleEl.textContent = "Nuevo Producto";
+            }
+
+            formCard.classList.remove('hidden');
+        };
+
+        window.closeMenuForm = function() {
+            document.getElementById('menu-form-card').classList.add('hidden');
+        };
+
+        window.saveMenuItem = async function(event) {
             event.preventDefault();
+            const id = document.getElementById('admin-item-id').value;
             const name = document.getElementById('admin-item-name').value.trim();
             const category = document.getElementById('admin-item-category').value.trim();
             const price = Number(document.getElementById('admin-item-price').value);
 
             try {
-                const { error } = await window.supabaseClient
-                    .from('menu')
-                    .insert([{ 
-                        restaurant_id: window.appState.currentRestaurantId,
-                        nombre: name, 
-                        categoria: category, 
-                        precio: price 
-                    }]);
+                if (id) {
+                    // Actualizar (Modificar)
+                    const { error } = await window.supabaseClient
+                        .from('menu')
+                        .update({ nombre: name, categoria: category, precio: price })
+                        .eq('id', id);
 
-                if (error) throw error;
-                window.showToast(`¡${name} agregado al menú!`);
-                event.target.reset();
+                    if (error) throw error;
+                    window.showToast("¡Producto modificado con éxito!");
+                } else {
+                    // Crear nuevo
+                    const { error } = await window.supabaseClient
+                        .from('menu')
+                        .insert([{ nombre: name, categoria: category, precio: price, restaurant_id: window.appState.currentRestaurantId }]);
+
+                    if (error) throw error;
+                    window.showToast("¡Producto agregado al menú!");
+                }
+
+                window.closeMenuForm();
                 window.loadCloudData();
             } catch (err) {
-                console.error("Error al guardar plato:", err);
-                window.showToast("Error al agregar producto");
+                console.error("Error guardando producto:", err);
+                window.showToast("Error al guardar producto");
             }
         };
 
-        window.onload = function() {
+        window.deleteMenuItem = async function(itemId) {
+            if (!confirm("¿Estás seguro de eliminar este producto del menú?")) return;
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('menu')
+                    .delete()
+                    .eq('id', itemId);
+
+                if (error) throw error;
+                window.showToast("Producto eliminado del menú");
+                window.loadCloudData();
+            } catch (err) {
+                console.error("Error al eliminar producto del menú:", err);
+                window.showToast("Error al eliminar producto");
+            }
+        };
+
+        // Inicializar al cargar la página
+        window.addEventListener('DOMContentLoaded', () => {
             window.loadCloudData();
             window.setupRealtime();
-        };
+        });
     </script>
+
 </body>
 </html>
