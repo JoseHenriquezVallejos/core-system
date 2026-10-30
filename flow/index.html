@@ -26,7 +26,7 @@
     /* Header */
     header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid var(--card-border); margin-bottom: 20px; }
     .brand { display: flex; align-items: center; gap: 10px; }
-    .brand-icon { background: var(--accent); p-2; border-radius: 8px; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; }
+    .brand-icon { background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; }
     .brand-title h1 { font-size: 1.2rem; font-weight: 700; }
     .brand-title p { font-size: 0.8rem; color: var(--text-muted); }
 
@@ -52,8 +52,20 @@
     .btn-delete { background: transparent; border: none; color: #ef4444; cursor: pointer; padding: 4px; border-radius: 4px; }
     .btn-delete:hover { background: rgba(239,68,68,0.1); }
 
-    /* Custom Textarea Modal Overlay */
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; }
+    /* Custom Textarea Modal Overlay - INICIA OCULTO RIGUROSO (display: none) */
+    .modal-overlay { 
+      display: none; 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      background: rgba(0,0,0,0.75); 
+      backdrop-filter: blur(4px); 
+      z-index: 9999; 
+      align-items: center; 
+      justify-content: center; 
+    }
     .modal-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; width: 90%; max-width: 500px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
     .modal-card h3 { font-size: 1.2rem; margin-bottom: 8px; font-weight: 600; }
     .modal-card p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; }
@@ -81,7 +93,7 @@
       <!-- Generated via Config etiquetas JSON -->
     </nav>
 
-    <button class="btn-action" onclick="toggleConfigView()"><i data-lucide="settings"></i></button>
+    <button class="btn-action"><i data-lucide="settings"></i></button>
   </header>
 
   <!-- Configuration View -->
@@ -116,14 +128,14 @@
   <!-- MODAL TEXTAREA AMPLIADO -->
   <div class="modal-overlay" id="modal-unidad">
     <div class="modal-card">
-      <h3 id="modal-unidad-title">Registrar Nueva Unidad</h3>
-      <p id="modal-unidad-desc">Ingresa los detalles de la unidad (soporta múltiples líneas):</p>
+      <h3>Registrar Nueva Unidad</h3>
+      <p>Ingresa los detalles de la unidad (soporta múltiples líneas):</p>
       
       <textarea 
         id="textarea-nueva-unidad" 
         class="custom-textarea" 
         rows="5" 
-        placeholder="Ej: José Henriquez&#10;RUT: 8.181.991-9&#10;Motivo: Terapia Individual"
+        placeholder="Ej: Box 3&#10;Atención Presencial&#10;Piso 2"
       ></textarea>
 
       <div class="modal-actions">
@@ -134,14 +146,15 @@
   </div>
 
   <script>
-    // 1. Supabase Initialization
-    const SUPABASE_URL = 'https://kosyaamaocsslumanzrm.supabase.co'; // <--- Reemplazar con tu URL de Supabase
-    const SUPABASE_ANON_KEY = 'sb_publishable_JwZ4ND6W9nMsqsOME-bc0A_JZYisN-4';           // <--- Reemplazar con tu Anon Key de Supabase
-
-    // Usamos 'var' para evitar el error de sintaxis por doble declaración
-    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // 1. Supabase Initialization - EVITA ERROR DE DOBLE DECLARACIÓN
+    const SUPABASE_URL = 'https://kosyaamaocsslumanzrm.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_JwZ4ND6W9nMsqOSME-bc0A_JZYIsN-4';
     
-    // Get current Tenant ID from URL (?id=consulta-psicologia)
+    // Asignación segura en objeto global
+    window.dbSupabase = window.dbSupabase || window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    var supabase = window.dbSupabase;
+
+    // Get current Tenant ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const tenantId = urlParams.get('id') || 'consulta-psicologia';
 
@@ -149,10 +162,14 @@
 
     // Load App Data
     async function initApp() {
-      await cargarConfiguracionTenant();
-      await cargarUnidades();
-      await cargarCatalogo();
-      lucide.createIcons();
+      try {
+        await cargarConfiguracionTenant();
+        await cargarUnidades();
+        await cargarCatalogo();
+        lucide.createIcons();
+      } catch(e) {
+        console.error("Error al inicializar la app:", e);
+      }
     }
 
     // 2. Fetch Tenant Config & UI Labels
@@ -172,7 +189,6 @@
       document.getElementById('tenant-subtitle').textContent = data.nombre_negocio;
       currentTenantConfig = data.config_etiquetas || {};
 
-      // Build top steps navigation dynamically
       const etapas = currentTenantConfig.etapas || {
         step_1: "Paso 1", step_2: "Paso 2", step_3: "Paso 3", step_4: "Paso 4"
       };
@@ -248,7 +264,7 @@
       lucide.createIcons();
     }
 
-    // 5. Custom Modal UI Handlers
+    // 5. Modal Control Functions
     function abrirModalUnidad() {
       document.getElementById('textarea-nueva-unidad').value = '';
       document.getElementById('modal-unidad').style.display = 'flex';
@@ -259,7 +275,7 @@
       document.getElementById('modal-unidad').style.display = 'none';
     }
 
-    // Create New Unit with Multiline Textarea Value
+    // Create New Unit
     async function confirmarCrearUnidad() {
       const textoUnidad = document.getElementById('textarea-nueva-unidad').value.trim();
       if (!textoUnidad) return alert("Por favor ingresa una descripción para la unidad.");
@@ -276,7 +292,7 @@
         ]);
 
       if (error) {
-        alert("Error al guardar en Supabase: " + error.message);
+        alert("Error al guardar: " + error.message);
       } else {
         cerrarModalUnidad();
         await cargarUnidades();
@@ -327,7 +343,7 @@
       else await cargarCatalogo();
     }
 
-    // Helper Utility: Escape HTML to avoid XSS
+    // Utility: Escape HTML
     function escapeHtml(text) {
       if (!text) return '';
       return text
@@ -338,7 +354,7 @@
         .replace(/'/g, "&#039;");
     }
 
-    // Initialize on window load
+    // Run on Load
     window.onload = initApp;
   </script>
 </body>
