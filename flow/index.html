@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CoreFlow SaaS Engine</title>
   <!-- Supabase CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
+  
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
@@ -148,7 +149,8 @@
   <script>
     // 1. Supabase Initialization - EVITA ERROR DE DOBLE DECLARACIÓN
     const SUPABASE_URL = 'https://kosyaamaocsslumanzrm.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_JwZ4ND6W9nMsqOSME-bc0A_JZYIsN-4';
+    const SUPABASE_ANON_KEY = 'sb_publishable_JwZ4ND6W9nMsqsOME-bc0A_JZYisN-4';
+    sb_publishable_JwZ4ND6W9nMsqsOME-bc0A_JZYisN-4
     
     // Asignación segura en objeto global
     window.dbSupabase = window.dbSupabase || window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
