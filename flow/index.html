@@ -1,470 +1,343 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CoreFlow SaaS Engine</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoreFlow SaaS Engine</title>
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --bg-dark: #0f111a;
+      --card-bg: #181b29;
+      --card-border: #282c40;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --danger: #ef4444;
+    }
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed top-5 right-5 z-50 transform translate-x-full transition-transform duration-300 bg-emerald-600 text-white px-5 py-2.5 rounded-xl shadow-xl text-xs font-semibold flex items-center gap-2 pointer-events-none">
-        <i class="fa-solid fa-circle-check"></i> <span id="toast-msg">Sincronizado</span>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg-dark); color: var(--text-main); min-height: 100vh; padding: 20px; }
+
+    /* Header */
+    header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid var(--card-border); margin-bottom: 20px; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-icon { background: var(--accent); p-2; border-radius: 8px; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; }
+    .brand-title h1 { font-size: 1.2rem; font-weight: 700; }
+    .brand-title p { font-size: 0.8rem; color: var(--text-muted); }
+
+    /* Dynamic Steps Bar */
+    .steps-nav { display: flex; gap: 10px; background: #141622; padding: 6px; border-radius: 10px; border: 1px solid var(--card-border); }
+    .step-btn { background: transparent; border: none; color: var(--text-muted); padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
+    .step-btn.active { background: var(--accent); color: white; }
+    .step-badge { background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 10px; font-size: 0.75rem; }
+
+    /* Configuration Panel Layout */
+    .config-container { display: flex; flex-direction: column; gap: 24px; max-width: 1200px; margin: 0 auto; }
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .section-title { font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+
+    .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .unit-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 16px; display: flex; justify-content: space-between; align-items: flex-start; }
+    .unit-card-content { white-space: pre-wrap; word-break: break-word; font-size: 0.95rem; line-height: 1.4; color: var(--text-main); }
+    
+    .btn-action { background: #222638; border: 1px solid var(--card-border); color: var(--text-muted); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .btn-action:hover { background: var(--card-border); color: white; }
+    .btn-primary { background: var(--accent); border: none; color: white; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-delete { background: transparent; border: none; color: #ef4444; cursor: pointer; padding: 4px; border-radius: 4px; }
+    .btn-delete:hover { background: rgba(239,68,68,0.1); }
+
+    /* Custom Textarea Modal Overlay */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; }
+    .modal-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; width: 90%; max-width: 500px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
+    .modal-card h3 { font-size: 1.2rem; margin-bottom: 8px; font-weight: 600; }
+    .modal-card p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; }
+    
+    .custom-textarea { width: 100%; background: #10121d; border: 1px solid var(--card-border); border-radius: 8px; color: var(--text-main); padding: 12px; font-size: 0.95rem; line-height: 1.4; resize: vertical; box-sizing: border-box; outline: none; }
+    .custom-textarea:focus { border-color: var(--accent); }
+    
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon"><i data-lucide="zap" style="color: white;"></i></div>
+      <div class="brand-title">
+        <h1>CoreFlow</h1>
+        <p id="tenant-subtitle">Cargando negocio...</p>
+      </div>
     </div>
 
-    <!-- Header Dinámico con Contadores por Etapa -->
-    <header class="bg-slate-900 border-b border-slate-800 px-4 py-3 sticky top-0 z-30 flex items-center justify-between shadow-md">
-        <div class="flex items-center space-x-3">
-            <div class="bg-indigo-600 text-white p-2 rounded-xl shadow">
-                <i class="fa-solid fa-bolt text-lg"></i>
-            </div>
-            <div>
-                <h1 id="app-title" class="font-bold text-base leading-none">CoreFlow</h1>
-                <p id="tenant-name" class="text-[11px] text-slate-400 mt-1">Cargando...</p>
-            </div>
+    <!-- Navigation / Modules -->
+    <nav class="steps-nav" id="steps-container">
+      <!-- Generated via Config etiquetas JSON -->
+    </nav>
+
+    <button class="btn-action" onclick="toggleConfigView()"><i data-lucide="settings"></i></button>
+  </header>
+
+  <!-- Configuration View -->
+  <main class="config-container" id="config-view">
+    <div style="display: flex; align-items: center; gap: 8px; font-size: 1.1rem; font-weight: bold; margin-bottom: 8px;">
+      <i data-lucide="sliders"></i> Configuración General
+    </div>
+
+    <!-- Registered Units Section -->
+    <section>
+      <div class="section-header">
+        <span class="section-title">Unidades Registradas</span>
+        <button class="btn-action btn-primary" onclick="abrirModalUnidad()">+ Agregar Unidad</button>
+      </div>
+      <div class="grid-cards" id="units-list">
+        <!-- Rendered units -->
+      </div>
+    </section>
+
+    <!-- Catalog Section -->
+    <section>
+      <div class="section-header">
+        <span class="section-title">Catálogo de Servicios / Productos</span>
+        <button class="btn-action btn-primary" onclick="agregarItemMenu()">+ Agregar Ítem</button>
+      </div>
+      <div class="grid-cards" id="catalog-list">
+        <!-- Rendered catalog items -->
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL TEXTAREA AMPLIADO -->
+  <div class="modal-overlay" id="modal-unidad">
+    <div class="modal-card">
+      <h3 id="modal-unidad-title">Registrar Nueva Unidad</h3>
+      <p id="modal-unidad-desc">Ingresa los detalles de la unidad (soporta múltiples líneas):</p>
+      
+      <textarea 
+        id="textarea-nueva-unidad" 
+        class="custom-textarea" 
+        rows="5" 
+        placeholder="Ej: José Henriquez&#10;RUT: 8.181.991-9&#10;Motivo: Terapia Individual"
+      ></textarea>
+
+      <div class="modal-actions">
+        <button class="btn-action" onclick="cerrarModalUnidad()">Cancelar</button>
+        <button class="btn-action btn-primary" onclick="confirmarCrearUnidad()">Guardar Unidad</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 1. Supabase Initialization
+    const SUPABASE_URL = 'https://TU_SUPABASE_URL.supabase.co'; // <--- Reemplazar con tu URL de Supabase
+    const SUPABASE_ANON_KEY = 'TU_SUPABASE_ANON_KEY';           // <--- Reemplazar con tu Anon Key de Supabase
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Get current Tenant ID from URL (?id=consulta-psicologia)
+    const urlParams = new URLSearchParams(window.location.search);
+    const tenantId = urlParams.get('id') || 'consulta-psicologia';
+
+    let currentTenantConfig = null;
+
+    // Load App Data
+    async function initApp() {
+      await cargarConfiguracionTenant();
+      await cargarUnidades();
+      await cargarCatalogo();
+      lucide.createIcons();
+    }
+
+    // 2. Fetch Tenant Config & UI Labels
+    async function cargarConfiguracionTenant() {
+      const { data, error } = await supabase
+        .from('tenants')
+        .select('*')
+        .eq('id', tenantId)
+        .single();
+
+      if (error || !data) {
+        console.error("Error al obtener tenant:", error);
+        document.getElementById('tenant-subtitle').textContent = tenantId;
+        return;
+      }
+
+      document.getElementById('tenant-subtitle').textContent = data.nombre_negocio;
+      currentTenantConfig = data.config_etiquetas || {};
+
+      // Build top steps navigation dynamically
+      const etapas = currentTenantConfig.etapas || {
+        step_1: "Paso 1", step_2: "Paso 2", step_3: "Paso 3", step_4: "Paso 4"
+      };
+
+      const stepsContainer = document.getElementById('steps-container');
+      stepsContainer.innerHTML = `
+        <button class="step-btn active">${etapas.step_1} <span class="step-badge" id="badge-step1">0</span></button>
+        <button class="step-btn">${etapas.step_2}</button>
+        <button class="step-btn">${etapas.step_3} <span class="step-badge">0</span></button>
+        <button class="step-btn">${etapas.step_4} <span class="step-badge">0</span></button>
+      `;
+    }
+
+    // 3. Load Units (mesas)
+    async function cargarUnidades() {
+      const { data, error } = await supabase
+        .from('mesas')
+        .select('*')
+        .eq('tenant_id', tenantId)
+        .order('id', { ascending: true });
+
+      if (error) return console.error("Error cargando unidades:", error);
+
+      const listContainer = document.getElementById('units-list');
+      const badgeStep1 = document.getElementById('badge-step1');
+      if (badgeStep1) badgeStep1.textContent = data ? data.length : 0;
+
+      if (!data || data.length === 0) {
+        listContainer.innerHTML = '<p style="color:var(--text-muted);">No hay unidades registradas.</p>';
+        return;
+      }
+
+      listContainer.innerHTML = data.map(item => `
+        <div class="unit-card">
+          <div class="unit-card-content">${escapeHtml(item.numero_mesa)}</div>
+          <button class="btn-delete" onclick="eliminarUnidad(${item.id})" title="Eliminar">
+            <i data-lucide="trash-2"></i>
+          </button>
         </div>
+      `).join('');
 
-        <div class="flex items-center space-x-2">
-            <button onclick="window.switchStep('admin')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-2 rounded-xl border border-slate-700 transition" title="Configuración">
-                <i class="fa-solid fa-gear text-indigo-400 text-base"></i>
-            </button>
+      lucide.createIcons();
+    }
 
-            <!-- Barra de Navegación con Contadores Dinámicos -->
-            <nav class="flex items-center space-x-1 bg-slate-950 p-1 rounded-xl border border-slate-800" id="nav-steps">
-                <button onclick="window.switchStep(1)" id="btn-step1" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white flex items-center gap-1.5">
-                    <span>Etapa 1</span> <span id="count-step1" class="bg-slate-800 px-1.5 py-0.5 rounded-full text-[10px]">0</span>
-                </button>
-                <button onclick="window.switchStep(2)" id="btn-step2" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5">
-                    <span>Etapa 2</span>
-                </button>
-                <button onclick="window.switchStep(3)" id="btn-step3" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5">
-                    <span>Etapa 3</span> <span id="count-step3" class="bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded-full text-[10px]">0</span>
-                </button>
-                <button onclick="window.switchStep(4)" id="btn-step4" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5">
-                    <span>Etapa 4</span> <span id="count-step4" class="bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-full text-[10px]">0</span>
-                </button>
-            </nav>
+    // 4. Load Menu Catalog
+    async function cargarCatalogo() {
+      const { data, error } = await supabase
+        .from('menu')
+        .select('*')
+        .eq('tenant_id', tenantId)
+        .order('id', { ascending: true });
+
+      if (error) return console.error("Error cargando catálogo:", error);
+
+      const catalogContainer = document.getElementById('catalog-list');
+      if (!data || data.length === 0) {
+        catalogContainer.innerHTML = '<p style="color:var(--text-muted);">No hay ítems registrados.</p>';
+        return;
+      }
+
+      catalogContainer.innerHTML = data.map(item => `
+        <div class="unit-card">
+          <div>
+            <div style="font-weight: 600;">${escapeHtml(item.nombre)}</div>
+            <div style="color: var(--accent); font-size: 0.9rem; margin-top: 4px;">$${Number(item.precio).toLocaleString('es-CL')}</div>
+          </div>
+          <button class="btn-delete" onclick="eliminarItemCatalog(${item.id})" title="Eliminar">
+            <i data-lucide="trash-2"></i>
+          </button>
         </div>
-    </header>
+      `).join('');
 
-    <!-- Contenedor Principal -->
-    <main class="flex-1 flex flex-col overflow-hidden p-4 md:p-6 max-w-7xl mx-auto w-full">
+      lucide.createIcons();
+    }
 
-        <!-- ETAPA 1 -->
-        <section id="view-step1" class="flex-1 space-y-4">
-            <h2 id="title-step1" class="text-lg font-bold border-b border-slate-800 pb-3 text-white">Unidades</h2>
-            <div id="grid-step1" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
-        </section>
+    // 5. Custom Modal UI Handlers
+    function abrirModalUnidad() {
+      document.getElementById('textarea-nueva-unidad').value = '';
+      document.getElementById('modal-unidad').style.display = 'flex';
+      document.getElementById('textarea-nueva-unidad').focus();
+    }
 
-        <!-- ETAPA 2 -->
-        <section id="view-step2" class="flex-1 flex flex-col md:flex-row gap-4 hidden">
-            <div class="flex-1 space-y-3">
-                <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl flex justify-between items-center">
-                    <span class="text-xs text-slate-400 font-bold uppercase">Unidad Activa: <strong id="active-unit-id" class="text-white text-sm ml-1">---</strong></span>
-                    <button onclick="window.switchStep(1)" class="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-lg border border-slate-700">Cambiar</button>
-                </div>
-                <div id="grid-catalog" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
-            </div>
-            <aside class="w-full md:w-80 bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
-                <div>
-                    <h3 class="text-sm font-bold border-b border-slate-800 pb-2 mb-3">Detalle del Registro</h3>
-                    <input type="text" id="input-responsible" placeholder="Responsable / Atendió" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-white mb-3 focus:outline-none focus:border-indigo-500">
-                    <div id="cart-list" class="space-y-2 max-h-60 overflow-y-auto"></div>
-                </div>
-                <div class="border-t border-slate-800 pt-3 mt-4 space-y-3">
-                    <div class="flex justify-between font-bold text-sm"><span>Total:</span><span id="cart-total" class="text-indigo-400">$0</span></div>
-                    <button onclick="window.saveAndAdvanceStep2()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2.5 rounded-xl transition shadow-lg shadow-indigo-600/30">Enviar a Proceso ➔</button>
-                </div>
-            </aside>
-        </section>
+    function cerrarModalUnidad() {
+      document.getElementById('modal-unidad').style.display = 'none';
+    }
 
-        <!-- ETAPA 3 -->
-        <section id="view-step3" class="flex-1 space-y-4 hidden">
-            <h2 id="title-step3" class="text-lg font-bold border-b border-slate-800 pb-3 text-amber-400">En Proceso</h2>
-            <div id="grid-step3" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-        </section>
+    // Create New Unit with Multiline Textarea Value
+    async function confirmarCrearUnidad() {
+      const textoUnidad = document.getElementById('textarea-nueva-unidad').value.trim();
+      if (!textoUnidad) return alert("Por favor ingresa una descripción para la unidad.");
 
-        <!-- ETAPA 4 -->
-        <section id="view-step4" class="flex-1 space-y-4 hidden">
-            <h2 id="title-step4" class="text-lg font-bold border-b border-slate-800 pb-3 text-emerald-400">Listos para Cierre</h2>
-            <div id="grid-step4" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-        </section>
+      const { data, error } = await supabase
+        .from('mesas')
+        .insert([
+          { 
+            tenant_id: tenantId, 
+            numero_mesa: textoUnidad, 
+            estado: 'free', 
+            items: [] 
+          }
+        ]);
 
-        <!-- PANEL DE CONFIGURACIÓN (⚙️) -->
-        <section id="view-admin" class="flex-1 space-y-6 overflow-y-auto hidden">
-            <h2 class="text-lg font-bold border-b border-slate-800 pb-3 text-indigo-400 flex items-center gap-2">
-                <i class="fa-solid fa-sliders"></i> Configuración General
-            </h2>
+      if (error) {
+        alert("Error al guardar en Supabase: " + error.message);
+      } else {
+        cerrarModalUnidad();
+        await cargarUnidades();
+      }
+    }
 
-            <div class="space-y-3">
-                <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-sm text-white">Unidades Registradas</h3>
-                    <button onclick="window.addUnitPrompt()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">+ Agregar Unidad</button>
-                </div>
-                <div id="admin-units-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
-            </div>
+    // Delete Unit
+    async function eliminarUnidad(id) {
+      if (!confirm("¿Deseas eliminar esta unidad?")) return;
 
-            <hr class="border-slate-800">
+      const { error } = await supabase
+        .from('mesas')
+        .delete()
+        .eq('id', id);
 
-            <div class="space-y-3">
-                <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-sm text-white">Catálogo de Servicios / Productos</h3>
-                    <button onclick="document.getElementById('form-add-item').classList.toggle('hidden')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">+ Agregar Ítem</button>
-                </div>
+      if (error) alert("Error al eliminar: " + error.message);
+      else await cargarUnidades();
+    }
 
-                <form id="form-add-item" onsubmit="window.saveCatalogItem(event)" class="hidden bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-3 max-w-md">
-                    <input type="text" id="item-name" placeholder="Nombre del Servicio / Producto" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-indigo-500">
-                    <input type="number" id="item-price" placeholder="Precio ($)" required min="0" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-indigo-500">
-                    <div class="flex justify-end space-x-2">
-                        <button type="button" onclick="document.getElementById('form-add-item').classList.add('hidden')" class="bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold">Cancelar</button>
-                        <button type="submit" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Guardar</button>
-                    </div>
-                </form>
+    // Add Menu Item
+    async function agregarItemMenu() {
+      const nombre = prompt("Nombre del servicio o producto:");
+      if (!nombre) return;
+      
+      const precioStr = prompt("Precio ($):");
+      if (!precioStr) return;
 
-                <div id="admin-catalog-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
-            </div>
-        </section>
+      const precio = parseInt(precioStr, 10) || 0;
 
-    </main>
+      const { error } = await supabase
+        .from('menu')
+        .insert([{ tenant_id: tenantId, nombre: nombre, precio: precio }]);
 
-    <script>
-        const SUPABASE_URL = 'https://kosyaamaocsslumanzrm.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_JwZ4ND6W9nMsqsOME-bc0A_JZYisN-4';
-        const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      if (error) alert("Error al guardar ítem: " + error.message);
+      else await cargarCatalogo();
+    }
 
-        const tenantId = new URLSearchParams(window.location.search).get('id') || 'don-pepe';
+    // Delete Menu Item
+    async function eliminarItemCatalog(id) {
+      if (!confirm("¿Deseas eliminar este servicio del catálogo?")) return;
 
-        let appState = { units: {}, catalog: [], activeUnit: null, cart: [] };
+      const { error } = await supabase
+        .from('menu')
+        .delete()
+        .eq('id', id);
 
-        function toast(msg) {
-            document.getElementById('toast-msg').textContent = msg;
-            const t = document.getElementById('toast');
-            t.classList.remove('translate-x-full');
-            setTimeout(() => t.classList.add('translate-x-full'), 2500);
-        }
+      if (error) alert("Error al eliminar: " + error.message);
+      else await cargarCatalogo();
+    }
 
-        window.switchStep = function(step) {
-            ['1', '2', '3', '4', 'admin'].forEach(s => {
-                const el = document.getElementById(`view-step${s}`) || document.getElementById(`view-${s}`);
-                if (el) el.classList.toggle('hidden', s !== String(step));
-            });
+    // Helper Utility: Escape HTML to avoid XSS
+    function escapeHtml(text) {
+      if (!text) return '';
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
 
-            [1, 2, 3, 4].forEach(s => {
-                const btn = document.getElementById(`btn-step${s}`);
-                if (btn) {
-                    btn.className = s === step ? 
-                        "px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white flex items-center gap-1.5" : 
-                        "px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5";
-                }
-            });
-        };
-
-        async function initSaaS() {
-            const { data: tenant } = await client.from('tenants').select('*').eq('id', tenantId).single();
-            if (!tenant) return;
-
-            document.getElementById('tenant-name').textContent = tenant.nombre_negocio;
-            const labels = tenant.config_etiquetas?.etapas || {};
-
-            // Actualizar etiquetas en la barra superior manteniendo los spans de contadores
-            document.getElementById('btn-step1').querySelector('span').textContent = labels.step_1 || "Etapa 1";
-            document.getElementById('btn-step2').textContent = labels.step_2 || "Etapa 2";
-            document.getElementById('btn-step3').querySelector('span').textContent = labels.step_3 || "Etapa 3";
-            document.getElementById('btn-step4').querySelector('span').textContent = labels.step_4 || "Etapa 4";
-
-            document.getElementById('title-step1').textContent = labels.step_1 || "Unidades";
-            document.getElementById('title-step3').textContent = labels.step_3 || "En Proceso";
-            document.getElementById('title-step4').textContent = labels.step_4 || "Cierre / Facturación";
-
-            await fetchCatalog();
-            await fetchUnits();
-
-            client.channel('saas-realtime')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'mesas' }, () => fetchUnits())
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'menu' }, () => fetchCatalog())
-                .subscribe();
-        }
-
-        async function fetchCatalog() {
-            const { data: menu } = await client.from('menu').select('*').eq('tenant_id', tenantId);
-            appState.catalog = menu || [];
-            renderCatalog();
-            renderAdminCatalog();
-        }
-
-        async function fetchUnits() {
-            const { data: units } = await client.from('mesas').select('*').eq('tenant_id', tenantId);
-            appState.units = {};
-            (units || []).forEach(u => appState.units[u.numero_mesa] = u);
-            
-            updateCounters();
-            renderStep1();
-            renderStep3();
-            renderStep4();
-            renderAdminUnits();
-        }
-
-        // --- ACTUALIZAR CONTADORES EN TIEMPO REAL ---
-        function updateCounters() {
-            const unitsArr = Object.values(appState.units);
-            const totalUnits = unitsArr.length;
-            const occupied = unitsArr.filter(u => u.estado === 'occupied').length;
-            const ready = unitsArr.filter(u => u.estado === 'ready').length;
-
-            document.getElementById('count-step1').textContent = totalUnits;
-            document.getElementById('count-step3').textContent = occupied;
-            document.getElementById('count-step4').textContent = ready;
-        }
-
-        // --- RENDERIZADO ETAPA 1 ---
-        function renderStep1() {
-            const grid = document.getElementById('grid-step1');
-            grid.innerHTML = '';
-            Object.keys(appState.units).sort().forEach(id => {
-                const u = appState.units[id];
-                const state = u.estado || 'free';
-                const total = (u.items || []).reduce((acc, i) => acc + (i.price * i.quantity), 0);
-                
-                let badge = `<span class="text-[10px] text-slate-400 font-bold bg-slate-800 px-2 py-0.5 rounded">DISPONIBLE</span>`;
-                let border = "border-slate-800 bg-slate-900";
-                let btnStyle = "bg-slate-800 hover:bg-indigo-600 text-white";
-                let btnText = "Abrir Registro";
-
-                if (state === 'occupied') {
-                    badge = `<span class="text-[10px] text-amber-400 font-bold bg-amber-950/60 border border-amber-500/30 px-2 py-0.5 rounded">EN PROCESO ($${total.toLocaleString('es-CL')})</span>`;
-                    border = "border-amber-500/60 bg-amber-950/10";
-                    btnStyle = "bg-amber-600 hover:bg-amber-500 text-white font-bold shadow-lg shadow-amber-600/20";
-                    btnText = "Ver en Proceso ➔";
-                } else if (state === 'ready') {
-                    badge = `<span class="text-[10px] text-emerald-400 font-bold bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded">POR COBRAR ($${total.toLocaleString('es-CL')})</span>`;
-                    border = "border-emerald-500/60 bg-emerald-950/10";
-                    btnStyle = "bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-lg shadow-emerald-600/20";
-                    btnText = "Cobrar / Cerrar ➔";
-                }
-
-                const card = document.createElement('div');
-                card.className = `border ${border} rounded-xl p-4 flex flex-col justify-between space-y-3 transition shadow-md`;
-                card.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h3 class="font-bold text-base text-white">${id}</h3>
-                            <p class="text-[11px] text-slate-400 mt-0.5">Resp: ${u.garzon_actual || 'Sin asignar'}</p>
-                        </div>
-                        <i class="fa-solid fa-cube text-slate-600 text-lg"></i>
-                    </div>
-                    <div>${badge}</div>
-                    <button onclick="window.selectUnit('${id}')" class="w-full ${btnStyle} text-xs py-2 rounded-lg transition">${btnText}</button>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        // --- ETAPA 2 ---
-        window.selectUnit = function(id) {
-            appState.activeUnit = id;
-            document.getElementById('active-unit-id').textContent = id;
-            const u = appState.units[id];
-            appState.cart = u && u.items ? JSON.parse(JSON.stringify(u.items)) : [];
-            document.getElementById('input-responsible').value = u?.garzon_actual || '';
-            renderCart();
-            window.switchStep(2);
-        };
-
-        function renderCatalog() {
-            const grid = document.getElementById('grid-catalog');
-            grid.innerHTML = '';
-            appState.catalog.forEach(item => {
-                const card = document.createElement('div');
-                card.className = "bg-slate-900 border border-slate-800 rounded-xl p-3 flex justify-between items-center";
-                card.innerHTML = `
-                    <div>
-                        <h4 class="font-bold text-xs text-white">${item.nombre}</h4>
-                        <span class="text-xs text-indigo-400 font-semibold">$${Number(item.precio).toLocaleString('es-CL')}</span>
-                    </div>
-                    <button onclick="window.addToCart('${item.id}', '${item.nombre}', ${item.precio})" class="bg-slate-800 hover:bg-indigo-600 text-white text-xs px-2.5 py-1.5 rounded-lg font-bold transition">+</button>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        window.addToCart = function(id, name, price) {
-            const exist = appState.cart.find(i => i.id == id);
-            if (exist) exist.quantity += 1;
-            else appState.cart.push({ id, name, price, quantity: 1 });
-            renderCart();
-        };
-
-        function renderCart() {
-            const list = document.getElementById('cart-list');
-            list.innerHTML = '';
-            let total = 0;
-            appState.cart.forEach((item, idx) => {
-                total += item.price * item.quantity;
-                const row = document.createElement('div');
-                row.className = "bg-slate-950 border border-slate-800 p-2 rounded-lg flex justify-between items-center text-xs";
-                row.innerHTML = `
-                    <span>${item.quantity}x ${item.name}</span>
-                    <div class="flex items-center gap-1">
-                        <span class="font-bold text-slate-300">$${(item.price * item.quantity).toLocaleString('es-CL')}</span>
-                        <button onclick="window.removeCart(${idx})" class="text-rose-400 hover:text-rose-300 ml-1">✕</button>
-                    </div>
-                `;
-                list.appendChild(row);
-            });
-            document.getElementById('cart-total').textContent = `$${total.toLocaleString('es-CL')}`;
-        }
-
-        window.removeCart = function(idx) {
-            appState.cart.splice(idx, 1);
-            renderCart();
-        };
-
-        // --- PASO DE ESTADOS ---
-        window.saveAndAdvanceStep2 = async function() {
-            if (!appState.activeUnit || appState.cart.length === 0) return;
-            const resp = document.getElementById('input-responsible').value.trim();
-
-            await client.from('mesas').update({
-                estado: 'occupied',
-                items: appState.cart,
-                garzon_actual: resp
-            }).eq('numero_mesa', appState.activeUnit).eq('tenant_id', tenantId);
-
-            toast("Avanzado a Proceso");
-            await fetchUnits();
-            window.switchStep(3);
-        };
-
-        window.advanceToStep4 = async function(id) {
-            await client.from('mesas').update({ estado: 'ready' }).eq('numero_mesa', id).eq('tenant_id', tenantId);
-            toast("Avanzado a Cierre");
-            await fetchUnits();
-            window.switchStep(4);
-        };
-
-        window.closeAndFreeUnit = async function(id) {
-            if (!confirm(`¿Cobrar y liberar ${id}?`)) return;
-            await client.from('mesas').update({
-                estado: 'free',
-                items: [],
-                garzon_actual: ''
-            }).eq('numero_mesa', id).eq('tenant_id', tenantId);
-
-            toast("Unidad Finalizada y Liberada");
-            await fetchUnits();
-            window.switchStep(1);
-        };
-
-        // --- RENDERIZADO ETAPAS 3 Y 4 ---
-        function renderStep3() {
-            const grid = document.getElementById('grid-step3');
-            grid.innerHTML = '';
-            const active = Object.values(appState.units).filter(u => u.estado === 'occupied');
-            if (active.length === 0) return grid.innerHTML = `<p class="col-span-full text-xs text-slate-500 py-6 text-center">Sin elementos en proceso.</p>`;
-
-            active.forEach(u => {
-                const total = (u.items || []).reduce((acc, i) => acc + (i.price * i.quantity), 0);
-                const card = document.createElement('div');
-                card.className = "bg-slate-900 border border-amber-500/30 rounded-xl p-4 space-y-3";
-                card.innerHTML = `
-                    <div class="flex justify-between border-b border-slate-800 pb-2">
-                        <span class="font-bold text-white text-sm">${u.numero_mesa}</span>
-                        <span class="text-xs text-amber-400 font-bold">$${total.toLocaleString('es-CL')}</span>
-                    </div>
-                    <p class="text-[11px] text-slate-400">Atendió/Resp: ${u.garzon_actual || 'Sin asignar'}</p>
-                    <button onclick="window.advanceToStep4('${u.numero_mesa}')" class="w-full bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold py-2 rounded-lg transition">Finalizar Proceso ➔</button>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        function renderStep4() {
-            const grid = document.getElementById('grid-step4');
-            grid.innerHTML = '';
-            const ready = Object.values(appState.units).filter(u => u.estado === 'ready');
-            if (ready.length === 0) return grid.innerHTML = `<p class="col-span-full text-xs text-slate-500 py-6 text-center">Sin elementos pendientes de cierre.</p>`;
-
-            ready.forEach(u => {
-                const total = (u.items || []).reduce((acc, i) => acc + (i.price * i.quantity), 0);
-                const card = document.createElement('div');
-                card.className = "bg-slate-900 border border-emerald-500/30 rounded-xl p-4 space-y-3";
-                card.innerHTML = `
-                    <div class="flex justify-between border-b border-slate-800 pb-2">
-                        <span class="font-bold text-white text-sm">${u.numero_mesa}</span>
-                        <span class="text-sm text-emerald-400 font-bold">$${total.toLocaleString('es-CL')}</span>
-                    </div>
-                    <button onclick="window.closeAndFreeUnit('${u.numero_mesa}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2 rounded-lg transition">Cobrar y Liberar</button>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        // --- ADMINISTRACIÓN ---
-        window.addUnitPrompt = async function() {
-            const name = prompt("Nombre de la nueva unidad (Ej: Mesa 5 o Vehículo 3):");
-            if (!name) return;
-            await client.from('mesas').insert({ tenant_id: tenantId, numero_mesa: name.trim(), estado: 'free', items: [] });
-            toast("Unidad Agregada");
-            await fetchUnits();
-        };
-
-        window.deleteUnit = async function(id) {
-            if (!confirm(`¿Eliminar ${id}?`)) return;
-            await client.from('mesas').delete().eq('numero_mesa', id).eq('tenant_id', tenantId);
-            toast("Unidad Eliminada");
-            await fetchUnits();
-        };
-
-        window.saveCatalogItem = async function(e) {
-            e.preventDefault();
-            const name = document.getElementById('item-name').value;
-            const price = document.getElementById('item-price').value;
-            await client.from('menu').insert({ tenant_id: tenantId, nombre: name, precio: Number(price) });
-            toast("Ítem Guardado");
-            document.getElementById('form-add-item').reset();
-            document.getElementById('form-add-item').classList.add('hidden');
-            await fetchCatalog();
-        };
-
-        window.deleteCatalogItem = async function(id) {
-            if (!confirm("¿Eliminar del catálogo?")) return;
-            await client.from('menu').delete().eq('id', id);
-            toast("Ítem Eliminado");
-            await fetchCatalog();
-        };
-
-        function renderAdminUnits() {
-            const grid = document.getElementById('admin-units-grid');
-            grid.innerHTML = '';
-            Object.keys(appState.units).sort().forEach(id => {
-                const card = document.createElement('div');
-                card.className = "bg-slate-900 border border-slate-800 p-2.5 rounded-xl flex justify-between items-center text-xs";
-                card.innerHTML = `<span class="font-bold text-white">${id}</span><button onclick="window.deleteUnit('${id}')" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button>`;
-                grid.appendChild(card);
-            });
-        }
-
-        function renderAdminCatalog() {
-            const grid = document.getElementById('admin-catalog-grid');
-            grid.innerHTML = '';
-            appState.catalog.forEach(item => {
-                const card = document.createElement('div');
-                card.className = "bg-slate-900 border border-slate-800 p-3 rounded-xl flex justify-between items-center text-xs";
-                card.innerHTML = `
-                    <div>
-                        <h4 class="font-bold text-white">${item.nombre}</h4>
-                        <span class="text-indigo-400 font-semibold">$${Number(item.precio).toLocaleString('es-CL')}</span>
-                    </div>
-                    <button onclick="window.deleteCatalogItem('${item.id}')" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', initSaaS);
-    </script>
+    // Initialize on window load
+    window.onload = initApp;
+  </script>
 </body>
 </html>
