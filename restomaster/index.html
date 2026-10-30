@@ -260,7 +260,7 @@
 
         // LECTURA DINÁMICA DE CLIENTE / TENANT VÍA URL (?id= O ?cliente=)
         const urlParams = new URLSearchParams(window.location.search);
-        const activeTenantId = urlParams.get('id') || urlParams.get('cliente') || 'don-pepe';
+        const activeTenantId = urlParams.get('id') || urlParams.get('cliente') || '';
 
         window.appState = {
             selectedTable: "Mesa 1",
