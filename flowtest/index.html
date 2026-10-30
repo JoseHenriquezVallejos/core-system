@@ -6,7 +6,7 @@
   <title>CoreFlow SaaS Engine - Test</title>
   
   <!-- Cargar versión UMD ultra estable de Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -146,14 +146,14 @@
       </div>
     </div>
   </div>
-
-  <script>
+  
+</script>
     // Configuración de Supabase para Entorno de Pruebas
     const SUPABASE_URL = 'https://kosyaamaocsslumanzrm.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_JwZ4ND6W9nMsqOSME-bc0A_JZYIsN-4';
     
     // Inicialización blindada usando el objeto global limpio
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Obtener Tenant ID de la URL
     const urlParams = new URLSearchParams(window.location.search);
