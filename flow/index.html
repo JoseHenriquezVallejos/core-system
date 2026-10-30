@@ -274,7 +274,10 @@
 
         window.switchView = function(viewName) {
             ['tables', 'pos', 'kitchen', 'cashier', 'admin'].forEach(v => {
-                const el = document.getElementById(`view-${v}`); if (el) el.classList.add('hidden'); }); const activeView = document.getElementById(`view-${viewName}`);
+                const el = document.getElementById(`view-${v}`);
+                if (el) el.classList.add('hidden');
+            });
+            const activeView = document.getElementById(`view-${viewName}`);
             if (activeView) activeView.classList.remove('hidden');
         };
 
@@ -436,13 +439,18 @@
 
                 if (estaOcupada) {
                     statusColor = esReady ? "border-emerald-500/50 bg-emerald-950/20" : "border-amber-500/50 bg-amber-950/20";
-                    statusBadge = `<span class="${esReady ? 'text-emerald-400' : 'text-amber-400'} text-[10px] font-bold">ACTIVO ($${tableData.total.toLocaleString('es-CL')})</span>`; }  const card = document.createElement('div'); card.className = `border ${statusColor} rounded-2xl p-4 flex flex-col justify-between space-y-3 cursor-pointer hover:border-indigo-500 transition shadow-md`;
+                    statusBadge = `<span class="${esReady ? 'text-emerald-400' : 'text-amber-400'} text-[10px] font-bold">ACTIVO ($${tableData.total.toLocaleString('es-CL')})</span>`;
+                }
+
+                const card = document.createElement('div');
+                card.className = `border ${statusColor} rounded-2xl p-4 flex flex-col justify-between space-y-3 cursor-pointer hover:border-indigo-500 transition shadow-md`;
                 card.onclick = () => window.selectTableAndOpenPos(tableId);
 
                 card.innerHTML = `
                     <div class="flex justify-between items-start">
                         <div>
-                            <h3 class="font-bold text-base text-white">${tableId}</h3>${statusBadge}
+                            <h3 class="font-bold text-base text-white">${tableId}</h3>
+                            ${statusBadge}
                         </div>
                         <i class="fa-solid fa-cube text-slate-700 text-xl"></i>
                     </div>
@@ -514,7 +522,8 @@
                 card.innerHTML = `
                     <div>
                         <div class="flex justify-between items-start mb-2">
-                            <span class="font-bold text-sm text-white">${item.name}</span> <span class="text-indigo-400 font-bold text-sm">$${item.price.toLocaleString('es-CL')}</span>
+                            <span class="font-bold text-sm text-white">${item.name}</span>
+                            <span class="text-indigo-400 font-bold text-sm">$${item.price.toLocaleString('es-CL')}</span>
                         </div>
                         <span class="text-[10px] bg-slate-950 border border-slate-800 text-slate-400 px-2 py-0.5 rounded-md">${item.category}</span>
                     </div>
@@ -563,7 +572,207 @@
                 row.className = "bg-slate-950 border border-slate-800 rounded-xl p-3 flex items-center justify-between";
                 row.innerHTML = `
                     <div>
-                        <h4 class="font-bold text-xs text-white">${item.name}</h4> <span class="text-[10px] text-slate-400">$${item.price.toLocaleString('es-CL')} c/u</span>
+                        <h4 class="font-bold text-xs text-white">${item.name}</h4>
+                        <span class="text-[10px] text-slate-400">$${item.price.toLocaleString('es-CL')} c/u</span>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <button onclick="window.updateCartQty(${index}, -1)" class="w-6 h-6 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white">-</button
+                        <button onclick="window.updateCartQty(${index}, -1)" class="w-6 h-6 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white">-</button>
+                        <span class="text-xs font-bold text-white">${item.quantity}</span>
+                        <button onclick="window.updateCartQty(${index}, 1)" class="w-6 h-6 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white">+</button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+
+            if (countLabel) countLabel.textContent = `${totalItems} ítems`;
+            if (subtotalLabel) subtotalLabel.textContent = `$${subtotal.toLocaleString('es-CL')}`;
+            if (totalLabel) totalLabel.textContent = `$${subtotal.toLocaleString('es-CL')}`;
+        };
+
+        window.updateCartQty = function(index, delta) {
+            window.appState.currentCart[index].quantity += delta;
+            if (window.appState.currentCart[index].quantity <= 0) {
+                window.appState.currentCart.splice(index, 1);
+            }
+            window.renderCart();
+        };
+
+        window.clearCurrentCart = function() {
+            window.appState.currentCart = [];
+            window.renderCart();
+        };
+
+        window.renderKitchenView = function() {
+            const grid = document.getElementById('kitchen-orders-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+        };
+
+        window.renderCashierView = function() {
+            const grid = document.getElementById('cashier-tables-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+        };
+
+        window.renderAdminTables = function() {
+            const grid = document.getElementById('admin-tables-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            const keys = Object.keys(window.appState.tablesData).sort();
+            if (keys.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-6 text-slate-500 text-xs">No hay unidades registradas.</div>`;
+                return;
+            }
+
+            keys.forEach(tableId => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-950 border border-slate-800 rounded-2xl p-3 flex justify-between items-center";
+                
+                const titleSpan = document.createElement('span');
+                titleSpan.className = "font-bold text-xs text-white";
+                titleSpan.textContent = tableId;
+
+                const delBtn = document.createElement('button');
+                delBtn.className = "text-rose-400 hover:text-rose-300 text-xs p-1";
+                delBtn.innerHTML = `<i class="fa-solid fa-trash"></i>`;
+                delBtn.onclick = () => window.deleteTableFromSupabase(tableId);
+
+                card.appendChild(titleSpan);
+                card.appendChild(delBtn);
+                grid.appendChild(card);
+            });
+        };
+
+        window.renderAdminMenu = function() {
+            const grid = document.getElementById('admin-menu-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            if (window.appState.menuData.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-6 text-slate-500 text-xs">No hay ítems en el catálogo.</div>`;
+                return;
+            }
+
+            window.appState.menuData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-950 border border-slate-800 rounded-2xl p-3.5 flex flex-col justify-between space-y-2";
+                
+                const infoDiv = document.createElement('div');
+                infoDiv.innerHTML = `
+                    <h4 class="font-bold text-xs text-white">${item.name}</h4>
+                    <span class="text-[10px] text-indigo-400 font-semibold">$${item.price.toLocaleString('es-CL')}</span>
+                    <span class="block text-[9px] text-slate-400">Cat: ${item.category}</span>
+                `;
+
+                const delBtn = document.createElement('button');
+                delBtn.className = "w-full bg-slate-900 hover:bg-rose-950/50 text-rose-400 border border-slate-800 text-[10px] font-semibold py-1 rounded-lg transition";
+                delBtn.textContent = "Eliminar Ítem";
+                delBtn.onclick = () => window.deleteMenuItem(item.id);
+
+                card.appendChild(infoDiv);
+                card.appendChild(delBtn);
+                grid.appendChild(card);
+            });
+        };
+
+        window.openMenuForm = function() {
+            const formCard = document.getElementById('menu-form-card');
+            if (formCard) formCard.classList.remove('hidden');
+        };
+
+        window.closeMenuForm = function() {
+            const formCard = document.getElementById('menu-form-card');
+            if (formCard) formCard.classList.add('hidden');
+        };
+
+        window.createNewTableInSupabase = async function() {
+            const newName = prompt("Ingresa el nombre de la nueva unidad (Ej: Vehículo 3 o Box 1):");
+            if (!newName) return;
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('mesas')
+                    .insert({
+                        restaurant_id: window.appState.currentRestaurantId,
+                        numero_mesa: newName.trim(),
+                        estado: 'free',
+                        items: [],
+                        garzon_actual: ''
+                    });
+
+                if (error) throw error;
+                window.showToast("¡Unidad creada con éxito!");
+                window.loadCloudData();
+            } catch (err) {
+                console.error("Error creando unidad:", err);
+                window.showToast("Error al crear unidad");
+            }
+        };
+
+        window.saveMenuItem = async function(event) {
+            event.preventDefault();
+            const name = document.getElementById('admin-item-name').value;
+            const category = document.getElementById('admin-item-category').value;
+            const price = document.getElementById('admin-item-price').value;
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('menu')
+                    .insert({
+                        restaurant_id: window.appState.currentRestaurantId,
+                        nombre: name,
+                        categoria: category,
+                        precio: Number(price)
+                    });
+
+                if (error) throw error;
+
+                window.showToast("¡Ítem guardado con éxito!");
+                window.closeMenuForm();
+                document.getElementById('admin-item-name').value = '';
+                document.getElementById('admin-item-category').value = '';
+                document.getElementById('admin-item-price').value = '';
+                window.loadCloudData();
+            } catch (err) {
+                console.error("Error guardando ítem:", err);
+                window.showToast("Error al guardar ítem");
+            }
+        };
+
+        window.deleteTableFromSupabase = async function(tableId) {
+            if (!confirm(`¿Eliminar la unidad ${tableId}?`)) return;
+            try {
+                await window.supabaseClient
+                    .from('mesas')
+                    .delete()
+                    .eq('numero_mesa', tableId)
+                    .eq('restaurant_id', window.appState.currentRestaurantId);
+                window.showToast("Unidad eliminada");
+                window.loadCloudData();
+            } catch (err) {
+                console.error("Error eliminando:", err);
+            }
+        };
+
+        window.deleteMenuItem = async function(itemId) {
+            if (!confirm("¿Eliminar este ítem del catálogo?")) return;
+            try {
+                await window.supabaseClient
+                    .from('menu')
+                    .delete()
+                    .eq('id', itemId);
+                window.showToast("Ítem eliminado");
+                window.loadCloudData();
+            } catch (err) {
+                console.error("Error eliminando ítem:", err);
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            window.loadCloudData();
+            window.setupRealtime();
+        });
+    </script>
+</body>
+</html>
