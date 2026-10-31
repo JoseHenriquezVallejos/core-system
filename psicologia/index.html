@@ -35,381 +35,344 @@
     <style>
         /* Smooth Fade In Animations */
         .step-transition {
-            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(8px);
+                transform: translateY(12px) scale(0.98);
             }
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) scale(1);
             }
+        }
+        .img-card-overlay {
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.1) 0%, rgba(15, 23, 42, 0.9) 100%);
         }
     </style>
 </head>
 <body class="bg-brand-dark text-slate-100 font-sans min-h-screen flex flex-col justify-between selection:bg-brand-accent selection:text-white">
 
     <!-- Header & Progress Bar -->
-    <header class="w-full border-b border-slate-800 bg-slate-950/60 backdrop-blur-md sticky top-0 z-50">
-        <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <button id="back-btn" onclick="prevStep()" class="text-slate-400 hover:text-white p-2 rounded-lg transition-colors invisible">
-                    <i class="fa-solid fa-arrow-left text-lg"></i>
+    <header class="w-full border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <button id="back-btn" onclick="prevStep()" class="text-slate-400 hover:text-white p-1.5 rounded-lg transition-colors invisible">
+                    <i class="fa-solid fa-arrow-left text-base"></i>
                 </button>
                 <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 rounded-full bg-brand-accent/20 flex items-center justify-center text-brand-highlight">
-                        <i class="fa-solid fa-brain text-sm"></i>
+                    <div class="w-7 h-7 rounded-full bg-brand-accent/20 flex items-center justify-center text-brand-highlight text-xs">
+                        <i class="fa-solid fa-brain"></i>
                     </div>
-                    <span class="font-semibold text-sm md:text-base tracking-wide text-slate-200">Dra. Natalia Valenzuela</span>
+                    <span class="font-semibold text-xs sm:text-sm tracking-wide text-slate-200">Dra. Natalia Valenzuela</span>
                 </div>
             </div>
-            <div class="text-xs font-medium text-brand-textMuted bg-slate-800/80 px-3 py-1 rounded-full border border-slate-700">
-                Paso <span id="current-step-num" class="text-brand-highlight font-bold">1</span> de 5
+            <div class="text-[11px] font-semibold text-brand-highlight bg-slate-900 px-2.5 py-1 rounded-full border border-slate-800">
+                Paso <span id="current-step-num">1</span> de 7
             </div>
         </div>
 
-        <!-- Top Progress Bar (Estilo Quiz Tai Chi) -->
-        <div class="w-full bg-slate-800 h-1.5 overflow-hidden">
-            <div id="progress-bar" class="bg-gradient-to-r from-brand-accent to-brand-highlight h-full w-1/7 transition-all duration-500 ease-out"></div>
+        <!-- Top Progress Bar (Estilo Quiz Tai Chi / MadMuscles) -->
+        <div class="w-full bg-slate-900 h-1.5 overflow-hidden">
+            <div id="progress-bar" class="bg-gradient-to-r from-amber-500 via-brand-accent to-brand-highlight h-full w-[14%] transition-all duration-300 ease-out"></div>
         </div>
     </header>
 
-    <!-- Main Container -->
-    <main class="flex-grow flex items-center justify-center px-4 py-8 md:py-12">
-        <div class="w-full max-w-4xl mx-auto">
+    <!-- Main Container - Mobile First Focus -->
+    <main class="flex-grow flex items-center justify-center px-3 py-6 sm:px-4 sm:py-8">
+        <div class="w-full max-w-xl mx-auto">
 
-            <!-- STEP 1: RANGO DE EDAD -->
+            <!-- STEP 1: RANGO DE EDAD CON IMÁGENES -->
             <div id="step-1" class="step-transition">
-                <div class="text-center mb-8 md:mb-10">
-                    <h1 class="text-2xl md:text-4xl font-bold tracking-tight mb-3">Selecciona tu rango de edad</h1>
-                    <p class="text-brand-textMuted text-sm md:text-base">Nos ayuda a adaptar las dinámicas de atención a tu etapa de vida.</p>
+                <div class="text-center mb-6">
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight mb-1 text-white">Selecciona tu edad</h1>
+                    <p class="text-brand-textMuted text-xs sm:text-sm">Adaptamos la pre-evaluación a tu etapa de vida.</p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
-                    <button onclick="selectOption('age', '18 a 29 años', 2)" class="group bg-brand-card hover:bg-brand-cardHover border border-slate-700/80 hover:border-brand-accent p-5 rounded-2xl flex items-center justify-between transition-all duration-200 text-left shadow-lg">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-xl bg-slate-800 group-hover:bg-brand-accent/20 text-slate-300 group-hover:text-brand-highlight flex items-center justify-center text-xl transition-colors">
-                                <i class="fa-solid fa-user-graduate"></i>
-                            </div>
-                            <div>
-                                <span class="block text-lg font-semibold text-slate-100">18 - 29 años</span>
-                                <span class="text-xs text-brand-textMuted">Jóvenes y etapa universitaria / laboral inicial</span>
-                            </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="selectOption('age', '18 a 29 años', 2)" class="group bg-brand-card hover:bg-brand-cardHover border border-slate-700/70 hover:border-brand-accent rounded-2xl overflow-hidden text-left transition-all shadow-md active:scale-95">
+                        <div class="h-28 sm:h-32 w-full relative overflow-hidden bg-slate-900">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80" alt="18-29 años" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute inset-0 img-card-overlay"></div>
+                            <span class="absolute bottom-2 left-3 text-xs font-semibold text-amber-400 bg-slate-950/80 px-2 py-0.5 rounded-full border border-amber-500/30">18 - 29</span>
                         </div>
-                        <i class="fa-solid fa-chevron-right text-slate-500 group-hover:text-brand-highlight transition-colors"></i>
+                        <div class="p-3">
+                            <span class="block text-xs sm:text-sm font-bold text-slate-100">Etapa Joven</span>
+                            <span class="text-[10px] text-brand-textMuted leading-tight block mt-0.5">Estudios, inicios laborales y cambio</span>
+                        </div>
                     </button>
 
-                    <button onclick="selectOption('age', '30 a 44 años', 2)" class="group bg-brand-card hover:bg-brand-cardHover border border-slate-700/80 hover:border-brand-accent p-5 rounded-2xl flex items-center justify-between transition-all duration-200 text-left shadow-lg">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-xl bg-slate-800 group-hover:bg-brand-accent/20 text-slate-300 group-hover:text-brand-highlight flex items-center justify-center text-xl transition-colors">
-                                <i class="fa-solid fa-briefcase"></i>
-                            </div>
-                            <div>
-                                <span class="block text-lg font-semibold text-slate-100">30 - 44 años</span>
-                                <span class="text-xs text-brand-textMuted">Desarrollo profesional y metas de vida</span>
-                            </div>
+                    <button onclick="selectOption('age', '30 a 44 años', 2)" class="group bg-brand-card hover:bg-brand-cardHover border border-slate-700/70 hover:border-brand-accent rounded-2xl overflow-hidden text-left transition-all shadow-md active:scale-95">
+                        <div class="h-28 sm:h-32 w-full relative overflow-hidden bg-slate-900">
+                            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80" alt="30-44 años" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute inset-0 img-card-overlay"></div>
+                            <span class="absolute bottom-2 left-3 text-xs font-semibold text-amber-400 bg-slate-950/80 px-2 py-0.5 rounded-full border border-amber-500/30">30 - 44</span>
                         </div>
-                        <i class="fa-solid fa-chevron-right text-slate-500 group-hover:text-brand-highlight transition-colors"></i>
+                        <div class="p-3">
+                            <span class="block text-xs sm:text-sm font-bold text-slate-100">Desarrollo</span>
+                            <span class="text-[10px] text-brand-textMuted leading-tight block mt-0.5">Metas de vida, trabajo y balance</span>
+                        </div>
                     </button>
 
-                    <button onclick="selectOption('age', '45 a 59 años', 2)" class="group bg-brand-card hover:bg-brand-cardHover border border-slate-700/80 hover:border-brand-accent p-5 rounded-2xl flex items-center justify-between transition-all duration-200 text-left shadow-lg">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-xl bg-slate-800 group-hover:bg-brand-accent/20 text-slate-300 group-hover:text-brand-highlight flex items-center justify-center text-xl transition-colors">
-                                <i class="fa-solid fa-users"></i>
-                            </div>
-                            <div>
-                                <span class="block text-lg font-semibold text-slate-100">45 - 59 años</span>
-                                <span class="text-xs text-brand-textMuted">Consolidación personal y balance familiar</span>
-                            </div>
+                    <button onclick="selectOption('age', '45 a 59 años', 2)" class="group bg-brand-card hover:bg-brand-cardHover border border-slate-700/70 hover:border-brand-accent rounded-2xl overflow-hidden text-left transition-all shadow-md active:scale-95">
+                        <div class="h-28 sm:h-32 w-full relative overflow-hidden bg-slate-900">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80" alt="45-59 años" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute inset-0 img-card-overlay"></div>
+                            <span class="absolute bottom-2 left-3 text-xs font-semibold text-amber-400 bg-slate-950/80 px-2 py-0.5 rounded-full border border-amber-500/30">45 - 59</span>
                         </div>
-                        <i class="fa-solid fa-chevron-right text-slate-500 group-hover:text-brand-highlight transition-colors"></i>
+                        <div class="p-3">
+                            <span class="block text-xs sm:text-sm font-bold text-slate-100">Consolidación</span>
+                            <span class="text-[10px] text-brand-textMuted leading-tight block mt-0.5">Familia, reinvención y serenidad</span>
+                        </div>
                     </button>
 
-                    <button onclick="selectOption('age', '+60 años', 2)" class="group bg-brand-card hover:bg-brand-cardHover border border-slate-700/80 hover:border-brand-accent p-5 rounded-2xl flex items-center justify-between transition-all duration-200 text-left shadow-lg">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-xl bg-slate-800 group-hover:bg-brand-accent/20 text-slate-300 group-hover:text-brand-highlight flex items-center justify-center text-xl transition-colors">
-                                <i class="fa-solid fa-heart"></i>
-                            </div>
-                            <div>
-                                <span class="block text-lg font-semibold text-slate-100">+60 años</span>
-                                <span class="text-xs text-brand-textMuted">Etapa de plenitud y nuevos propósitos</span>
-                            </div>
+                    <button onclick="selectOption('age', '+60 años', 2)" class="group bg-brand-card hover:bg-brand-cardHover border border-slate-700/70 hover:border-brand-accent rounded-2xl overflow-hidden text-left transition-all shadow-md active:scale-95">
+                        <div class="h-28 sm:h-32 w-full relative overflow-hidden bg-slate-900">
+                            <img src="https://images.unsplash.com/photo-1581579438747-1dc8d1e292c7?auto=format&fit=crop&w=400&q=80" alt="+60 años" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute inset-0 img-card-overlay"></div>
+                            <span class="absolute bottom-2 left-3 text-xs font-semibold text-amber-400 bg-slate-950/80 px-2 py-0.5 rounded-full border border-amber-500/30">+60</span>
                         </div>
-                        <i class="fa-solid fa-chevron-right text-slate-500 group-hover:text-brand-highlight transition-colors"></i>
+                        <div class="p-3">
+                            <span class="block text-xs sm:text-sm font-bold text-slate-100">Plenitud</span>
+                            <span class="text-[10px] text-brand-textMuted leading-tight block mt-0.5">Nuevos horizontes y tranquilidad</span>
+                        </div>
                     </button>
                 </div>
             </div>
 
-            <!-- STEP 2: META PRINCIPAL -->
+            <!-- STEP 2: META PRINCIPAL CON IMÁGENES -->
             <div id="step-2" class="step-transition hidden">
-                <div class="text-center mb-8">
-                    <h2 class="text-2xl md:text-4xl font-bold tracking-tight mb-3">Elige tu meta u objetivo principal</h2>
-                    <p class="text-brand-textMuted text-sm md:text-base">¿Cuál es la prioridad que te gustaría abordar en este momento?</p>
+                <div class="text-center mb-6">
+                    <h2 class="text-xl sm:text-2xl font-bold tracking-tight mb-1 text-white">¿Cuál es tu objetivo principal?</h2>
+                    <p class="text-brand-textMuted text-xs sm:text-sm">Selecciona el área que más necesitas priorizar hoy.</p>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center max-w-4xl mx-auto">
-                    <div class="lg:col-span-7 space-y-3">
-                        <button onclick="selectOption('goal', 'Reducir Ansiedad y Estrés', 3)" class="w-full group bg-brand-card hover:bg-brand-cardHover border border-slate-700/80 hover:border-brand-accent p-4 rounded-xl flex items-center justify-between transition-all text-left">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-3 h-3 rounded-full bg-brand-accent group-hover:scale-125 transition-transform"></div>
-                                <span class="font-medium text-slate-200 group-hover:text-white">Reducir ansiedad y estrés constante</span>
-                            </div>
-                            <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:text-brand-highlight"></i>
-                        </button>
-
-                        <button onclick="selectOption('goal', 'Superar Desmotivación o Tristeza', 3)" class="w-full group bg-brand-card hover:bg-brand-cardHover border border-slate-700/80 hover:border-brand-accent p-4 rounded-xl flex items-center justify-between transition-all text-left">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-3 h-3 rounded-full bg-brand-accent group-hover:scale-125 transition-transform"></div>
-                                <span class="font-medium text-slate-200 group-hover:text-white">Superar desmotivación / estado de ánimo bajo</span>
-                            </div>
-                            <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:text-brand-highlight"></i>
-                        </button>
-
-                        <button onclick="selectOption('goal', 'Mejorar Relación de Pareja / Vínculos', 3)" class="w-full group bg-brand-card hover:bg-brand-cardHover border border-slate-700/80 hover:border-brand-accent p-4 rounded-xl flex items-center justify-between transition-all text-left">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-3 h-3 rounded-full bg-brand-accent group-hover:scale-125 transition-transform"></div>
-                                <span class="font-medium text-slate-200 group-hover:text-white">Mejorar relación de pareja / comunicación</span>
-                            </div>
-                            <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:text-brand-highlight"></i>
-                        </button>
-
-                        <button onclick="selectOption('goal', 'Gestionar Duelo o Cambios Fuertes', 3)" class="w-full group bg-brand-card hover:bg-brand-cardHover border border-slate-700/80 hover:border-brand-accent p-4 rounded-xl flex items-center justify-between transition-all text-left">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-3 h-3 rounded-full bg-brand-accent group-hover:scale-125 transition-transform"></div>
-                                <span class="font-medium text-slate-200 group-hover:text-white">Gestionar duelo o cambios de vida importantes</span>
-                            </div>
-                            <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:text-brand-highlight"></i>
-                        </button>
-                    </div>
-
-                    <div class="lg:col-span-5 hidden lg:block">
-                        <div class="relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 shadow-2xl">
-                            <img src="https://images.unsplash.com/photo-1544027993-37dbfe43562a?auto=format&fit=crop&w=600&q=80" 
-                                 alt="Psicología y Bienestar" 
-                                 class="w-full h-80 object-cover opacity-80 hover:opacity-100 transition-opacity duration-300"
-                                 onerror="this.onerror=null; this.src='https://placehold.co/600x800/1e293b/2dd4bf?text=Bienestar+Emocional';">
-                            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
-                            <div class="absolute bottom-4 left-4 right-4 text-center">
-                                <span class="text-xs font-semibold uppercase tracking-wider text-brand-highlight bg-slate-950/80 px-3 py-1 rounded-full border border-brand-accent/30">Espacio de confianza</span>
-                            </div>
+                <div class="space-y-3">
+                    <button onclick="selectOption('goal', 'Reducir Ansiedad y Estrés', 3)" class="w-full group bg-brand-card hover:bg-brand-cardHover border border-slate-700/70 hover:border-brand-accent rounded-2xl p-2.5 flex items-center space-x-3 text-left transition-all shadow-md active:scale-98">
+                        <img src="https://images.unsplash.com/photo-1499209974431-9dddcece7f88?auto=format&fit=crop&w=200&q=80" alt="Ansiedad" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover flex-shrink-0">
+                        <div class="flex-grow pr-2">
+                            <h3 class="text-sm font-bold text-slate-100 group-hover:text-brand-highlight">Reducir Ansiedad y Estrés</h3>
+                            <p class="text-[11px] text-brand-textMuted mt-0.5 leading-snug">Calmar la mente, frenar la tensión corporal e hiperactividad.</p>
                         </div>
-                    </div>
+                        <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:text-brand-highlight pr-2"></i>
+                    </button>
+
+                    <button onclick="selectOption('goal', 'Superar Tristeza o Desmotivación', 3)" class="w-full group bg-brand-card hover:bg-brand-cardHover border border-slate-700/70 hover:border-brand-accent rounded-2xl p-2.5 flex items-center space-x-3 text-left transition-all shadow-md active:scale-98">
+                        <img src="https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=200&q=80" alt="Motivación" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover flex-shrink-0">
+                        <div class="flex-grow pr-2">
+                            <h3 class="text-sm font-bold text-slate-100 group-hover:text-brand-highlight">Recuperar Motivación</h3>
+                            <p class="text-[11px] text-brand-textMuted mt-0.5 leading-snug">Superar estados de apatía, desánimo y agotamiento emocional.</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:text-brand-highlight pr-2"></i>
+                    </button>
+
+                    <button onclick="selectOption('goal', 'Mejorar Relación de Pareja', 3)" class="w-full group bg-brand-card hover:bg-brand-cardHover border border-slate-700/70 hover:border-brand-accent rounded-2xl p-2.5 flex items-center space-x-3 text-left transition-all shadow-md active:scale-98">
+                        <img src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=200&q=80" alt="Pareja" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover flex-shrink-0">
+                        <div class="flex-grow pr-2">
+                            <h3 class="text-sm font-bold text-slate-100 group-hover:text-brand-highlight">Relaciones y Pareja</h3>
+                            <p class="text-[11px] text-brand-textMuted mt-0.5 leading-snug">Resolver conflictos de comunicación, límites y vínculos afectivos.</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:text-brand-highlight pr-2"></i>
+                    </button>
+
+                    <button onclick="selectOption('goal', 'Gestionar Duelo o Cambios', 3)" class="w-full group bg-brand-card hover:bg-brand-cardHover border border-slate-700/70 hover:border-brand-accent rounded-2xl p-2.5 flex items-center space-x-3 text-left transition-all shadow-md active:scale-98">
+                        <img src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=200&q=80" alt="Duelo" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover flex-shrink-0">
+                        <div class="flex-grow pr-2">
+                            <h3 class="text-sm font-bold text-slate-100 group-hover:text-brand-highlight">Procesar Duelo o Cambios</h3>
+                            <p class="text-[11px] text-brand-textMuted mt-0.5 leading-snug">Afrontar rupturas, pérdidas recientes o transiciones difíciles.</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:text-brand-highlight pr-2"></i>
+                    </button>
                 </div>
             </div>
 
-            <!-- STEP 3: SÍNTOMAS O MANIFESTACIÓN PRINCIPAL (NUEVO PASO DE PROFUNDIZACIÓN) -->
+            <!-- STEP 3: MANIFESTACIÓN PRINCIPAL (VISUAL) -->
             <div id="step-3" class="step-transition hidden">
-                <div class="text-center mb-8">
-                    <h2 class="text-2xl md:text-4xl font-bold tracking-tight mb-3">¿Cómo se manifiesta principalmente esto en tu día a día?</h2>
-                    <p class="text-brand-textMuted text-sm md:text-base">Selecciona la señal que más resuena con lo que estás experimentando actualmente.</p>
+                <div class="text-center mb-6">
+                    <h2 class="text-xl sm:text-2xl font-bold tracking-tight mb-1 text-white">¿Cómo lo experimentas a diario?</h2>
+                    <p class="text-brand-textMuted text-xs sm:text-sm">Toca la opción que mejor describe lo que sientes físicamente o mentalmente.</p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
-                    <button onclick="selectOption('symptom', 'Problemas para dormir y cansancio mental', 4)" class="group bg-brand-card hover:bg-brand-cardHover border border-slate-700/80 hover:border-brand-accent p-5 rounded-2xl flex items-center justify-between transition-all text-left shadow-lg">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-10 h-10 rounded-xl bg-slate-800 group-hover:bg-brand-accent/20 text-brand-highlight flex items-center justify-center text-lg">
-                                <i class="fa-solid fa-moon"></i>
-                            </div>
-                            <div>
-                                <span class="block font-semibold text-slate-100">Insomnio o cansancio constante</span>
-                                <span class="text-xs text-brand-textMuted">Cuesta desconectar la cabeza de noche</span>
-                            </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="selectOption('symptom', 'Insomnio y cansancio nocturno', 4)" class="group bg-brand-card hover:bg-brand-cardHover border border-slate-700/70 hover:border-brand-accent rounded-2xl p-3 flex flex-col justify-between text-left transition-all shadow-md active:scale-95">
+                        <img src="https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?auto=format&fit=crop&w=300&q=80" alt="Insomnio" class="w-full h-24 sm:h-28 rounded-xl object-cover mb-2">
+                        <div>
+                            <span class="block text-xs sm:text-sm font-bold text-slate-100">Insomnio / Falta de sueño</span>
+                            <span class="text-[10px] text-brand-textMuted block mt-0.5">La mente no descansa de noche</span>
                         </div>
-                        <i class="fa-solid fa-chevron-right text-slate-500 group-hover:text-brand-highlight"></i>
                     </button>
 
-                    <button onclick="selectOption('symptom', 'Pensamientos rumiativos y preocupación excesiva', 4)" class="group bg-brand-card hover:bg-brand-cardHover border border-slate-700/80 hover:border-brand-accent p-5 rounded-2xl flex items-center justify-between transition-all text-left shadow-lg">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-10 h-10 rounded-xl bg-slate-800 group-hover:bg-brand-accent/20 text-brand-highlight flex items-center justify-center text-lg">
-                                <i class="fa-solid fa-rotate text-brand-highlight"></i>
-                            </div>
-                            <div>
-                                <span class="block font-semibold text-slate-100">Pensamientos repetitivos</span>
-                                <span class="text-xs text-brand-textMuted">Pensar demasiado en el futuro o errores</span>
-                            </div>
+                    <button onclick="selectOption('symptom', 'Pensamientos rumiativos o sobrepensar', 4)" class="group bg-brand-card hover:bg-brand-cardHover border border-slate-700/70 hover:border-brand-accent rounded-2xl p-3 flex flex-col justify-between text-left transition-all shadow-md active:scale-95">
+                        <img src="https://images.unsplash.com/photo-1474552226712-ac0f0961a954?auto=format&fit=crop&w=300&q=80" alt="Sobrepensar" class="w-full h-24 sm:h-28 rounded-xl object-cover mb-2">
+                        <div>
+                            <span class="block text-xs sm:text-sm font-bold text-slate-100">Pensamientos repetitivos</span>
+                            <span class="text-[10px] text-brand-textMuted block mt-0.5">Sobrepensar el futuro o errores</span>
                         </div>
-                        <i class="fa-solid fa-chevron-right text-slate-500 group-hover:text-brand-highlight"></i>
                     </button>
 
-                    <button onclick="selectOption('symptom', 'Irritabilidad o tensión en mis relaciones', 4)" class="group bg-brand-card hover:bg-brand-cardHover border border-slate-700/80 hover:border-brand-accent p-5 rounded-2xl flex items-center justify-between transition-all text-left shadow-lg">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-10 h-10 rounded-xl bg-slate-800 group-hover:bg-brand-accent/20 text-brand-highlight flex items-center justify-center text-lg">
-                                <i class="fa-solid fa-comments text-brand-highlight"></i>
-                            </div>
-                            <div>
-                                <span class="block font-semibold text-slate-100">Tensión interpersonal</span>
-                                <span class="text-xs text-brand-textMuted">Fácil irritabilidad o discusiones frecuentes</span>
-                            </div>
+                    <button onclick="selectOption('symptom', 'Tensión corporal e irritabilidad', 4)" class="group bg-brand-card hover:bg-brand-cardHover border border-slate-700/70 hover:border-brand-accent rounded-2xl p-3 flex flex-col justify-between text-left transition-all shadow-md active:scale-95">
+                        <img src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=300&q=80" alt="Tensión" class="w-full h-24 sm:h-28 rounded-xl object-cover mb-2">
+                        <div>
+                            <span class="block text-xs sm:text-sm font-bold text-slate-100">Tensión muscular</span>
+                            <span class="text-[10px] text-brand-textMuted block mt-0.5">Nudo en pecho, cuello o irritabilidad</span>
                         </div>
-                        <i class="fa-solid fa-chevron-right text-slate-500 group-hover:text-brand-highlight"></i>
                     </button>
 
-                    <button onclick="selectOption('symptom', 'Falta de energía y pérdida de interés', 4)" class="group bg-brand-card hover:bg-brand-cardHover border border-slate-700/80 hover:border-brand-accent p-5 rounded-2xl flex items-center justify-between transition-all text-left shadow-lg">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-10 h-10 rounded-xl bg-slate-800 group-hover:bg-brand-accent/20 text-brand-highlight flex items-center justify-center text-lg">
-                                <i class="fa-solid fa-battery-quarter text-brand-highlight"></i>
-                            </div>
-                            <div>
-                                <span class="block font-semibold text-slate-100">Pérdida de motivación</span>
-                                <span class="text-xs text-brand-textMuted">Sensación de vacío o apatía general</span>
-                            </div>
+                    <button onclick="selectOption('symptom', 'Sensación de aislamiento y apatía', 4)" class="group bg-brand-card hover:bg-brand-cardHover border border-slate-700/70 hover:border-brand-accent rounded-2xl p-3 flex flex-col justify-between text-left transition-all shadow-md active:scale-95">
+                        <img src="https://images.unsplash.com/photo-1499209974431-9dddcece7f88?auto=format&fit=crop&w=300&q=80" alt="Aislamiento" class="w-full h-24 sm:h-28 rounded-xl object-cover mb-2">
+                        <div>
+                            <span class="block text-xs sm:text-sm font-bold text-slate-100">Aislamiento emocional</span>
+                            <span class="text-[10px] text-brand-textMuted block mt-0.5">Dificultad para conectar con otros</span>
                         </div>
-                        <i class="fa-solid fa-chevron-right text-slate-500 group-hover:text-brand-highlight"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- STEP 4: TIEMPO CON EL PROBLEMA / EXPERIENCIA PREVIA (NUEVO PASO) -->
+            <!-- STEP 4: TIEMPO CON EL PROBLEMA -->
             <div id="step-4" class="step-transition hidden">
-                <div class="text-center mb-8">
-                    <h2 class="text-2xl md:text-4xl font-bold tracking-tight mb-3">¿Hace cuánto tiempo convives con esto?</h2>
-                    <p class="text-brand-textMuted text-sm md:text-base">Nos orienta sobre si se trata de algo reciente o de un proceso prolongado.</p>
+                <div class="text-center mb-6">
+                    <h2 class="text-xl sm:text-2xl font-bold tracking-tight mb-1 text-white">¿Hace cuánto tiempo convives con esto?</h2>
+                    <p class="text-brand-textMuted text-xs sm:text-sm">Para determinar la intensidad y estructura del plan.</p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
-                    <button onclick="selectOption('duration', 'Menos de 1 mes (Eventual / Reciente)', 5)" class="group bg-brand-card hover:bg-brand-cardHover border border-slate-700/80 hover:border-brand-accent p-5 rounded-2xl flex items-center justify-between transition-all text-left shadow-lg">
-                        <div>
-                            <span class="block font-semibold text-slate-100 text-lg">Menos de 1 mes</span>
-                            <span class="text-xs text-brand-textMuted">Episodio puntual o detonante reciente</span>
+                <div class="space-y-3">
+                    <button onclick="selectOption('duration', 'Menos de 1 mes (Reciente)', 5)" class="w-full group bg-brand-card hover:bg-brand-cardHover border border-slate-700/70 hover:border-brand-accent p-4 rounded-2xl flex items-center justify-between text-left transition-all active:scale-98">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-sm">
+                                <i class="fa-solid fa-bolt"></i>
+                            </div>
+                            <div>
+                                <span class="block text-sm font-bold text-slate-100">Menos de 1 mes</span>
+                                <span class="text-[11px] text-brand-textMuted">Detonante o episodio puntual reciente</span>
+                            </div>
                         </div>
-                        <i class="fa-solid fa-chevron-right text-slate-500 group-hover:text-brand-highlight"></i>
+                        <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:text-brand-highlight"></i>
                     </button>
 
-                    <button onclick="selectOption('duration', 'Entre 1 y 6 meses', 5)" class="group bg-brand-card hover:bg-brand-cardHover border border-slate-700/80 hover:border-brand-accent p-5 rounded-2xl flex items-center justify-between transition-all text-left shadow-lg">
-                        <div>
-                            <span class="block font-semibold text-slate-100 text-lg">Entre 1 y 6 meses</span>
-                            <span class="text-xs text-brand-textMuted">Persiste en el tiempo y empieza a agotar</span>
+                    <button onclick="selectOption('duration', 'Entre 1 y 6 meses', 5)" class="w-full group bg-brand-card hover:bg-brand-cardHover border border-slate-700/70 hover:border-brand-accent p-4 rounded-2xl flex items-center justify-between text-left transition-all active:scale-98">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-brand-accent/20 text-brand-highlight flex items-center justify-center font-bold text-sm">
+                                <i class="fa-solid fa-hourglass-half"></i>
+                            </div>
+                            <div>
+                                <span class="block text-sm font-bold text-slate-100">Entre 1 y 6 meses</span>
+                                <span class="text-[11px] text-brand-textMuted">Ha empezado a desgastar tu rutina diaria</span>
+                            </div>
                         </div>
-                        <i class="fa-solid fa-chevron-right text-slate-500 group-hover:text-brand-highlight"></i>
+                        <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:text-brand-highlight"></i>
                     </button>
 
-                    <button onclick="selectOption('duration', 'Más de 1 año (Crónico)', 5)" class="group bg-brand-card hover:bg-brand-cardHover border border-slate-700/80 hover:border-brand-accent p-5 rounded-2xl flex items-center justify-between transition-all text-left shadow-lg">
-                        <div>
-                            <span class="block font-semibold text-slate-100 text-lg">Más de 1 año</span>
-                            <span class="text-xs text-brand-textMuted">Es un patrón arraigado que necesito cambiar</span>
+                    <button onclick="selectOption('duration', 'Más de 1 año (Crónico)', 5)" class="w-full group bg-brand-card hover:bg-brand-cardHover border border-slate-700/70 hover:border-brand-accent p-4 rounded-2xl flex items-center justify-between text-left transition-all active:scale-98">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center font-bold text-sm">
+                                <i class="fa-solid fa-calendar-days"></i>
+                            </div>
+                            <div>
+                                <span class="block text-sm font-bold text-slate-100">Más de 1 año</span>
+                                <span class="text-[11px] text-brand-textMuted">Patrón constante que requiere intervención</span>
+                            </div>
                         </div>
-                        <i class="fa-solid fa-chevron-right text-slate-500 group-hover:text-brand-highlight"></i>
-                    </button>
-
-                    <button onclick="selectOption('duration', 'Ya he hecho terapia antes sin el resultado deseado', 5)" class="group bg-brand-card hover:bg-brand-cardHover border border-slate-700/80 hover:border-brand-accent p-5 rounded-2xl flex items-center justify-between transition-all text-left shadow-lg">
-                        <div>
-                            <span class="block font-semibold text-slate-100 text-lg">He probado terapia antes</span>
-                            <span class="text-xs text-brand-textMuted">Busco un enfoque más práctico o distinto</span>
-                        </div>
-                        <i class="fa-solid fa-chevron-right text-slate-500 group-hover:text-brand-highlight"></i>
+                        <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:text-brand-highlight"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- STEP 5: MODALIDAD DE CONSULTA -->
+            <!-- STEP 5: PANTALLA EMPÁTICA (ESTÁS EN EL LUGAR CORRECTO) -->
             <div id="step-5" class="step-transition hidden">
-                <div class="text-center mb-8 md:mb-10">
-                    <h2 class="text-2xl md:text-4xl font-bold tracking-tight mb-3">¿Qué modalidad prefieres para tus sesiones?</h2>
-                    <p class="text-brand-textMuted text-sm md:text-base">Elige la opción que mejor se acomode a tus rutinas.</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-                    <!-- Consulta Online -->
-                    <button onclick="selectOption('modality', 'Consulta Online (Videollamada)', 6)" class="group bg-brand-card hover:bg-brand-cardHover border border-slate-700/80 hover:border-brand-accent p-6 rounded-2xl flex flex-col items-center text-center transition-all shadow-xl">
-                        <div class="w-16 h-16 rounded-2xl bg-slate-800 group-hover:bg-brand-accent/20 text-brand-highlight flex items-center justify-center text-3xl mb-4 transition-transform group-hover:scale-110">
-                            <i class="fa-solid fa-laptop-house"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-100 mb-1">Consulta Online</h3>
-                        <p class="text-xs text-brand-textMuted mb-4">Vía videollamada privada. Comodidad desde tu hogar u oficina.</p>
-                        <span class="inline-flex items-center text-xs font-semibold text-brand-highlight group-hover:underline">
-                            Seleccionar modalidad <i class="fa-solid fa-arrow-right ml-1"></i>
+                <div class="bg-slate-900 border border-brand-accent/40 rounded-3xl p-5 sm:p-7 text-center shadow-2xl relative overflow-hidden">
+                    <div class="w-full h-40 sm:h-48 rounded-2xl overflow-hidden mb-5 relative">
+                        <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=600&q=80" alt="Consulta acogedora" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
+                        <span class="absolute bottom-3 left-1/2 -translate-x-1/2 text-xs font-medium text-slate-200 bg-slate-950/80 px-3 py-1 rounded-full border border-slate-700 backdrop-blur-sm">
+                            Atención Humana y Confidencial
                         </span>
-                    </button>
-
-                    <!-- Consulta Presencial -->
-                    <button onclick="selectOption('modality', 'Consulta Presencial (En Consultorio)', 6)" class="group bg-brand-card hover:bg-brand-cardHover border border-slate-700/80 hover:border-brand-accent p-6 rounded-2xl flex flex-col items-center text-center transition-all shadow-xl">
-                        <div class="w-16 h-16 rounded-2xl bg-slate-800 group-hover:bg-brand-accent/20 text-brand-highlight flex items-center justify-center text-3xl mb-4 transition-transform group-hover:scale-110">
-                            <i class="fa-solid fa-building-user"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-100 mb-1">Consulta Presencial</h3>
-                        <p class="text-xs text-brand-textMuted mb-4">Atención personalizada en espacio privado acondicionado.</p>
-                        <span class="inline-flex items-center text-xs font-semibold text-brand-highlight group-hover:underline">
-                            Seleccionar modalidad <i class="fa-solid fa-arrow-right ml-1"></i>
-                        </span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- STEP 6: INTERSTITIAL EMPATHETIC VALIDATION -->
-            <div id="step-6" class="step-transition hidden">
-                <div class="max-w-xl mx-auto bg-slate-900 border border-brand-accent/40 rounded-3xl p-8 text-center shadow-2xl relative overflow-hidden">
-                    <div class="absolute -top-12 -right-12 w-32 h-32 bg-brand-accent/10 rounded-full blur-2xl"></div>
-                    
-                    <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-brand-accent/20 border border-brand-accent/50 flex items-center justify-center text-brand-highlight text-2xl shadow-lg">
-                        <i class="fa-solid fa-heart-pulse"></i>
                     </div>
 
-                    <h2 class="text-2xl md:text-3xl font-bold text-white mb-4">Estás en el lugar correcto</h2>
-                    
-                    <p class="text-slate-300 text-sm md:text-base leading-relaxed mb-6">
-                        Dar el paso para priorizar tu tranquilidad requiere valentía. Hemos organizado tus respuestas para ofrecerte una atención profesional, confidencial y a tu propio ritmo.
+                    <h2 class="text-xl sm:text-2xl font-bold text-white mb-2">Estás en el lugar correcto</h2>
+                    <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6">
+                        Reconocer lo que sientes es el paso más importante. Esta evaluación le permite a la Dra. Natalia entender tus necesidades antes de la primera sesión.
                     </p>
 
-                    <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800 text-xs text-brand-textMuted mb-8 space-y-1">
-                        <div class="flex items-center justify-center space-x-2">
-                            <i class="fa-solid fa-shield-halved text-brand-highlight"></i>
-                            <span>Pre-evaluación confidencial directa al WhatsApp de la especialista.</span>
-                        </div>
-                    </div>
-
-                    <button onclick="goToStep(7)" class="w-full bg-gradient-to-r from-brand-accent to-brand-accentHover hover:from-brand-accentHover hover:to-teal-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 shadow-lg shadow-brand-accent/20 flex items-center justify-center space-x-2 group">
-                        <span>Ver resumen y contactar</span>
-                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    <button onclick="goToStep(6)" class="w-full bg-gradient-to-r from-brand-accent to-teal-600 hover:from-teal-600 hover:to-brand-accent text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-lg text-sm flex items-center justify-center space-x-2">
+                        <span>Elegir modalidad de atención</span>
+                        <i class="fa-solid fa-arrow-right"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- STEP 7: FINAL CTA - RESUMEN COMPLETO Y BOTÓN A WHATSAPP -->
+            <!-- STEP 6: MODALIDAD DE CONSULTA -->
+            <div id="step-6" class="step-transition hidden">
+                <div class="text-center mb-6">
+                    <h2 class="text-xl sm:text-2xl font-bold tracking-tight mb-1 text-white">¿Qué modalidad te resulta más cómoda?</h2>
+                    <p class="text-brand-textMuted text-xs sm:text-sm">Selecciona cómo deseas realizar tus consultas.</p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4">
+                    <button onclick="selectOption('modality', 'Consulta Online (Videollamada)', 7)" class="group bg-brand-card hover:bg-brand-cardHover border border-slate-700/70 hover:border-brand-accent rounded-2xl p-4 flex items-center space-x-4 text-left transition-all shadow-md active:scale-98">
+                        <img src="https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?auto=format&fit=crop&w=300&q=80" alt="Online" class="w-20 h-20 rounded-xl object-cover flex-shrink-0">
+                        <div class="flex-grow">
+                            <span class="block text-sm font-bold text-slate-100 group-hover:text-brand-highlight">Consulta Online</span>
+                            <span class="text-[11px] text-brand-textMuted block mt-0.5">Videollamada privada desde donde estés. Cero desplazamientos.</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:text-brand-highlight"></i>
+                    </button>
+
+                    <button onclick="selectOption('modality', 'Consulta Presencial (En Consultorio)', 7)" class="group bg-brand-card hover:bg-brand-cardHover border border-slate-700/70 hover:border-brand-accent rounded-2xl p-4 flex items-center space-x-4 text-left transition-all shadow-md active:scale-98">
+                        <img src="https://images.unsplash.com/photo-1527689368864-3a821dbccc34?auto=format&fit=crop&w=300&q=80" alt="Presencial" class="w-20 h-20 rounded-xl object-cover flex-shrink-0">
+                        <div class="flex-grow">
+                            <span class="block text-sm font-bold text-slate-100 group-hover:text-brand-highlight">Consulta Presencial</span>
+                            <span class="text-[11px] text-brand-textMuted block mt-0.5">En consultorio privado acondicionado para tu comodidad.</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:text-brand-highlight"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 7: FINAL CTA (ENVIAR A WHATSAPP) -->
             <div id="step-7" class="step-transition hidden">
-                <div class="max-w-xl mx-auto bg-brand-card border border-slate-700 rounded-3xl p-6 md:p-8 text-center shadow-2xl">
-                    <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl">
+                <div class="bg-brand-card border border-slate-700 rounded-3xl p-5 sm:p-7 text-center shadow-2xl">
+                    <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl">
                         <i class="fa-solid fa-check"></i>
                     </div>
 
-                    <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">Pre-evaluación completada</h2>
-                    <p class="text-brand-textMuted text-xs md:text-sm mb-6">Tu diagnóstico inicial ha sido consolidado. Todo está listo para coordinar tu cita.</p>
+                    <h2 class="text-xl sm:text-2xl font-bold text-white mb-1">Evaluación Completada</h2>
+                    <p class="text-brand-textMuted text-xs mb-5">Tus elecciones han sido procesadas para enviar el resumen a la especialista.</p>
 
-                    <!-- Resumen de las respuestas seleccionadas -->
-                    <div class="bg-slate-950/80 rounded-2xl p-4 text-left border border-slate-800 mb-6 space-y-2.5">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-brand-highlight block mb-2 border-b border-slate-800 pb-2">Resumen de tu evaluación:</span>
+                    <!-- Resumen visual compacto -->
+                    <div class="bg-slate-950/80 rounded-2xl p-3.5 text-left border border-slate-800 mb-5 space-y-2 text-xs">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-brand-highlight block mb-1 border-b border-slate-800 pb-1">Resumen del paciente:</span>
                         
-                        <div class="flex items-start space-x-3 text-xs md:text-sm">
-                            <i class="fa-solid fa-user text-brand-accent mt-0.5"></i>
-                            <span class="text-slate-300">Edad: <strong id="summary-age" class="text-white">--</strong></span>
+                        <div class="flex justify-between items-center text-slate-300">
+                            <span>Edad:</span>
+                            <strong id="summary-age" class="text-white">--</strong>
                         </div>
-                        <div class="flex items-start space-x-3 text-xs md:text-sm">
-                            <i class="fa-solid fa-bullseye text-brand-accent mt-0.5"></i>
-                            <span class="text-slate-300">Objetivo: <strong id="summary-goal" class="text-white">--</strong></span>
+                        <div class="flex justify-between items-center text-slate-300">
+                            <span>Meta principal:</span>
+                            <strong id="summary-goal" class="text-white">--</strong>
                         </div>
-                        <div class="flex items-start space-x-3 text-xs md:text-sm">
-                            <i class="fa-solid fa-stethoscope text-brand-accent mt-0.5"></i>
-                            <span class="text-slate-300">Manifestación: <strong id="summary-symptom" class="text-white">--</strong></span>
+                        <div class="flex justify-between items-center text-slate-300">
+                            <span>Manifestación:</span>
+                            <strong id="summary-symptom" class="text-white">--</strong>
                         </div>
-                        <div class="flex items-start space-x-3 text-xs md:text-sm">
-                            <i class="fa-solid fa-clock text-brand-accent mt-0.5"></i>
-                            <span class="text-slate-300">Tiempo: <strong id="summary-duration" class="text-white">--</strong></span>
+                        <div class="flex justify-between items-center text-slate-300">
+                            <span>Tiempo:</span>
+                            <strong id="summary-duration" class="text-white">--</strong>
                         </div>
-                        <div class="flex items-start space-x-3 text-xs md:text-sm">
-                            <i class="fa-solid fa-hospital-user text-brand-accent mt-0.5"></i>
-                            <span class="text-slate-300">Modalidad: <strong id="summary-modality" class="text-white">--</strong></span>
+                        <div class="flex justify-between items-center text-slate-300">
+                            <span>Modalidad:</span>
+                            <strong id="summary-modality" class="text-white">--</strong>
                         </div>
                     </div>
 
-                    <!-- Botón Principal a WhatsApp -->
-                    <a id="whatsapp-link" href="#" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 shadow-xl shadow-emerald-950/40 flex items-center justify-center space-x-3 text-base md:text-lg mb-4">
-                        <i class="fa-brands fa-whatsapp text-2xl"></i>
+                    <!-- Botón directo a WhatsApp -->
+                    <a id="whatsapp-link" href="#" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center space-x-2 text-sm sm:text-base mb-3 active:scale-98">
+                        <i class="fa-brands fa-whatsapp text-xl"></i>
                         <span>Enviar evaluación a la Dra. Natalia</span>
                     </a>
 
-                    <p class="text-xs text-brand-textMuted">
-                        Se abrirá tu WhatsApp con este diagnóstico formateado para agendar tu hora directamente.
+                    <p class="text-[10px] text-brand-textMuted">
+                        Tu información es 100% confidencial y llegará formateada al chat oficial.
                     </p>
                 </div>
             </div>
@@ -418,13 +381,12 @@
     </main>
 
     <!-- Footer Simple -->
-    <footer class="w-full py-4 text-center border-t border-slate-900 bg-slate-950/40 text-xs text-slate-600">
-        <p>© 2026 Sistema de Triaje y Agendamiento Clínico. Demo Llave en Mano.</p>
+    <footer class="w-full py-3 text-center border-t border-slate-900 bg-slate-950/40 text-[10px] text-slate-600">
+        <p>© 2026 Funnel Interactivo de Salud Mental. Sistema Llave en Mano.</p>
     </footer>
 
     <!-- Logic JavaScript -->
     <script>
-        // Objeto global de almacenamiento del flujo ampliado
         const userAnswers = {
             age: '',
             goal: '',
@@ -435,8 +397,6 @@
 
         let currentStep = 1;
         const totalSteps = 7;
-
-        // Número telefónico demo de la psicóloga
         const psychologistPhone = "56912345678";
 
         function selectOption(key, value, nextStepNum) {
@@ -445,26 +405,18 @@
         }
 
         function goToStep(stepNum) {
-            // Ocultar paso actual
             document.getElementById(`step-${currentStep}`).classList.add('hidden');
-            
-            // Actualizar número de paso
             currentStep = stepNum;
-            
-            // Mostrar nuevo paso
             const nextStepElem = document.getElementById(`step-${currentStep}`);
             nextStepElem.classList.remove('hidden');
 
-            // Actualizar interfaz
             updateProgress();
             updateBackButton();
 
-            // Si llegamos al paso 7, armar resumen y link de WhatsApp
             if (currentStep === 7) {
                 renderSummaryAndWhatsApp();
             }
 
-            // Scroll arriba suave
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -496,14 +448,13 @@
             document.getElementById('summary-duration').textContent = userAnswers.duration || 'No especificado';
             document.getElementById('summary-modality').textContent = userAnswers.modality || 'No especificado';
 
-            // Armado del mensaje pre-llenado completo para WhatsApp
             const message = `Hola Dra. Natalia, completé la evaluación interactiva en su web:\n\n` +
-                            `• Rango de Edad: ${userAnswers.age}\n` +
-                            `• Objetivo Principal: ${userAnswers.goal}\n` +
-                            `• Síntoma/Manifestación: ${userAnswers.symptom}\n` +
-                            `• Tiempo con esto: ${userAnswers.duration}\n` +
-                            `• Modalidad Deseada: ${userAnswers.modality}\n\n` +
-                            `Me gustaría consultar disponibilidad para agendar mi sesión.`;
+                            `• Edad: ${userAnswers.age}\n` +
+                            `• Objetivo: ${userAnswers.goal}\n` +
+                            `• Manifestación: ${userAnswers.symptom}\n` +
+                            `• Tiempo: ${userAnswers.duration}\n` +
+                            `• Modalidad: ${userAnswers.modality}\n\n` +
+                            `Quisiera consultar disponibilidad para agendar mi sesión.`;
 
             const encodedMessage = encodeURIComponent(message);
             const whatsappURL = `https://api.whatsapp.com/send?phone=${psychologistPhone}&text=${encodedMessage}`;
