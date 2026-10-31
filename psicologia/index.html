@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dr. Alejandro Morales | Psicología Clínica & Psicoterapia</title>
+    <title>Dr. Alejandro Morales | Triaje & Diagnóstico Psicopedagógico</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Inter & Playfair Display -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
     <!-- FontAwesome icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -39,499 +39,492 @@
         }
     </script>
     <style>
-        .active-pain-card {
-            border-color: #2d6152 !important;
-            background-color: #f4f7f6 !important;
-            box-shadow: 0 10px 25px -5px rgba(45, 97, 82, 0.15);
+        .card-shadow {
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
         }
-        .step-pill-active {
+        .card-shadow:hover {
+            box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.15);
+        }
+        .step-active {
             background-color: #2d6152;
             color: #ffffff;
+            border-color: #2d6152;
         }
     </style>
 </head>
-<body class="font-sans text-slate-700 bg-slate-50 antialiased selection:bg-sage-100 selection:text-sage-700">
+<body class="font-sans text-slate-700 bg-slate-50 antialiased selection:bg-sage-100 selection:text-sage-700 min-h-screen flex flex-col justify-between">
 
-    <!-- BARRA DE PROGRESO DEL EMBUDO (Sticky Top Bar) -->
-    <div class="sticky top-0 z-50 bg-navy-900 text-white border-b border-slate-800 shadow-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+    <!-- BARRA SUPERIOR FIJA CON INDICADOR DE PROGRESO -->
+    <header class="sticky top-0 z-50 bg-navy-900 text-white border-b border-slate-800 shadow-md">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <div class="w-8 h-8 rounded-full bg-sage-500 flex items-center justify-center text-white font-bold text-sm">
+                <div class="w-9 h-9 rounded-xl bg-sage-500 flex items-center justify-center text-white font-bold text-base shadow-sm">
                     <i class="fa-solid fa-brain"></i>
                 </div>
                 <div>
                     <span class="block text-sm font-bold font-serif leading-tight text-slate-100">Dr. Alejandro Morales</span>
-                    <span class="block text-[10px] text-sage-100 uppercase tracking-widest font-semibold">Psicología Clínica • Reg. 48102</span>
+                    <span class="block text-[10px] text-sage-100 uppercase tracking-widest font-semibold">Psicología Clínica • Reg. Sanitario Nº 48102</span>
                 </div>
             </div>
 
-            <!-- Steps Indicator -->
-            <div class="flex items-center space-x-2 sm:space-x-4 text-xs font-medium">
-                <div id="step-pill-1" class="px-3 py-1 rounded-full bg-sage-600 text-white flex items-center space-x-1 transition-all">
-                    <span>1. Situación</span>
+            <!-- Pasos del embudo -->
+            <div class="flex items-center space-x-1 sm:space-x-3 text-xs font-semibold">
+                <div id="step-pill-1" class="px-3 py-1.5 rounded-lg border border-sage-500 bg-sage-600 text-white flex items-center space-x-1.5 transition-all">
+                    <span class="w-4 h-4 rounded-full bg-white text-sage-700 flex items-center justify-center text-[10px] font-bold">1</span>
+                    <span class="hidden sm:inline">Especialidad</span>
                 </div>
                 <i class="fa-solid fa-chevron-right text-[10px] text-slate-500"></i>
-                <div id="step-pill-2" class="px-3 py-1 rounded-full bg-slate-800 text-slate-400 flex items-center space-x-1 transition-all">
-                    <span>2. Servicio</span>
+                <div id="step-pill-2" class="px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-800 text-slate-400 flex items-center space-x-1.5 transition-all">
+                    <span class="w-4 h-4 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center text-[10px] font-bold">2</span>
+                    <span class="hidden sm:inline">Síntoma</span>
                 </div>
                 <i class="fa-solid fa-chevron-right text-[10px] text-slate-500"></i>
-                <div id="step-pill-3" class="px-3 py-1 rounded-full bg-slate-800 text-slate-400 flex items-center space-x-1 transition-all">
-                    <span>3. Diagnóstico & Cita</span>
+                <div id="step-pill-3" class="px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-800 text-slate-400 flex items-center space-x-1.5 transition-all">
+                    <span class="w-4 h-4 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center text-[10px] font-bold">3</span>
+                    <span class="hidden sm:inline">Diagnóstico</span>
                 </div>
             </div>
         </div>
-    </div>
+    </header>
 
-    <!-- MÓDULO 1: HERO CON SELECCIÓN DE PUNTO DE DOLOR -->
-    <section id="modulo-1" class="py-16 md:py-24 bg-gradient-to-b from-slate-100 to-white border-b border-slate-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            
-            <span class="inline-block px-4 py-1.5 rounded-full bg-sage-100 text-sage-700 text-xs font-bold uppercase tracking-wider mb-6">
-                Paso 1: Identifica tu necesidad principal
-            </span>
+    <!-- MAIN DIAGNOSTIC FUNNEL CONTAINER -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex-grow w-full">
 
-            <h1 class="text-3xl sm:text-5xl font-bold font-serif text-navy-900 tracking-tight leading-tight max-w-4xl mx-auto">
-                Recupera tu tranquilidad y bienestar emocional con un proceso guiado a tu medida.
-            </h1>
+        <!-- PASO 1: SELECCIÓN DE ESPECIALIDAD (6 TARJETAS LLAMATIVAS) -->
+        <section id="step-1-container" class="transition-all duration-300">
+            <div class="text-center max-w-3xl mx-auto mb-8 sm:mb-12">
+                <span class="inline-block px-3.5 py-1 rounded-full bg-sage-100 text-sage-700 text-xs font-bold uppercase tracking-wider mb-3">
+                    Paso 1 de 3 • Selección Directa
+                </span>
+                <h1 class="text-3xl sm:text-5xl font-extrabold font-serif text-navy-900 tracking-tight leading-tight">
+                    ¿Qué área te gustaría consultar hoy?
+                </h1>
+                <p class="mt-3 text-slate-600 text-sm sm:text-base">
+                    Selecciona una especialidad para adaptar la evaluación inmediata a tu situación.
+                </p>
+            </div>
 
-            <p class="mt-4 text-lg text-slate-600 max-w-2xl mx-auto">
-                Selecciona la situación que mejor describe tu momento actual para activar tu embudo de atención personalizada:
-            </p>
-
-            <!-- Grid de Selección de Dolores / Diagnóstico Inicial -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-12 max-w-6xl mx-auto">
+            <!-- Grid de 6 Rectángulos de Colores Vibrantes -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 max-w-5xl mx-auto">
                 
-                <!-- Card 1: Ansiedad -->
-                <button onclick="seleccionarModulo('ansiedad')" id="card-ansiedad" class="pain-card active-pain-card border-2 border-slate-200 rounded-2xl p-6 text-left transition-all hover:border-sage-500 group relative flex flex-col justify-between">
-                    <div>
-                        <div class="w-12 h-12 rounded-xl bg-sage-100 text-sage-700 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-bolt-lightning"></i>
+                <!-- 1. Ansiedad y Estrés (Azul Intenso) -->
+                <button onclick="selectSpecialty('ansiedad')" class="card-shadow group relative overflow-hidden text-left p-6 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white transform hover:-translate-y-1 transition-all duration-200 border border-blue-500">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-bolt"></i>
                         </div>
-                        <h3 class="font-bold text-lg text-navy-900 mb-2">Ansiedad & Estrés</h3>
-                        <p class="text-xs text-slate-600 leading-relaxed">Pensamientos intrusivos, taquicardia, sensación de descontrol o insomnio continuo.</p>
+                        <span class="text-xs bg-white/20 px-2.5 py-1 rounded-md font-semibold backdrop-blur-sm">Consulta Popular</span>
                     </div>
-                    <div class="mt-6 flex items-center justify-between text-xs font-semibold text-sage-600">
-                        <span>Seleccionar servicio</span>
-                        <i class="fa-solid fa-arrow-down group-hover:translate-y-1 transition-transform"></i>
+                    <h3 class="text-xl font-bold font-serif mb-1">Ansiedad & Estrés</h3>
+                    <p class="text-xs text-blue-100 leading-relaxed">Ataques de pánico, fobias, pensamientos obsesivos e hipervigilancia constante.</p>
+                    <div class="mt-6 flex items-center justify-between text-xs font-bold text-blue-200 group-hover:text-white">
+                        <span>Seleccionar opción</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
                     </div>
                 </button>
 
-                <!-- Card 2: Pareja -->
-                <button onclick="seleccionarModulo('pareja')" id="card-pareja" class="pain-card border-2 border-slate-200 bg-white rounded-2xl p-6 text-left transition-all hover:border-sage-500 group relative flex flex-col justify-between">
-                    <div>
-                        <div class="w-12 h-12 rounded-xl bg-sage-100 text-sage-700 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-heart-crack"></i>
+                <!-- 2. Pareja y Familia (Rosa / Rojo Rubí) -->
+                <button onclick="selectSpecialty('pareja')" class="card-shadow group relative overflow-hidden text-left p-6 rounded-2xl bg-gradient-to-br from-rose-600 to-pink-700 text-white transform hover:-translate-y-1 transition-all duration-200 border border-rose-500">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-heart-circle-bolt"></i>
                         </div>
-                        <h3 class="font-bold text-lg text-navy-900 mb-2">Crisis de Pareja</h3>
-                        <p class="text-xs text-slate-600 leading-relaxed">Problemas de comunicación, discusiones cíclicas o pérdida de confianza.</p>
+                        <span class="text-xs bg-white/20 px-2.5 py-1 rounded-md font-semibold backdrop-blur-sm">Vínculos</span>
                     </div>
-                    <div class="mt-6 flex items-center justify-between text-xs font-semibold text-sage-600">
-                        <span>Seleccionar servicio</span>
-                        <i class="fa-solid fa-arrow-down group-hover:translate-y-1 transition-transform"></i>
+                    <h3 class="text-xl font-bold font-serif mb-1">Pareja & Familia</h3>
+                    <p class="text-xs text-rose-100 leading-relaxed">Crisis de convivencia, fallos de comunicación, infidelidad y mediación.</p>
+                    <div class="mt-6 flex items-center justify-between text-xs font-bold text-rose-200 group-hover:text-white">
+                        <span>Seleccionar opción</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
                     </div>
                 </button>
 
-                <!-- Card 3: Autoestima -->
-                <button onclick="seleccionarModulo('autoestima')" id="card-autoestima" class="pain-card border-2 border-slate-200 bg-white rounded-2xl p-6 text-left transition-all hover:border-sage-500 group relative flex flex-col justify-between">
-                    <div>
-                        <div class="w-12 h-12 rounded-xl bg-sage-100 text-sage-700 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-user-shield"></i>
+                <!-- 3. Autoestima y Confianza (Verde Esmeralda) -->
+                <button onclick="selectSpecialty('autoestima')" class="card-shadow group relative overflow-hidden text-left p-6 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white transform hover:-translate-y-1 transition-all duration-200 border border-emerald-500">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-shield-halved"></i>
                         </div>
-                        <h3 class="font-bold text-lg text-navy-900 mb-2">Autoestima & Bloqueo</h3>
-                        <p class="text-xs text-slate-600 leading-relaxed">Inseguridad personal, miedo a tomar decisiones o sensación de estar estancado.</p>
+                        <span class="text-xs bg-white/20 px-2.5 py-1 rounded-md font-semibold backdrop-blur-sm">Personal</span>
                     </div>
-                    <div class="mt-6 flex items-center justify-between text-xs font-semibold text-sage-600">
-                        <span>Seleccionar servicio</span>
-                        <i class="fa-solid fa-arrow-down group-hover:translate-y-1 transition-transform"></i>
+                    <h3 class="text-xl font-bold font-serif mb-1">Autoestima & Confianza</h3>
+                    <p class="text-xs text-emerald-100 leading-relaxed">Inseguridad, síndrome del impostor, autocrítica excesiva y dificultad para fijar límites.</p>
+                    <div class="mt-6 flex items-center justify-between text-xs font-bold text-emerald-200 group-hover:text-white">
+                        <span>Seleccionar opción</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
                     </div>
                 </button>
 
-                <!-- Card 4: Burnout -->
-                <button onclick="seleccionarModulo('burnout')" id="card-burnout" class="pain-card border-2 border-slate-200 bg-white rounded-2xl p-6 text-left transition-all hover:border-sage-500 group relative flex flex-col justify-between">
-                    <div>
-                        <div class="w-12 h-12 rounded-xl bg-sage-100 text-sage-700 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+                <!-- 4. Trauma y Duelo (Púrpura Profundo) -->
+                <button onclick="selectSpecialty('duelo')" class="card-shadow group relative overflow-hidden text-left p-6 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-900 text-white transform hover:-translate-y-1 transition-all duration-200 border border-purple-500">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-feather-pointed"></i>
+                        </div>
+                        <span class="text-xs bg-white/20 px-2.5 py-1 rounded-md font-semibold backdrop-blur-sm">Acompañamiento</span>
+                    </div>
+                    <h3 class="text-xl font-bold font-serif mb-1">Trauma & Duelo</h3>
+                    <p class="text-xs text-purple-100 leading-relaxed">Pérdidas de seres queridos, rupturas dolorosas, experiencias del pasado no resueltas.</p>
+                    <div class="mt-6 flex items-center justify-between text-xs font-bold text-purple-200 group-hover:text-white">
+                        <span>Seleccionar opción</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </button>
+
+                <!-- 5. Crecimiento Personal (Naranja Cálido) -->
+                <button onclick="selectSpecialty('crecimiento')" class="card-shadow group relative overflow-hidden text-left p-6 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white transform hover:-translate-y-1 transition-all duration-200 border border-amber-400">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-compass"></i>
+                        </div>
+                        <span class="text-xs bg-white/20 px-2.5 py-1 rounded-md font-semibold backdrop-blur-sm">Enfoque</span>
+                    </div>
+                    <h3 class="text-xl font-bold font-serif mb-1">Crecimiento & Metas</h3>
+                    <p class="text-xs text-amber-100 leading-relaxed">Sensación de estancamiento, toma de decisiones cruciales y propósito de vida.</p>
+                    <div class="mt-6 flex items-center justify-between text-xs font-bold text-amber-200 group-hover:text-white">
+                        <span>Seleccionar opción</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </button>
+
+                <!-- 6. Psicología Laboral & Burnout (Cian / Azul Turquesa) -->
+                <button onclick="selectSpecialty('laboral')" class="card-shadow group relative overflow-hidden text-left p-6 rounded-2xl bg-gradient-to-br from-cyan-600 to-blue-700 text-white transform hover:-translate-y-1 transition-all duration-200 border border-cyan-500">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
                             <i class="fa-solid fa-briefcase"></i>
                         </div>
-                        <h3 class="font-bold text-lg text-navy-900 mb-2">Burnout Laboral</h3>
-                        <p class="text-xs text-slate-600 leading-relaxed">Agotamiento extremo por trabajo, pérdida de motivación o estrés corporativo.</p>
+                        <span class="text-xs bg-white/20 px-2.5 py-1 rounded-md font-semibold backdrop-blur-sm">Profesional</span>
                     </div>
-                    <div class="mt-6 flex items-center justify-between text-xs font-semibold text-sage-600">
-                        <span>Seleccionar servicio</span>
-                        <i class="fa-solid fa-arrow-down group-hover:translate-y-1 transition-transform"></i>
+                    <h3 class="text-xl font-bold font-serif mb-1">Psicología Laboral</h3>
+                    <p class="text-xs text-cyan-100 leading-relaxed">Burnout por sobrecarga, insatisfacción profesional y equilibrio vida-trabajo.</p>
+                    <div class="mt-6 flex items-center justify-between text-xs font-bold text-cyan-200 group-hover:text-white">
+                        <span>Seleccionar opción</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
                     </div>
                 </button>
 
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- MÓDULO 2: FICHA DE SERVICIO PERSONALIZADA -->
-    <section id="modulo-2" class="py-20 bg-white border-b border-slate-200">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            
-            <div class="flex items-center justify-between mb-8 pb-4 border-b border-slate-100">
-                <div>
-                    <span class="text-xs font-bold text-sage-600 uppercase tracking-widest">Paso 2 de 3: Solución Clínica Recomendada</span>
-                    <h2 id="service-title" class="text-3xl font-bold font-serif text-navy-900 mt-1">
-                        Tratamiento Especializado de Ansiedad & Estrés
-                    </h2>
-                </div>
-                <span class="hidden sm:inline-block px-3 py-1 bg-sage-50 border border-sage-200 text-sage-700 rounded-lg text-xs font-semibold">
-                    Evidencia Científica Acreditada
+        <!-- PASO 2: SELECCIÓN DE SÍNTOMA ESPECÍFICO (4 OPCIONES SECUNDARIAS) -->
+        <section id="step-2-container" class="hidden transition-all duration-300">
+            <div class="flex items-center justify-between max-w-4xl mx-auto mb-6">
+                <button onclick="goBackToStep(1)" class="inline-flex items-center space-x-2 text-xs font-bold text-sage-700 hover:text-sage-600 bg-sage-100 px-3 py-1.5 rounded-lg transition">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Volver a especialidades</span>
+                </button>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Paso 2 de 3</span>
+            </div>
+
+            <div class="text-center max-w-3xl mx-auto mb-8">
+                <h2 id="step-2-title" class="text-2xl sm:text-4xl font-extrabold font-serif text-navy-900 tracking-tight">
+                    Selecciona tu síntoma o motivo principal
+                </h2>
+                <p id="step-2-subtitle" class="mt-2 text-slate-600 text-sm">
+                    ¿Cuál de estas situaciones describe mejor tu estado actual?
+                </p>
+            </div>
+
+            <!-- Grid de 4 opciones por especialidad -->
+            <div id="sub-options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-4xl mx-auto">
+                <!-- Se llena dinámicamente mediante JS -->
+            </div>
+        </section>
+
+        <!-- PASO 3: DIAGNÓSTICO Y ACCIÓN FINAL -->
+        <section id="step-3-container" class="hidden transition-all duration-300">
+            <div class="flex items-center justify-between max-w-4xl mx-auto mb-6">
+                <button onclick="goBackToStep(2)" class="inline-flex items-center space-x-2 text-xs font-bold text-sage-700 hover:text-sage-600 bg-sage-100 px-3 py-1.5 rounded-lg transition">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Modificar síntoma</span>
+                </button>
+                <span class="inline-block px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full">
+                    <i class="fa-solid fa-check-circle mr-1"></i> Triaje Completado
                 </span>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 
-                <!-- Columna Izquierda: Detalles clínicos -->
-                <div class="lg:col-span-2 space-y-6">
-                    <p id="service-description" class="text-slate-600 text-base leading-relaxed">
-                        Un abordaje estructurado mediante Terapia Cognitivo-Conductual (TCC) y técnicas de autorregulación emocional designed para desactivar los síntomas físicos y mentales de la hipervigilancia.
-                    </p>
+                <!-- Columna Principal: Resultado del Diagnóstico -->
+                <div class="lg:col-span-8 bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xl">
+                    <div class="border-b border-slate-100 pb-6 mb-6">
+                        <span class="text-xs font-bold text-sage-600 uppercase tracking-widest block mb-1">Resultado de Solicitud de Consulta</span>
+                        <h2 id="diag-title" class="text-2xl sm:text-3xl font-bold font-serif text-navy-900">
+                            Evaluación Diagnóstica Recomendada
+                        </h2>
+                    </div>
 
-                    <!-- Síntomas que se abordan -->
-                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
-                        <h4 class="font-bold text-navy-900 text-sm mb-3 flex items-center space-x-2">
-                            <i class="fa-solid fa-list-check text-sage-600"></i>
-                            <span>Síntomas principales que tratamos:</span>
+                    <!-- Resumen del Paciente -->
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 mb-6 text-xs text-slate-700 space-y-2">
+                        <div class="flex items-start justify-between">
+                            <span class="text-slate-400 font-medium">Área seleccionada:</span>
+                            <span id="summary-spec" class="font-bold text-navy-900 text-right">Ansiedad & Estrés</span>
+                        </div>
+                        <div class="flex items-start justify-between pt-2 border-t border-slate-200">
+                            <span class="text-slate-400 font-medium">Situación/Motivo:</span>
+                            <span id="summary-sub" class="font-bold text-navy-900 text-right">Ataques de pánico recurrentes</span>
+                        </div>
+                    </div>
+
+                    <!-- Abordaje sugerido -->
+                    <div class="space-y-4 mb-8">
+                        <h4 class="font-bold text-navy-900 text-sm flex items-center space-x-2">
+                            <i class="fa-solid fa-notes-medical text-sage-600"></i>
+                            <span>Plan de Abordaje Terapéutico:</span>
                         </h4>
-                        <ul id="service-symptoms" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-700">
-                            <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-sage-600"></i><span>Pensamientos rumiantes continuos</span></li>
-                            <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-sage-600"></i><span>Tensión muscular y opresión en el pecho</span></li>
-                            <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-sage-600"></i><span>Insomnio o despertares tempranos</span></li>
-                            <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-sage-600"></i><span>Evitación de situaciones sociales o laborales</span></li>
-                        </ul>
-                    </div>
-
-                    <!-- Metodología y Formato -->
-                    <div class="grid grid-cols-2 gap-4 text-xs">
-                        <div class="p-4 rounded-xl border border-slate-200 bg-white">
-                            <span class="text-slate-400 block font-medium">Metodología Principal</span>
-                            <span id="service-method" class="font-bold text-navy-900 text-sm mt-0.5 block">Cognitivo-Conductual + ACT</span>
-                        </div>
-                        <div class="p-4 rounded-xl border border-slate-200 bg-white">
-                            <span class="text-slate-400 block font-medium">Modalidad & Duración</span>
-                            <span id="service-duration" class="font-bold text-navy-900 text-sm mt-0.5 block">50 min • Presencial u Online</span>
-                        </div>
-                    </div>
-
-                    <!-- Testimonio Modular -->
-                    <div class="p-5 bg-sage-50 border border-sage-200 rounded-2xl italic text-xs text-slate-700 relative">
-                        <p id="service-testimonial">
-                            "Aprender a gestionar mi ansiedad con el Dr. Morales me devolvió la capacidad de dormir tranquilo y concentrarme en mi trabajo."
+                        <p id="diag-description" class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            Se sugiere iniciar con una **Sesión de Valoración Clínica** para estructurar un marco terapéutico adaptado con herramientas prácticas desde la primera consulta.
                         </p>
-                        <span id="service-author" class="block font-bold not-italic text-navy-900 mt-2">— Camilo R., 34 años</span>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-2">
+                            <div class="p-3 bg-sage-50 rounded-xl border border-sage-200 flex items-center space-x-3">
+                                <i class="fa-solid fa-clock text-sage-600 text-base"></i>
+                                <div>
+                                    <span class="block font-bold text-navy-900">Duración: 50 minutos</span>
+                                    <span class="text-slate-500 text-[11px]">Modalidad Online o Presencial</span>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-sage-50 rounded-xl border border-sage-200 flex items-center space-x-3">
+                                <i class="fa-solid fa-user-shield text-sage-600 text-base"></i>
+                                <div>
+                                    <span class="block font-bold text-navy-900">Privacidad 100%</span>
+                                    <span class="text-slate-500 text-[11px]">Bajo secreto profesional</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Columna Derecha: Panel de Acción y Scroll al Formulario -->
-                <div class="bg-navy-900 text-white p-6 rounded-3xl flex flex-col justify-between h-full">
-                    <div>
-                        <span class="text-[10px] uppercase font-bold text-sage-500 tracking-widest block mb-2">Próximo Paso</span>
-                        <h3 class="text-xl font-bold font-serif mb-3">Evalúa tu compatibilidad de tratamiento</h3>
-                        <p class="text-xs text-slate-300 leading-relaxed mb-6">
-                            Para garantizar la máxima efectividad clínica, completaremos un rápido triaje antes de agendar tu cita.
-                        </p>
-                    </div>
-
-                    <button onclick="irAModulo3()" class="w-full py-3.5 bg-sage-500 hover:bg-sage-600 text-white font-semibold rounded-xl text-xs transition flex items-center justify-center space-x-2 shadow-lg">
-                        <span>Iniciar Triaje de Compatibilidad</span>
-                        <i class="fa-solid fa-arrow-right"></i>
-                    </button>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- MÓDULO 3: EVALUACIÓN DE COMPATIBILIDAD Y TRIAJE -->
-    <section id="modulo-3" class="py-20 bg-slate-100 border-b border-slate-200">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-10">
-                <span class="text-xs font-bold text-sage-600 uppercase tracking-widest">Paso 3 de 3: Evaluación de Compatibilidad</span>
-                <h2 class="text-3xl font-bold font-serif text-navy-900 mt-2">Cuestionario Clínico de Triaje</h2>
-                <p class="text-xs text-slate-600 mt-2">Completa estas 2 preguntas para personalizar la propuesta de tu primera consulta.</p>
-            </div>
-
-            <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm">
-                
-                <!-- Pregunta 1 -->
-                <div id="triaje-p1">
-                    <label class="block font-bold text-navy-900 text-sm mb-3">1. ¿Con qué intensidad te afecta esta situación en tu día a día?</label>
+                    <!-- BOTÓN WHATSAPP DE CONVERSIÓN RÁPIDA -->
                     <div class="space-y-3">
-                        <button onclick="setTriajeP1('Moderada')" class="triaje-btn-1 w-full text-left p-3.5 rounded-xl border border-slate-200 text-xs font-medium hover:border-sage-500 hover:bg-sage-50 transition flex items-center justify-between">
-                            <span>Moderada (Puedo continuar mis tareas pero con malestar permanente).</span>
-                            <i class="fa-regular fa-circle text-slate-400"></i>
-                        </button>
-                        <button onclick="setTriajeP1('Alta')" class="triaje-btn-1 w-full text-left p-3.5 rounded-xl border border-slate-200 text-xs font-medium hover:border-sage-500 hover:bg-sage-50 transition flex items-center justify-between">
-                            <span>Alta (Me cuesta concentrarme, trabajar o mantener relaciones sanas).</span>
-                            <i class="fa-regular fa-circle text-slate-400"></i>
-                        </button>
-                        <button onclick="setTriajeP1('Urgente')" class="triaje-btn-1 w-full text-left p-3.5 rounded-xl border border-slate-200 text-xs font-medium hover:border-sage-500 hover:bg-sage-50 transition flex items-center justify-between">
-                            <span>Muy Alta / Urgente (Siento un nivel de agotamiento o crisis límite).</span>
-                            <i class="fa-regular fa-circle text-slate-400"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Pregunta 2 (Oculta al inicio) -->
-                <div id="triaje-p2" class="hidden mt-8 pt-6 border-t border-slate-100">
-                    <label class="block font-bold text-navy-900 text-sm mb-3">2. ¿En qué modalidad prefieres llevar a cabo la consulta?</label>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <button onclick="finalizarTriaje('Online')" class="p-4 rounded-xl border border-slate-200 text-xs font-medium hover:border-sage-500 hover:bg-sage-50 transition text-center group">
-                            <i class="fa-solid fa-laptop text-2xl text-sage-600 block mb-2 group-hover:scale-110 transition-transform"></i>
-                            <span class="font-bold block text-navy-900">Modalidad Online</span>
-                            <span class="text-[11px] text-slate-500">Videollamada privada e individual</span>
-                        </button>
-                        <button onclick="finalizarTriaje('Presencial')" class="p-4 rounded-xl border border-slate-200 text-xs font-medium hover:border-sage-500 hover:bg-sage-50 transition text-center group">
-                            <i class="fa-solid fa-building-user text-2xl text-sage-600 block mb-2 group-hover:scale-110 transition-transform"></i>
-                            <span class="font-bold block text-navy-900">Modalidad Presencial</span>
-                            <span class="text-[11px] text-slate-500">En consultorio privado</span>
-                        </button>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- MÓDULO 4: OFERTA Y CONVERSIÓN FINAL -->
-    <section id="modulo-4" class="py-20 bg-white">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-gradient-to-br from-navy-900 to-slate-900 text-white rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden">
-                
-                <div class="relative z-10 max-w-2xl">
-                    <span class="inline-block px-3 py-1 bg-sage-500 text-white text-[11px] font-bold rounded-md uppercase tracking-wider mb-4">
-                        Embudo Completado • Listo para Agendar
-                    </span>
-                    <h2 class="text-3xl sm:text-4xl font-bold font-serif leading-tight">
-                        Reserva tu Sesión Diagnóstica Inicial
-                    </h2>
-                    <p id="conversion-summary" class="text-slate-300 text-sm mt-3 leading-relaxed">
-                        Hemos preparado el contexto de tu consulta para el tratamiento de <strong>Ansiedad & Estrés</strong>. En esta primera sesión definiremos tu hoja de ruta terapéutica.
-                    </p>
-
-                    <!-- Features de la sesión -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 my-8 text-xs text-slate-200">
-                        <div class="flex items-center space-x-2">
-                            <i class="fa-solid fa-circle-check text-sage-500 text-sm"></i>
-                            <span>Evaluación clínica de 50 minutos</span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <i class="fa-solid fa-circle-check text-sage-500 text-sm"></i>
-                            <span>Plan de tratamiento personalizado</span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <i class="fa-solid fa-circle-check text-sage-500 text-sm"></i>
-                            <span>Absoluta confidencialidad legal</span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <i class="fa-solid fa-circle-check text-sage-500 text-sm"></i>
-                            <span>Atención directa por el Dr. Morales</span>
-                        </div>
-                    </div>
-
-                    <!-- CTAs de Conversión -->
-                    <div class="flex flex-col sm:flex-row items-center gap-4">
-                        <a id="btn-whatsapp-final" href="#" target="_blank" class="w-full sm:w-auto bg-sage-500 hover:bg-sage-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg transition flex items-center justify-center space-x-3 text-sm">
-                            <i class="fa-brands fa-whatsapp text-xl"></i>
-                            <span>Agendar Vía WhatsApp</span>
+                        <a id="whatsapp-link" href="#" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg hover:shadow-xl transition flex items-center justify-center space-x-3 text-sm sm:text-base group">
+                            <i class="fa-brands fa-whatsapp text-2xl group-hover:scale-110 transition-transform"></i>
+                            <span>Enviar Diagnóstico y Agendar por WhatsApp</span>
                         </a>
-                        <button onclick="simularCalendly()" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold py-4 px-6 rounded-xl transition text-sm text-center">
-                            Ver Horarios Disponibles
-                        </button>
+                        <p class="text-[11px] text-center text-slate-400">
+                            Serás redirigido a WhatsApp con tu información pre-llenada para coordinar día y hora.
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- Columna Lateral: Tarjeta del Psicólogo -->
+                <div class="lg:col-span-4 space-y-4">
+                    <div class="bg-navy-900 text-white rounded-3xl p-6 border border-slate-800 shadow-lg">
+                        <div class="w-20 h-20 rounded-2xl overflow-hidden mx-auto mb-4 border-2 border-sage-500 bg-slate-800">
+                            <img src="https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=400" alt="Dr. Alejandro Morales" class="w-full h-full object-cover">
+                        </div>
+                        <div class="text-center">
+                            <h3 class="font-bold font-serif text-lg text-white">Dr. Alejandro Morales</h3>
+                            <p class="text-xs text-sage-100 mt-0.5">Psicólogo Clínico & Terapeuta</p>
+                            <span class="inline-block mt-2 text-[10px] bg-slate-800 text-slate-300 px-3 py-1 rounded-full font-mono">Reg. Sanitario Nº 48102</span>
+                        </div>
+
+                        <div class="mt-6 pt-6 border-t border-slate-800 space-y-3 text-xs text-slate-300">
+                            <div class="flex items-center space-x-2.5">
+                                <i class="fa-solid fa-graduation-cap text-sage-500"></i>
+                                <span>Máster TCC (U. de Barcelona)</span>
+                            </div>
+                            <div class="flex items-center space-x-2.5">
+                                <i class="fa-solid fa-user-check text-sage-500"></i>
+                                <span>+10 Años de Experiencia Clínica</span>
+                            </div>
+                            <div class="flex items-center space-x-2.5">
+                                <i class="fa-solid fa-location-dot text-sage-500"></i>
+                                <span>Consulta Presencial & Online</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sello de Atención Inmediata -->
+                    <div class="bg-sage-100 border border-sage-200 rounded-2xl p-4 text-xs text-sage-800 flex items-center space-x-3">
+                        <i class="fa-solid fa-bolt text-sage-600 text-xl flex-shrink-0"></i>
+                        <span>Respuesta habitual por WhatsApp en menos de 2 horas hábiles.</span>
                     </div>
                 </div>
 
             </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER SIMPLE Y DE CONFIANZA -->
+    <footer class="bg-navy-900 text-slate-400 text-xs py-6 border-t border-slate-800 mt-12">
+        <div class="max-w-6xl mx-auto px-4 text-center space-y-2">
+            <p class="font-medium text-slate-300">Dr. Alejandro Morales — Centro de Psicología y Psicoterapia Integral</p>
+            <p class="text-[11px] text-slate-500">&copy; <span id="year"></span> Todos los derechos reservados. Confidencialidad y protección de datos garantizados.</p>
         </div>
-    </section>
+    </footer>
 
-    <!-- MÓDULO 5: AUTORIDAD Y CONFIANZA (FOOTER & CREDENCIALES) -->
-    <section class="py-16 bg-slate-100 border-t border-slate-200">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
-                
-                <div class="md:col-span-4 text-center md:text-left">
-                    <div class="w-24 h-24 rounded-full overflow-hidden mx-auto md:mx-0 border-4 border-white shadow-md mb-4 bg-navy-900">
-                        <img src="https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=400" alt="Dr. Alejandro Morales" class="w-full h-full object-cover">
-                    </div>
-                    <h3 class="font-bold font-serif text-navy-900 text-lg">Dr. Alejandro Morales</h3>
-                    <p class="text-xs text-slate-500">Psicólogo Clínico • Reg. Sanitario Nº 48102</p>
-                </div>
-
-                <div class="md:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                        <i class="fa-solid fa-graduation-cap text-sage-600 text-lg mb-2"></i>
-                        <h4 class="font-bold text-navy-900">Máster TCC</h4>
-                        <p class="text-slate-500 mt-1">Universidad de Barcelona. Especialista en terapia basada en evidencia.</p>
-                    </div>
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                        <i class="fa-solid fa-clock-rotate-left text-sage-600 text-lg mb-2"></i>
-                        <h4 class="font-bold text-navy-900">+10 Años de Práctica</h4>
-                        <p class="text-slate-500 mt-1">+1.200 horas de acompañamiento psicoterapéutico.</p>
-                    </div>
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                        <i class="fa-solid fa-user-lock text-sage-600 text-lg mb-2"></i>
-                        <h4 class="font-bold text-navy-900">Código Deontológico</h4>
-                        <p class="text-slate-500 mt-1">Secreto profesional y privacidad 100% garantizados.</p>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Copyright -->
-            <div class="mt-12 pt-6 border-t border-slate-200 text-center text-xs text-slate-400">
-                <p>&copy; <span id="year"></span> Dr. Alejandro Morales. Todos los derechos reservados.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- SCRIPTS DEL EMBUDO MODULAR -->
+    <!-- LÓGICA DE INTERACCIONES Y DIAGNÓSTICO EN TIEMPO REAL -->
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
 
-        // Estado del Embudo
-        const estadoEmbudo = {
-            servicio: 'ansiedad',
-            intensidad: 'Moderada',
-            modalidad: 'Online'
-        };
+        // Número de WhatsApp configurado (Reemplazar según necesidad)
+        const WHATSAPP_PHONE = "56912345678"; 
 
-        // Base de Datos de Módulos de Servicio
-        const datosServicios = {
+        // Estructura de Datos para las 24 sub-opciones (4 por cada una de las 6 especialidades)
+        const subOptionsData = {
             ansiedad: {
-                titulo: "Tratamiento Especializado de Ansiedad & Estrés",
-                descripcion: "Un abordaje clínico estructurado mediante Terapia Cognitivo-Conductual (TCC) para desactivar patrones de pensamiento rumiativo y síntomas físicos de angustia.",
-                sintomas: [
-                    "Pensamientos rumiantes o catastróficos",
-                    "Sensación de opresión en el pecho o taquicardia",
-                    "Insomnio o despertares nocturnos frecuentes",
-                    "Dificultad para concentrarse en tareas diarias"
+                title: "Ansiedad & Estrés",
+                subtitle: "¿Cuál de estos síntomas de ansiedad interfiere más en tu rutina?",
+                options: [
+                    { id: "ans_1", title: "Ataques de Pánico / Angustia", desc: "Episodios repentinos de opresión en el pecho, taquicardia o miedo desmedido.", bg: "from-blue-600 to-indigo-700" },
+                    { id: "ans_2", title: "Pensamientos Rumiantes", desc: "Imposibilidad de apagar la mente, preocupación constante por el futuro.", bg: "from-blue-600 to-indigo-700" },
+                    { id: "ans_3", title: "Fobia o Ansiedad Social", desc: "Malestar severo al interactuar en público, temor al juicio o la exposición.", bg: "from-blue-600 to-indigo-700" },
+                    { id: "ans_4", title: "Insomnio & Tensión Física", desc: "Dificultad para conciliar el sueño, dolores musculares o bruxismo constante.", bg: "from-blue-600 to-indigo-700" }
                 ],
-                metodo: "Cognitivo-Conductual + ACT",
-                duracion: "50 min • Presencial u Online",
-                testimonio: '"Recuperé el control sobre mi mente y aprendí a manejar mis ataques de ansiedad en pocas semanas."',
-                autor: "— Camilo R., 34 años"
+                diagText: "El cuadro reportado responde con alta efectividad a técnicas de Reestructuración Cognitiva e Higiene del Sueño combinadas con exposición graduada."
             },
             pareja: {
-                titulo: "Terapia de Pareja y Mediación Víncular",
-                descripcion: "Espacio neutral enfocado en desbloquear canales de comunicación destructivos, resolver conflictos acumulados y sanar el vínculo afectivo.",
-                sintomas: [
-                    "Discusiones recurrentes por los mismos temas",
-                    "Sensación de distanciamiento emocional o apatía",
-                    "Dificultades tras una ruptura de confianza",
-                    "Falta de acuerdos sobre el futuro común"
+                title: "Pareja & Familia",
+                subtitle: "¿Cuál es la dificultad principal que atraviesa el vínculo actualmente?",
+                options: [
+                    { id: "par_1", title: "Falla Grave de Comunicación", desc: "Discusiones constantes que terminan en gritos, distancia o indiferencia.", bg: "from-rose-600 to-pink-700" },
+                    { id: "par_2", title: "Ruptura de Confianza / Infidelidad", desc: "Sensación de traición y dificultad para reconstruir la seguridad afectiva.", bg: "from-rose-600 to-pink-700" },
+                    { id: "par_3", title: "Distanciamiento & Apatía", desc: "Sensación de 'vivir como compañeros de cuarto' sin intimidad ni conexión.", bg: "from-rose-600 to-pink-700" },
+                    { id: "par_4", title: "Decisión de Separación Consciente", desc: "Orientación para tomar una decisión madura o llevar una separación sana.", bg: "from-rose-600 to-pink-700" }
                 ],
-                metodo: "Terapia Sistémica + Gottman",
-                duracion: "60-75 min • Presencial u Online",
-                testimonio: '"Aprendimos a escucharnos sin atacarnos. Salvamos nuestra relación en un momento muy crítico."',
-                autor: "— Elena & Marcos, 8 años juntos"
+                diagText: "Se recomienda un encuadre de mediación afectiva estructurado para redefinir acuerdos de convivencia y desbloquear canales de diálogo."
             },
             autoestima: {
-                titulo: "Programa de Autoestima & Desbloqueo Personal",
-                descripcion: "Proceso psicoterapéutico diseñado para desactivar el auto-juicio constante, superar el miedo al fracaso y establecer límites personales firmes.",
-                sintomas: [
-                    "Síndrome del impostor y autoexigencia desmedida",
-                    "Dificultad para decir 'No' y poner límites",
-                    "Dependencia de la aprobación externa",
-                    "Sensación constante de estar estancado"
+                title: "Autoestima & Confianza",
+                subtitle: "¿En qué aspecto sientes que tu autovaloración está siendo afectada?",
+                options: [
+                    { id: "aut_1", title: "Síndrome del Impostor", desc: "Sensación de no ser suficiente pese a los logros o miedo constante a fallar.", bg: "from-emerald-600 to-teal-700" },
+                    { id: "aut_2", title: "Dificultad para Poner Límites", desc: "Decir 'sí' por compromiso y postergar las propias necesidades.", bg: "from-emerald-600 to-teal-700" },
+                    { id: "aut_3", title: "Autocrítica Rígida & Culpa", desc: "Un diálogo interno exigente y juzgador que impide disfrutar.", bg: "from-emerald-600 to-teal-700" },
+                    { id: "aut_4", title: "Dependencia Emocional", desc: "Necesidad de aprobación externa para validar decisiones personales.", bg: "from-emerald-600 to-teal-700" }
                 ],
-                metodo: "Psicología Integrativa",
-                duracion: "50 min • Modalidad Online",
-                testimonio: '"Logré cambiar la forma en que me hablo a mí misma y tomé decisiones de vida que postergué por años."',
-                autor: "— Sofía M., 29 años"
+                diagText: "Trabajaremos en el fortalecimiento del Yo, desactivando mandatos rígidos y cultivando una autocompasión funcional en tu cotidianeidad."
             },
-            burnout: {
-                titulo: "Intervención en Burnout & Estrés Laboral",
-                descripcion: "Programa de recuperación emocional ante el agotamiento profesional extremo, diseñado para restaurar la motivación y el equilibrio vida-trabajo.",
-                sintomas: [
-                    "Agotamiento físico y mental crónico al trabajar",
-                    "Cinicismo o desapego hacia las tareas diarias",
-                    "Somatizaciones gastrointestinales o cefaleas",
-                    "Bajo rendimiento por sobrecarga cognitiva"
+            duelo: {
+                title: "Trauma & Duelo",
+                subtitle: "¿Qué tipo de vivencia requiere acompañamiento en este momento?",
+                options: [
+                    { id: "due_1", title: "Fallecimiento de un Ser Querido", desc: "Proceso doloroso de pérdida que se siente difícil de asimilar o transitar.", bg: "from-purple-600 to-indigo-900" },
+                    { id: "due_2", title: "Ruptura Amorosa Dolorosa", desc: "Duelo emocional por el fin de una relación significativa.", bg: "from-purple-600 to-indigo-900" },
+                    { id: "due_3", title: "Experiencia Traumática Pasada", desc: "Recuerdos intrusivos o huellas emocionales no resueltas de la infancia o juventud.", bg: "from-purple-600 to-indigo-900" },
+                    { id: "due_4", title: "Cambio Vital / Crisis Adaptativa", desc: "Migración, pérdida de empleo o cambio de etapa vital drástico.", bg: "from-purple-600 to-indigo-900" }
                 ],
-                metodo: "Gestión del Estrés & Mindfulness",
-                duracion: "50 min • Presencial u Online",
-                testimonio: '"Pude poner freno al colapso profesional y reorganizar mis prioridades sin descuidar mi carrera."',
-                autor: "— Javier G., Líder de Equipo"
+                diagText: "Un abordaje compasivo mediante procesamiento emocional te permitirá integrar la vivencia y reconstruir tu sentido de seguridad personal."
+            },
+            crecimiento: {
+                title: "Crecimiento & Metas",
+                subtitle: "¿Cuál es el principal bloqueo que frena tu desarrollo personal?",
+                options: [
+                    { id: "cre_1", title: "Sensación de Estancamiento", desc: "Sentir que los días pasan en piloto automático sin un propósito claro.", bg: "from-amber-500 to-orange-600" },
+                    { id: "cre_2", title: "Parálisis por Análisis", desc: "Incapacidad para tomar decisiones importantes por miedo a equivocarse.", bg: "from-amber-500 to-orange-600" },
+                    { id: "cre_3", title: "Procrastinación Crónica", desc: "Postergar proyectos vitales sustituyéndolos por tareas secundarias.", bg: "from-amber-500 to-orange-600" },
+                    { id: "cre_4", title: "Reorientación de Vida", desc: "Necesidad de replantear objetivos personales, profesionales o valores.", bg: "from-amber-500 to-orange-600" }
+                ],
+                diagText: "Diseñaremos un plan estratégico de clarificación de valores y objetivos para desbloquear la toma de acción de forma consistente."
+            },
+            laboral: {
+                title: "Psicología Laboral",
+                subtitle: "¿Cómo se manifiesta el estrés o conflicto en tu entorno de trabajo?",
+                options: [
+                    { id: "lab_1", title: "Agotamiento Extremo (Burnout)", desc: "Sensación de colapso físico/mental e incapacidad para rendir en el trabajo.", bg: "from-cyan-600 to-blue-700" },
+                    { id: "lab_2", title: "Sobrecarga & Falta de Desconexión", desc: "Incapacidad de separar el espacio laboral del tiempo personal/familiar.", bg: "from-cyan-600 to-blue-700" },
+                    { id: "lab_3", title: "Conflictos con Equipos o Jefaturas", desc: "Estrés por ambientes laborales tóxicos o dificultades de liderazgo.", bg: "from-cyan-600 to-blue-700" },
+                    { id: "lab_4", title: "Desmotivación & Crisis de Carrera", desc: "Pérdida total del sentido o entusiasmo por la profesión actual.", bg: "from-cyan-600 to-blue-700" }
+                ],
+                diagText: "Implementaremos estrategias de regulación del estrés corporativo, establecimiento de límites profesionales y prevención del colapso emocional."
             }
         };
 
-        // Selección de Módulo 1 -> Actualización de Módulo 2
-        function seleccionarModulo(key) {
-            estadoEmbudo.servicio = key;
+        // Estado global del embudo
+        let selectedCategoryKey = null;
+        let selectedSubOptionObj = null;
 
-            // Actualizar estilo visual de las cards en Módulo 1
-            document.querySelectorAll('.pain-card').forEach(card => card.classList.remove('active-pain-card', 'bg-white'));
-            const selectedCard = document.getElementById(`card-${key}`);
-            if (selectedCard) {
-                selectedCard.classList.add('active-pain-card');
-            }
+        // SELECCIONAR ESPECIALIDAD (PASO 1 -> PASO 2)
+        function selectSpecialty(key) {
+            selectedCategoryKey = key;
+            const data = subOptionsData[key];
 
-            // Cargar datos en Módulo 2
-            const data = datosServicios[key];
-            document.getElementById('service-title').textContent = data.titulo;
-            document.getElementById('service-description').textContent = data.descripcion;
-            document.getElementById('service-method').textContent = data.metodo;
-            document.getElementById('service-duration').textContent = data.duracion;
-            document.getElementById('service-testimonial').textContent = data.testimonio;
-            document.getElementById('service-author').textContent = data.autor;
+            // Cargar títulos del Paso 2
+            document.getElementById('step-2-title').textContent = `Paso 2: ${data.title}`;
+            document.getElementById('step-2-subtitle').textContent = data.subtitle;
 
-            // Cargar lista de síntomas
-            const symptomsContainer = document.getElementById('service-symptoms');
-            symptomsContainer.innerHTML = '';
-            data.sintomas.forEach(sintoma => {
-                const li = document.createElement('li');
-                li.className = 'flex items-center space-x-2';
-                li.innerHTML = `<i class="fa-solid fa-check text-sage-600"></i><span>${sintoma}</span>`;
-                symptomsContainer.appendChild(li);
+            // Renderizar las 4 tarjetas rectangulares secundarias
+            const grid = document.getElementById('sub-options-grid');
+            grid.innerHTML = '';
+
+            data.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = `card-shadow text-left p-5 rounded-2xl bg-white border-2 border-slate-200 hover:border-sage-500 transition-all duration-200 group relative flex flex-col justify-between`;
+                btn.onclick = () => selectSubOption(opt);
+
+                btn.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="w-7 h-7 rounded-lg bg-sage-100 text-sage-700 flex items-center justify-center font-bold text-xs">${index + 1}</span>
+                            <i class="fa-solid fa-chevron-right text-xs text-slate-300 group-hover:text-sage-600 group-hover:translate-x-1 transition-all"></i>
+                        </div>
+                        <h4 class="font-bold text-navy-900 text-base mb-1 group-hover:text-sage-700 transition-colors">${opt.title}</h4>
+                        <p class="text-xs text-slate-500 leading-relaxed">${opt.desc}</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-end text-xs font-semibold text-sage-600">
+                        <span>Seleccionar síntoma</span>
+                    </div>
+                `;
+
+                grid.appendChild(btn);
             });
 
-            // Actualizar indicador del top bar
-            document.getElementById('step-pill-2').classList.replace('bg-slate-800', 'bg-sage-600');
-            document.getElementById('step-pill-2').classList.replace('text-slate-400', 'text-white');
-
-            // Scroll suave hacia Módulo 2
-            document.getElementById('modulo-2').scrollIntoView({ behavior: 'smooth' });
+            // Actualizar vista
+            showStepContainer(2);
+            updateProgressBar(2);
         }
 
-        // Navegación de Módulo 2 a Módulo 3
-        function irAModulo3() {
-            document.getElementById('modulo-3').scrollIntoView({ behavior: 'smooth' });
+        // SELECCIONAR SÍNTOMA (PASO 2 -> PASO 3)
+        function selectSubOption(subObj) {
+            selectedSubOptionObj = subObj;
+            const catData = subOptionsData[selectedCategoryKey];
+
+            // Llenar datos en el resumen final
+            document.getElementById('summary-spec').textContent = catData.title;
+            document.getElementById('summary-sub').textContent = subObj.title;
+            document.getElementById('diag-description').textContent = catData.diagText;
+
+            // Generar enlace directo de WhatsApp dinámico
+            const message = `Hola Dr. Alejandro Morales, completé la evaluación de triaje en su sitio web:\n\n` +
+                            `• *Especialidad:* ${catData.title}\n` +
+                            `• *Motivo/Síntoma:* ${subObj.title}\n\n` +
+                            `Quisiera conocer la disponibilidad de agenda para realizar una primera sesión de evaluación diagnóstica.`;
+
+            const waUrl = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(message)}`;
+            document.getElementById('whatsapp-link').href = waUrl;
+
+            // Actualizar vista
+            showStepContainer(3);
+            updateProgressBar(3);
         }
 
-        // Lógica de Triaje en Módulo 3
-        function setTriajeP1(intensidad) {
-            estadoEmbudo.intensidad = intensidad;
-            document.getElementById('triaje-p2').classList.remove('hidden');
+        // CONTROL DE VISIBILIDAD DE PASOS
+        function showStepContainer(stepNum) {
+            document.getElementById('step-1-container').classList.add('hidden');
+            document.getElementById('step-2-container').classList.add('hidden');
+            document.getElementById('step-3-container').classList.add('hidden');
+
+            document.getElementById(`step-${stepNum}-container`).classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function finalizarTriaje(modalidad) {
-            estadoEmbudo.modalidad = modalidad;
-
-            // Actualizar resumen en Módulo 4
-            const sData = datosServicios[estadoEmbudo.servicio];
-            document.getElementById('conversion-summary').innerHTML = `
-                Hemos preparado el contexto de tu consulta para el <strong>${sData.titulo}</strong> en modalidad <strong>${modalidad}</strong> (Intensidad reportada: <strong>${estadoEmbudo.intensidad}</strong>).
-            `;
-
-            // Construir mensaje contextualizado para WhatsApp
-            const msgWhatsApp = `Hola Dr. Alejandro Morales, completé el triaje en su web:\n\n- Servicio: ${sData.titulo}\n- Intensidad del síntoma: ${estadoEmbudo.intensidad}\n- Modalidad sugerida: ${modalidad}\n\nMe gustaría solicitar disponibilidad para agendar mi primera sesión diagnóstica.`;
-            
-            const btnWA = document.getElementById('btn-whatsapp-final');
-            btnWA.href = `https://wa.me/1234567890?text=${encodeURIComponent(msgWhatsApp)}`;
-
-            // Actualizar indicador del top bar
-            document.getElementById('step-pill-3').classList.replace('bg-slate-800', 'bg-sage-600');
-            document.getElementById('step-pill-3').classList.replace('text-slate-400', 'text-white');
-
-            // Scroll hacia Módulo 4
-            document.getElementById('modulo-4').scrollIntoView({ behavior: 'smooth' });
+        function goBackToStep(stepNum) {
+            showStepContainer(stepNum);
+            updateProgressBar(stepNum);
         }
 
-        function simularCalendly() {
-            alert("Modal simulado de agendamiento: El usuario puede seleccionar día y hora en tiempo real según la disponibilidad del Dr. Morales.");
+        // CONTROL DE BARRA DE PROGRESO
+        function updateProgressBar(activeStep) {
+            for (let i = 1; i <= 3; i++) {
+                const pill = document.getElementById(`step-pill-${i}`);
+                if (i <= activeStep) {
+                    pill.className = "px-3 py-1.5 rounded-lg border border-sage-500 bg-sage-600 text-white flex items-center space-x-1.5 transition-all";
+                } else {
+                    pill.className = "px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-800 text-slate-400 flex items-center space-x-1.5 transition-all";
+                }
+            }
         }
     </script>
 </body>
