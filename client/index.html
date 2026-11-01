@@ -471,10 +471,16 @@
                     }
                 }
 
-                // Asignar Hotmart
-                if(user[4] && user[4].trim() !== "") {
-                    document.getElementById('btn-hotmart').href = user[4].replace(/['"]+/g, '').trim();
-                }
+                // Asignar Hotmart de forma dinámica (Columna E / índice 4)
+                let linkHotmart = user[4] ? user[4].replace(/['"]+/g, '').trim() : "";
+                let btnHotmart = document.getElementById('btn-hotmart');
+
+                if (linkHotmart !== "") {
+                    btnHotmart.href = linkHotmart;
+                    btnHotmart.style.display = 'flex'; // Se muestra si tiene información
+                } else {
+                    btnHotmart.style.display = 'none'; // Se oculta automáticamente si está vacío
+                }                
 
                 // Configuración dinámica del botón adicional (Columnas AC: titulo_docum [28], AD: link_docum [29])
                 let tituloDoc = user[28] ? user[28].replace(/['"]+/g, '').trim() : ""; 
