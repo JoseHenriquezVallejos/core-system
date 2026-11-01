@@ -1,6 +1,6 @@
 {
-  "name": "Llave en Mano",
-  "short_name": "LlaveEnMano",
+  "name": "Soporte y Servicios",
+  "short_name": "SoporteApp",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0f172a",
