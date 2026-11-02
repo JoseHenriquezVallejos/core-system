@@ -1,1 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alerta de Oferta | Mercado Libre</title>
+    <!-- Tailwind CSS cargado desde CDN para rendimiento ultra rápido -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .bg-ml { background-color: #ffe600; }
+        .btn-ml { background-color: #3483fa; }
+        .btn-ml:hover { background-color: #2968c8; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen font-sans flex flex-col justify-between">
 
+    <!-- Header institucional estilo e-commerce -->
+    <header class="bg-ml p-4 text-center shadow-md">
+        <h1 class="text-xl font-bold text-gray-900 tracking-wide flex items-center justify-center gap-2">
+            <span>⚡</span> ALERTA DE OFERTA EXCLUSIVA
+        </h1>
+    </header>
+
+    <!-- Tarjeta Principal del Producto en Oferta -->
+    <main class="max-w-md mx-auto my-auto p-4 w-full">
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200">
+            
+            <!-- Contenedor de Imagen y Badge de Descuento -->
+            <div class="relative bg-white flex justify-center items-center p-4">
+                <img id="prod-img" src="https://via.placeholder.com/500" alt="Cargando oferta..." class="w-full h-64 object-contain">
+                <span id="prod-desc-badge" class="absolute top-3 right-3 bg-red-600 text-white font-black text-sm px-3 py-1 rounded-full shadow-md">
+                    -0% OFF
+                </span>
+            </div>
+
+            <!-- Información del Producto -->
+            <div class="p-6 border-t border-gray-100">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">Envío FULL / Gratis</span>
+                    <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2.5 py-0.5 rounded">★ 4.8</span>
+                </div>
+
+                <h2 id="prod-titulo" class="text-lg font-bold text-gray-800 leading-snug mb-4">
+                    Cargando información del producto...
+                </h2>
+
+                <!-- Bloque de Precios -->
+                <div class="flex items-baseline gap-3 mb-6">
+                    <span id="prod-precio" class="text-3xl font-extrabold text-gray-900">$0</span>
+                    <span id="prod-old" class="text-sm text-gray-400 line-through">$0</span>
+                </div>
+
+                <!-- Botón de Redirección a Mercado Libre -->
+                <a id="prod-link" href="#" target="_blank" rel="noopener" 
+                   class="btn-ml text-white text-center w-full block py-4 rounded-xl font-bold text-lg shadow-lg transform transition active:scale-95 flex items-center justify-center gap-2">
+                    <span>Ver Oferta en Mercado Libre</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+
+                <p class="text-center text-xs text-gray-400 mt-3">
+                    🔒 Serás redirigido de forma segura a la App/Web oficial de Mercado Libre.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Pie de página -->
+    <footer class="text-center p-4 text-xs text-gray-400">
+        <p>© Radar de Ofertas - Servicio independiente de recomendaciones.</p>
+    </footer>
+
+    <!-- Lógica JavaScript para procesar parámetros de la URL -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+
+            // Obtener variables de la URL
+            const titulo = params.get('titulo') || 'Producto en Oferta Especial';
+            const precio = params.get('precio') ? `$${Number(params.get('precio')).toLocaleString('es-CL')}` : '$0';
+            const old = params.get('old') ? `$${Number(params.get('old')).toLocaleString('es-CL')}` : '$0';
+            const desc = params.get('desc') || '0';
+            const img = params.get('img') || 'https://via.placeholder.com/500';
+            const link = params.get('link') || 'https://www.mercadolibre.cl';
+
+            // Inyectar en el DOM
+            document.getElementById('prod-titulo').textContent = titulo;
+            document.getElementById('prod-precio').textContent = precio;
+            document.getElementById('prod-old').textContent = old;
+            document.getElementById('prod-desc-badge').textContent = `-${desc}% OFF`;
+            document.getElementById('prod-img').src = img;
+            document.getElementById('prod-link').href = link;
+        });
+    </script>
+</body>
+</html>
