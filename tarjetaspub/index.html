@@ -2,29 +2,96 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Cargando producto...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Productos</title>
 
-    <!-- Metaetiquetas Open Graph por defecto -->
-    <meta property="og:title" id="og-title" content="Catálogo de Productos">
+    <!-- Metaetiquetas Open Graph para redes sociales -->
+    <meta property="og:title" id="og-title" content="Catálogo de Productos Exclusivos">
     <meta property="og:description" content="Toca aquí para ver los detalles y comprar directamente.">
     <meta property="og:image" id="og-image" content="">
     <meta property="og:url" id="og-url" content="">
     <meta property="og:type" content="website">
 
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0f172a;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .card {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+        .card img {
+            width: 100%;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            display: block;
+        }
+        .card img:hover {
+            transform: scale(1.02);
+        }
+        .btn {
+            display: block;
+            margin-top: 15px;
+            padding: 14px;
+            background-color: #22c55e;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+        .btn:hover {
+            background-color: #16a34a;
+        }
+        #loading {
+            font-size: 18px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card" id="content" style="display: none;">
+        <!-- Imagen que viene de la columna 'tarjeta' (R2) -->
+        <a id="link-imagen" href="#" target="_blank">
+            <img id="imagen-producto" src="" alt="Tarjeta del producto">
+        </a>
+        
+        <!-- Botón que apunta a la columna 'link Producto' (Hotmart / Mercado Libre) -->
+        <a id="link-boton" href="#" class="btn" target="_blank">Ver Producto / Comprar</a>
+    </div>
+
+    <p id="loading">Cargando tarjeta desde la planilla...</p>
+
     <script>
-        // URL de tu planilla publicada en CSV
+        // Enlace CSV público de tu Google Sheet
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSDp3ZhtXPMIy3s7_sBXD_KiTTcKLqxFBh0IeglUWOC0PAzfnnhcsPmspKmW_obRcZR-pxVWWaJHgyr/pub?gid=0&single=true&output=csv";
 
-        // Obtener el ID desde el enlace (ejemplo: ?id=crochet1)
+        // Capturamos el ID de la URL (Ejemplo: ?id=crochet1)
         const urlParams = new URLSearchParams(window.location.search);
-        const productoId = urlParams.get('id') || 'crochet1';
+        const productoId = urlParams.get('id');
 
-        // Función para parsear texto CSV a un array/objeto de JS
+        // Función para parsear texto CSV de forma segura
         function parseCSV(text) {
             const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
             const headers = lines[0].split(',').map(h => h.trim());
             
             return lines.slice(1).map(line => {
+                // Manejo básico de separación por comas
                 const values = line.split(',');
                 let row = {};
                 headers.forEach((header, index) => {
@@ -34,40 +101,46 @@
             });
         }
 
-        // Consultar la planilla y redirigir
-        async function cargarProducto() {
+        async function cargarTarjeta() {
+            if (!productoId) {
+                document.getElementById("loading").innerText = "Falta el parámetro ID en la URL.";
+                return;
+            }
+
             try {
                 const response = await fetch(CSV_URL);
                 const csvText = await response.text();
                 const productos = parseCSV(csvText);
 
-                // Buscar la fila por el ID (columna "ID")
+                // Buscamos la fila que coincida con el ID de la columna "ID"
                 const producto = productos.find(p => p["ID"] === productoId);
 
                 if (producto) {
-                    // Actualizar etiquetas visuales con los datos de tu planilla
                     const linkDestino = producto["link Producto"];
                     const linkTarjeta = producto["tarjeta"];
 
+                    // Asignamos la imagen de R2 y actualizamos los metadatos Open Graph
+                    document.getElementById("imagen-producto").src = linkTarjeta;
                     document.getElementById("og-image").setAttribute("content", linkTarjeta);
                     document.getElementById("og-url").setAttribute("content", window.location.href);
 
-                    // Redirección instantánea al enlace de Hotmart o Mercado Libre
-                    if (linkDestino) {
-                        window.location.replace(linkDestino);
-                    }
+                    // Asignamos los enlaces de Hotmart o Mercado Libre al botón y a la imagen
+                    document.getElementById("link-imagen").href = linkDestino;
+                    document.getElementById("link-boton").href = linkDestino;
+
+                    // Mostramos la tarjeta y ocultamos el texto de carga
+                    document.getElementById("loading").style.display = "none";
+                    document.getElementById("content").style.display = "block";
                 } else {
-                    console.error("ID de producto no encontrado en la planilla.");
+                    document.getElementById("loading").innerText = "No se encontró el ID '" + productoId + "' en la planilla.";
                 }
             } catch (error) {
-                console.error("Error leyendo la planilla CSV:", error);
+                console.error("Error leyendo la planilla:", error);
+                document.getElementById("loading").innerText = "Error al conectar con la planilla.";
             }
         }
 
-        cargarProducto();
+        cargarTarjeta();
     </script>
-</head>
-<body>
-    <p>Cargando información del producto...</p>
 </body>
 </html>
