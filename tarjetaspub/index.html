@@ -66,12 +66,12 @@
 <body>
 
     <div class="card" id="content" style="display: none;">
-        <!-- Imagen que viene de la columna 'tarjeta' (R2) -->
+        <!-- Imagen que viene de la columna C (tarjeta) -->
         <a id="link-imagen" href="#" target="_blank">
             <img id="imagen-producto" src="" alt="Tarjeta del producto">
         </a>
         
-        <!-- Botón que apunta a la columna 'link Producto' (Hotmart / Mercado Libre) -->
+        <!-- Botón que apunta a la columna B (link Producto) -->
         <a id="link-boton" href="#" class="btn" target="_blank">Ver Producto / Comprar</a>
     </div>
 
@@ -85,50 +85,68 @@
         const urlParams = new URLSearchParams(window.location.search);
         const productoId = urlParams.get('id');
 
-        // Función para parsear texto CSV de forma segura
-        function parseCSV(text) {
-            const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-            const headers = lines[0].split(',').map(h => h.trim());
-            
-            return lines.slice(1).map(line => {
-                // Manejo básico de separación por comas
-                const values = line.split(',');
-                let row = {};
-                headers.forEach((header, index) => {
-                    row[header] = values[index] ? values[index].trim() : '';
-                });
-                return row;
-            });
+        // Función robusta para limpiar y separar filas CSV respetando comillas o espacios
+        function parseCSVLine(text) {
+            let result = [];
+            let cell = '';
+            let inQuotes = false;
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(cell.trim());
+                    cell = '';
+                } else {
+                    cell += char;
+                }
+            }
+            result.push(cell.trim());
+            return result;
         }
 
         async function cargarTarjeta() {
             if (!productoId) {
-                document.getElementById("loading").innerText = "Falta el parámetro ID en la URL.";
+                document.getElementById("loading").innerText = "Falta el parámetro ID en la URL (ej: ?id=crochet1).";
                 return;
             }
 
             try {
                 const response = await fetch(CSV_URL);
                 const csvText = await response.text();
-                const productos = parseCSV(csvText);
+                const lines = csvText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
-                // Buscamos la fila que coincida con el ID de la columna "ID"
-                const producto = productos.find(p => p["ID"] === productoId);
+                let productoEncontrado = null;
 
-                if (producto) {
-                    const linkDestino = producto["link Producto"];
-                    const linkTarjeta = producto["tarjeta"];
+                // Omitimos la primera línea (cabecera) y recorremos los datos
+                for (let i = 1; i < lines.length; i++) {
+                    const columns = parseCSVLine(lines[i]);
+                    const currentId = columns[0]; // Columna A: ID
 
-                    // Asignamos la imagen de R2 y actualizamos los metadatos Open Graph
+                    if (currentId === productoId) {
+                        productoEncontrado = {
+                            id: columns[0],          // Columna A
+                            linkProducto: columns[1], // Columna B
+                            tarjeta: columns[2]       // Columna C
+                        };
+                        break;
+                    }
+                }
+
+                if (productoEncontrado) {
+                    const linkDestino = productoEncontrado.linkProducto;
+                    const linkTarjeta = productoEncontrado.tarjeta;
+
+                    // Asignamos la imagen de la columna C (R2)
                     document.getElementById("imagen-producto").src = linkTarjeta;
                     document.getElementById("og-image").setAttribute("content", linkTarjeta);
                     document.getElementById("og-url").setAttribute("content", window.location.href);
 
-                    // Asignamos los enlaces de Hotmart o Mercado Libre al botón y a la imagen
+                    // Asignamos el enlace de Hotmart de la columna B al botón y a la imagen
                     document.getElementById("link-imagen").href = linkDestino;
                     document.getElementById("link-boton").href = linkDestino;
 
-                    // Mostramos la tarjeta y ocultamos el texto de carga
+                    // Mostramos la tarjeta visual y ocultamos el texto de carga
                     document.getElementById("loading").style.display = "none";
                     document.getElementById("content").style.display = "block";
                 } else {
