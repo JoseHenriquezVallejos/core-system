@@ -2,161 +2,21 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cargando producto...</title>
+    <title>Bolsos de Lujo en Trapillo - Curso Online</title>
 
-    <!-- Metaetiquetas Open Graph dinámicas -->
-    <meta property="og:title" id="og-title" content="Catálogo de Productos Exclusivos">
-    <meta property="og:description" content="Toca aquí para ver los detalles y comprar directamente.">
-    <meta property="og:image" id="og-image" content="">
-    <meta property="og:url" id="og-url" content="">
+    <!-- METADATOS OPEN GRAPH PARA FACEBOOK -->
+    <meta property="og:title" content="Aprende a tejer Bolsos de Lujo en Trapillo 🧶 | Curso Online">
+    <meta property="og:description" content="Toca aquí para ver los modelos, el temario completo y los cupos disponibles para aprender desde casa.">
+    
+    <!-- Ruta absoluta a la imagen que subiste -->
+    <meta property="og:image" content="https://ais21.com/crochet/imagen.jpg">
+    <meta property="og:url" content="https://ais21.com/crochet/">
     <meta property="og:type" content="website">
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #0f172a;
-            color: #ffffff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            text-align: center;
-        }
-        .card {
-            background: #1e293b;
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            max-width: 400px;
-            width: 90%;
-        }
-        .card img {
-            width: 100%;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-            display: block;
-        }
-        .card img:hover {
-            transform: scale(1.02);
-        }
-        .btn {
-            display: block;
-            margin-top: 15px;
-            padding: 14px;
-            background-color: #22c55e;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 16px;
-            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
-        }
-        .btn:hover {
-            background-color: #16a34a;
-        }
-        #loading {
-            font-size: 18px;
-            color: #94a3b8;
-        }
-    </style>
+    <!-- REDIRECCIÓN A HOTMART -->
+    <meta http-equiv="refresh" content="0; url=https://go.hotmart.com/Y107971290D">
 </head>
 <body>
-
-    <div class="card" id="content" style="display: none;">
-        <!-- Imagen que se alimenta de la columna C (tarjeta) de la planilla -->
-        <a id="link-imagen" href="#" target="_blank">
-            <img id="imagen-producto" src="" alt="Tarjeta del producto">
-        </a>
-        
-        <!-- Botón que apunta a la columna B (link Producto) de la planilla -->
-        <a id="link-boton" href="#" class="btn" target="_blank">Ver Producto / Comprar</a>
-    </div>
-
-    <p id="loading">Cargando tarjeta desde la planilla...</p>
-
-    <script>
-        // Tu enlace CSV público de Google Sheets
-        const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSDp3ZhtXPMIy3s7_sBXD_KiTTcKLqxFBh0IeglUWOC0PAzfnnhcsPmspKmW_obRcZR-pxVWWaJHgyr/pub?gid=0&single=true&output=csv";
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const productoId = urlParams.get('id');
-
-        function parseCSVLine(text) {
-            let result = [];
-            let cell = '';
-            let inQuotes = false;
-            for (let i = 0; i < text.length; i++) {
-                let char = text[i];
-                if (char === '"') {
-                    inQuotes = !inQuotes;
-                } else if (char === ',' && !inQuotes) {
-                    result.push(cell.trim());
-                    cell = '';
-                } else {
-                    cell += char;
-                }
-            }
-            result.push(cell.trim());
-            return result;
-        }
-
-        async function inicializarBridge() {
-            if (!productoId) {
-                document.getElementById("loading").innerText = "Falta el parámetro ID en la URL (ej: ?id=crochet1).";
-                return;
-            }
-
-            try {
-                const response = await fetch(CSV_URL);
-                const csvText = await response.text();
-                const lines = csvText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-
-                let productoEncontrado = null;
-
-                // Buscamos el ID en la fila correspondiente (Columna A = ID)
-                for (let i = 1; i < lines.length; i++) {
-                    const columns = parseCSVLine(lines[i]);
-                    if (columns[0] === productoId) {
-                        productoEncontrado = {
-                            id: columns[0],           // Columna A
-                            linkProducto: columns[1],  // Columna B (Hotmart / Mercado Libre)
-                            tarjeta: columns[2]        // Columna C (Imagen R2)
-                        };
-                        break;
-                    }
-                }
-
-                if (productoEncontrado) {
-                    const linkDestino = productoEncontrado.linkProducto;
-                    const linkTarjeta = productoEncontrado.tarjeta;
-
-                    // 1. Inyectamos la imagen de la planilla (Columna C) en la vista visual
-                    document.getElementById("imagen-producto").src = linkTarjeta;
-
-                    // 2. Actualizamos las etiquetas de la cabecera para los navegadores
-                    document.getElementById("og-image").setAttribute("content", linkTarjeta);
-                    document.getElementById("og-url").setAttribute("content", window.location.href);
-
-                    // 3. Vinculamos el destino de la columna B al botón y a la imagen
-                    document.getElementById("link-imagen").href = linkDestino;
-                    document.getElementById("link-boton").href = linkDestino;
-
-                    // Mostramos la tarjeta en pantalla
-                    document.getElementById("loading").style.display = "none";
-                    document.getElementById("content").style.display = "block";
-                } else {
-                    document.getElementById("loading").innerText = "No se encontró el ID '" + productoId + "' en la planilla.";
-                }
-            } catch (error) {
-                console.error("Error al leer la planilla:", error);
-                document.getElementById("loading").innerText = "Error al conectar con la planilla.";
-            }
-        }
-
-        inicializarBridge();
-    </script>
+    <p>Cargando información del curso...</p>
 </body>
 </html>
