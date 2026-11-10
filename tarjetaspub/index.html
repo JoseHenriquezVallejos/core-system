@@ -2,27 +2,78 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Aprende a tejer Bolsos de Lujo en Trapillo 🧶</title>
-
-    <!-- METADATOS ABIERTOS (OPEN GRAPH) EXPLÍCITOS -->
+    <title>Aprende desde casa | Curso Online</title>
+    
+    <!-- Metaetiquetas por defecto (mientras JavaScript lee la planilla) -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Aprende a tejer Bolsos de Lujo en Trapillo 🧶 | Curso Online">
-    <meta property="og:description" content="Toca aquí para ver los modelos, el temario completo y los cupos disponibles para aprender desde casa.">
-    <meta property="og:image" content="https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=800">
+    <meta property="og:title" content="Aprende desde casa con nuestro curso online">
+    <meta property="og:description" content="Toca aquí para ver los detalles, temario y promociones disponibles.">
+    <meta property="og:image" content="https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/50.jpg.webp">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:url" content="https://josehenriquezvallejos.github.io/core-system/tarjetaspub/">
 
-    <!-- REDIRECCIÓN CON UN PEQUEÑO RETRASO DE SEGURIDAD (1.5 segundos) -->
     <script>
-        window.addEventListener('DOMContentLoaded', (event) => {
-            setTimeout(function() {
-                window.location.replace("https://go.hotmart.com/Y107971290D");
-            }, 1500);
-        });
+        const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSDp3ZhtXPMIy3s7_sBXD_KiTTcKLqxFBh0IeglUWOC0PAzfnnhcsPmspKmW_obRcZR-pxVWWaJHgyr/pub?gid=0&single=true&output=csv";
+
+        async function init() {
+            // 1. Obtener el ID desde la URL (ej: ?id=crochet1)
+            const params = new URLSearchParams(window.location.search);
+            const productId = params.get('id');
+
+            if (!productId) {
+                document.getElementById("mensaje").innerText = "Por favor, especifica un producto válido en el enlace.";
+                return;
+            }
+
+            try {
+                // 2. Descargar la planilla CSV en tiempo real
+                const response = await fetch(CSV_URL);
+                const data = await response.text();
+                const lineas = data.split('\n').filter(l => l.trim() !== '');
+
+                let linkHotmart = "";
+                let imgUrl = "";
+                let descripcion = "";
+
+                // 3. Buscar la fila correspondiente al ID (Columna A: ID, B: link, C: imagen, D: descripcion)
+                for (let i = 1; i < lineas.length; i++) {
+                    const cols = lineas[i].split(',');
+                    if (cols.length >= 3 && cols[0].trim() === productId) {
+                        linkHotmart = cols[1].trim();
+                        imgUrl = cols[2].trim();
+                        descripcion = cols[3] ? cols[3].trim() : "Aprende desde casa";
+                        break;
+                    }
+                }
+
+                if (linkHotmart) {
+                    // Actualizar dinámicamente las etiquetas en el DOM si el navegador las procesa
+                    document.title = descripcion;
+                    
+                    // Actualizar Open Graph dinámicamente para usuarios que carguen la vista previa
+                    let ogTitle = document.querySelector('meta[property="og:title"]');
+                    let ogImage = document.querySelector('meta[property="og:image"]');
+                    if (ogTitle) ogTitle.setAttribute('content', descripcion);
+                    if (ogImage && imgUrl) ogImage.setAttribute('content', imgUrl);
+
+                    // 4. Redirigir a Hotmart tras un breve margen para asegurar la lectura
+                    setTimeout(() => {
+                        window.location.replace(linkHotmart);
+                    }, 1500);
+                } else {
+                    document.getElementById("mensaje").innerText = "El producto no se encontró en la planilla.";
+                }
+
+            } catch (error) {
+                console.error("Error al conectar con la planilla:", error);
+                document.getElementById("mensaje").innerText = "Error al cargar la información.";
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', init);
     </script>
 </head>
 <body>
-    <p style="text-align: center; margin-top: 20vh; font-family: sans-serif;">Cargando la información del curso...</p>
+    <p id="mensaje" style="text-align: center; margin-top: 20vh; font-family: sans-serif; color: #555;">Cargando la información del curso...</p>
 </body>
 </html>
