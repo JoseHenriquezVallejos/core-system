@@ -2,12 +2,12 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Aprende desde casa | Curso Online</title>
+    <title>Cargando oferta...</title>
     
-    <!-- Metaetiquetas por defecto (mientras JavaScript lee la planilla) -->
+    <!-- Metaetiquetas por defecto (respaldo inicial) -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="Aprende desde casa con nuestro curso online">
-    <meta property="og:description" content="Toca aquí para ver los detalles, temario y promociones disponibles.">
+    <meta property="og:description" content="Toca aquí para ver los detalles y promociones disponibles.">
     <meta property="og:image" content="https://pub-9190f1c645a042929f0e4da380ae327a.r2.dev/50.jpg.webp">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -20,8 +20,10 @@
             const params = new URLSearchParams(window.location.search);
             const productId = params.get('id');
 
+            const mensajeEl = document.getElementById("mensaje");
+
             if (!productId) {
-                document.getElementById("mensaje").innerText = "Por favor, especifica un producto válido en el enlace.";
+                mensajeEl.innerText = "Por favor, especifica un identificador de producto válido en el enlace.";
                 return;
             }
 
@@ -35,45 +37,53 @@
                 let imgUrl = "";
                 let descripcion = "";
 
-                // 3. Buscar la fila correspondiente al ID (Columna A: ID, B: link, C: imagen, D: descripcion)
+                // 3. Buscar la fila correspondiente al ID 
+                // Estructura de tu planilla: Columna A = ID, B = link Producto, C = imagen tarjeta, D = descripcion
                 for (let i = 1; i < lineas.length; i++) {
                     const cols = lineas[i].split(',');
-                    if (cols.length >= 3 && cols[0].trim() === productId) {
+                    if (cols.length >= 4 && cols[0].trim() === productId) {
                         linkHotmart = cols[1].trim();
                         imgUrl = cols[2].trim();
-                        descripcion = cols[3] ? cols[3].trim() : "Aprende desde casa";
+                        descripcion = cols[3].trim();
                         break;
                     }
                 }
 
                 if (linkHotmart) {
-                    // Actualizar dinámicamente las etiquetas en el DOM si el navegador las procesa
+                    // 4. Actualizar dinámicamente el título y las metaetiquetas con los datos de la planilla
                     document.title = descripcion;
                     
-                    // Actualizar Open Graph dinámicamente para usuarios que carguen la vista previa
                     let ogTitle = document.querySelector('meta[property="og:title"]');
+                    let ogDesc = document.querySelector('meta[property="og:description"]');
                     let ogImage = document.querySelector('meta[property="og:image"]');
+
                     if (ogTitle) ogTitle.setAttribute('content', descripcion);
+                    if (ogDesc) ogDesc.setAttribute('content', "Toca aquí para ver los detalles, temario y promociones disponibles.");
                     if (ogImage && imgUrl) ogImage.setAttribute('content', imgUrl);
 
-                    // 4. Redirigir a Hotmart tras un breve margen para asegurar la lectura
+                    mensajeEl.innerText = "¡Redirigiendo a la oferta oficial...";
+
+                    // 5. Redirigir a Hotmart tras un breve margen para asegurar la lectura del navegador
                     setTimeout(() => {
                         window.location.replace(linkHotmart);
                     }, 1500);
                 } else {
-                    document.getElementById("mensaje").innerText = "El producto no se encontró en la planilla.";
+                    mensajeEl.innerText = "No se encontró ningún producto asociado a ese ID en la planilla.";
                 }
 
             } catch (error) {
                 console.error("Error al conectar con la planilla:", error);
-                document.getElementById("mensaje").innerText = "Error al cargar la información.";
+                mensajeEl.innerText = "Hubo un error al procesar la información de la planilla.";
             }
         }
 
         window.addEventListener('DOMContentLoaded', init);
     </script>
 </head>
-<body>
-    <p id="mensaje" style="text-align: center; margin-top: 20vh; font-family: sans-serif; color: #555;">Cargando la información del curso...</p>
+<body style="background-color: #f9f9f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;">
+    <div style="text-align: center; font-family: sans-serif;">
+        <h2 style="color: #333; font-weight: 500;">Cargando contenido...</h2>
+        <p id="mensaje" style="color: #666; font-size: 14px;">Preparando los detalles de tu curso</p>
+    </div>
 </body>
 </html>
