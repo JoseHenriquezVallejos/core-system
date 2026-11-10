@@ -35,31 +35,36 @@
 
                 let linkHotmart = "";
                 let imgUrl = "";
-                let descripcion = "";
+                let descripcionPlanilla = "";
+                let tituloPlanilla = "";
+                let subtituloPlanilla = "";
 
                 // 3. Buscar la fila correspondiente al ID 
-                // Estructura: Columna A = ID, B = link Producto, C = imagen tarjeta, D = descripcion
+                // Estructura: Columna A = ID, B = link Producto, C = imagen tarjeta, D = desc, E = titulo, F = subtitulo
                 for (let i = 1; i < lineas.length; i++) {
                     const cols = lineas[i].split(',');
-                    if (cols.length >= 4 && cols[0].trim() === productId) {
+                    if (cols.length >= 6 && cols[0].trim() === productId) {
                         linkHotmart = cols[1].trim();
                         imgUrl = cols[2].trim();
-                        descripcion = cols[3].trim();
+                        descripcionPlanilla = cols[3].trim(); // Columna D
+                        tituloPlanilla = cols[4].trim();      // Columna E
+                        subtituloPlanilla = cols[5].trim();   // Columna F
                         break;
                     }
                 }
 
                 if (linkHotmart) {
-                    // 4. Tomar la descripción de la planilla para el título principal de la tarjeta y pestaña
-                    document.title = descripcion;
+                    // 4. Tomar los datos de la planilla para la pestaña y metaetiquetas
+                    if (tituloPlanilla) {
+                        document.title = tituloPlanilla;
+                    }
                     
                     let ogTitle = document.querySelector('meta[property="og:title"]');
                     let ogDesc = document.querySelector('meta[property="og:description"]');
                     let ogImage = document.querySelector('meta[property="og:image"]');
 
-                    // Asignamos la descripción exacta de la planilla al og:title de la tarjeta
-                    if (ogTitle) ogTitle.setAttribute('content', descripcion);
-                    if (ogDesc) ogDesc.setAttribute('content', "Toca aquí para ver los detalles y promociones disponibles.");
+                    if (ogTitle && tituloPlanilla) ogTitle.setAttribute('content', tituloPlanilla);
+                    if (ogDesc && descripcionPlanilla) ogDesc.setAttribute('content', descripcionPlanilla);
                     if (ogImage && imgUrl) ogImage.setAttribute('content', imgUrl);
 
                     mensajeEl.innerText = "¡Redirigiendo a la oferta oficial...";
