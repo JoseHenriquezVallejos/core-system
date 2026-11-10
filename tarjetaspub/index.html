@@ -38,7 +38,7 @@
                 let descripcion = "";
 
                 // 3. Buscar la fila correspondiente al ID 
-                // Estructura de tu planilla: Columna A = ID, B = link Producto, C = imagen tarjeta, D = descripcion
+                // Estructura: Columna A = ID, B = link Producto, C = imagen tarjeta, D = descripcion
                 for (let i = 1; i < lineas.length; i++) {
                     const cols = lineas[i].split(',');
                     if (cols.length >= 4 && cols[0].trim() === productId) {
@@ -50,23 +50,24 @@
                 }
 
                 if (linkHotmart) {
-                    // 4. Actualizar dinámicamente el título y las metaetiquetas con los datos de la planilla
+                    // 4. Tomar la descripción de la planilla para el título principal de la tarjeta y pestaña
                     document.title = descripcion;
                     
                     let ogTitle = document.querySelector('meta[property="og:title"]');
                     let ogDesc = document.querySelector('meta[property="og:description"]');
                     let ogImage = document.querySelector('meta[property="og:image"]');
 
+                    // Asignamos la descripción exacta de la planilla al og:title de la tarjeta
                     if (ogTitle) ogTitle.setAttribute('content', descripcion);
-                    if (ogDesc) ogDesc.setAttribute('content', "Toca aquí para ver los detalles, temario y promociones disponibles.");
+                    if (ogDesc) ogDesc.setAttribute('content', "Toca aquí para ver los detalles y promociones disponibles.");
                     if (ogImage && imgUrl) ogImage.setAttribute('content', imgUrl);
 
                     mensajeEl.innerText = "¡Redirigiendo a la oferta oficial...";
 
-                    // 5. Redirigir a Hotmart tras un breve margen para asegurar la lectura del navegador
+                    // 5. Redirigir a Hotmart tras un breve margen
                     setTimeout(() => {
                         window.location.replace(linkHotmart);
-                    }, 1500);
+                    }, 1200);
                 } else {
                     mensajeEl.innerText = "No se encontró ningún producto asociado a ese ID en la planilla.";
                 }
