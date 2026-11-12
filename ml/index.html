@@ -3,13 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <!-- Título y foto que leerá Facebook para la tarjeta -->
-  <meta property="og:title" content="Ofertas Destacadas en Chile - Envío Gratis" />
-  <meta property="og:description" content="Ver vitrina oficial en Mercado Libre." />
-  <meta property="og:image" content="https://http2.mlstatic.com/D_NQ_NP_2X_983955-MLA106660754103_022026-F.webp" />
-
-  <title>Abriendo en Mercado Libre...</title>
+  <title>Redirigiendo a Mercado Libre...</title>
   <style>
     body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #fff159; color: #333; text-align: center; padding: 20px; }
     .btn { background: #3483fa; color: white; padding: 16px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px; margin-top: 20px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
@@ -17,12 +11,11 @@
 </head>
 <body>
   <h2>Abriendo la oferta en Mercado Libre...</h2>
-  <p>Si la aplicación no se abre automáticamente en un momento, toca el botón:</p>
+  <p>Si la aplicación no se abre automáticamente, toca el botón de abajo:</p>
   
-  <a id="btn-fallback" class="btn" href="#">Ver en la App de Mercado Libre</a>
+  <a id="btn-fallback" class="btn" href="#">Entrar a la Aplicación</a>
 
   <script>
-    // Tu enlace largo exacto sin el "https://"
     const urlSinHttps = "www.mercadolibre.cl/social/jh20250316143032?matt_word=jh20250316143032&matt_tool=46465124&forceInApp=true&ref=BOemwEW3eHIx3k0Y0zH3%2BYn%2BR2xI%2BNoIUQA3KKv2GjwdlslYejrd9xwQAN%2F7ZP3V1FC0Dt%2BYHAyBvPrO9jzxhneohob7y91FlpUfYFKLlAoyYylgnyLjIo4VmmKGqKpH3BSJHiVW9PCJhUfO65zAhy7HrajyY92f4Uz3Ttc70QVfxG2ZMccB3m92f%2FdpVA8ucFFeokI0%2FoRvV1GuCbXTI3QW5187ee0uOdr1jAvN%2Bt6qmNqy6EVoVmNB8j5zHIZdz3XJGw%3D%3D#origin=copy_link";
 
     const urlCompleta = "https://" + urlSinHttps;
@@ -33,8 +26,8 @@
 
     document.getElementById("btn-fallback").href = destino;
 
-    // Salto directo a la app
-    window.location.replace(destino);
+    // Intento de redirección automática inmediata
+    window.location.href = destino;
   </script>
 </body>
 </html>
