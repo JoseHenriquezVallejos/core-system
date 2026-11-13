@@ -1,1 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Configuración PWA y Pantalla Completa -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#fff159">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
+  <!-- Open Graph para que la tarjeta se vea perfecta al compartir en Facebook -->
+  <meta property="og:title" content="Catálogo Exclusivo - Ofertas Chile" />
+  <meta property="og:description" content="Toca para ver los productos destacados del día." />
+  <meta property="og:image" content="https://http2.mlstatic.com/D_NQ_NP_2X_983955-MLA106660754103_022026-F.webp" />
+
+  <title>Catálogo Ofertas</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      background: #f5f5f5;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px;
+    }
+    header {
+      background: #fff159;
+      width: 100%;
+      padding: 15px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      max-width: 340px;
+      width: 100%;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .card img {
+      width: 100%;
+      border-radius: 8px;
+      object-fit: cover;
+      max-height: 250px;
+      margin-bottom: 12px;
+    }
+    .card h3 {
+      font-size: 18px;
+      margin: 10px 0;
+      color: #333;
+    }
+    .price {
+      font-size: 22px;
+      font-weight: bold;
+      color: #2e7d32;
+      margin-bottom: 15px;
+    }
+    .btn {
+      background: #3483fa;
+      color: white;
+      padding: 14px;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 16px;
+      display: block;
+      box-shadow: 0 4px 10px rgba(52,131,250,0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <header>🔥 Ofertas Destacadas Chile</header>
+
+  <!-- Contenedor de prueba (aquí después inyectaremos los productos dinámicamente) -->
+  <div class="card">
+    <img src="https://http2.mlstatic.com/D_NQ_NP_2X_983955-MLA106660754103_022026-F.webp" alt="Producto de prueba">
+    <h3>Producto de Demostración</h3>
+    <div class="price">Envío Gratis</div>
+    
+    <!-- Enlace de afiliado largo con control de salida -->
+    <a id="btn-ml" class="btn" href="https://www.mercadolibre.cl/social/jh20250316143032?matt_word=jh20250316143032&matt_tool=46465124&ref=BOemwEW3eHIx3k0Y0zH3%2BYn%2BR2xI%2BNoIUQA3KKv2GjwdlslYejrd9xwQAN%2F7ZP3V1FC0Dt%2BYHAyBvPrO9jzxhneohob7y91FlpUfYFKLlAoyYylgnyLjIo4VmmKGqKpH3BSJHiVW9PCJhUfO65zAhy7HrajyY92f4Uz3Ttc70QVfxG2ZMccB3m92f%2FdpVA8ucFFeokI0%2FoRvV1GuCbXTI3QW5187ee0uOdr1jAvN%2Bt6qmNqy6EVoVmNB8j5zHIZdz3XJGw%3D%3D#origin=copy_link" target="_blank">
+      Ver Oferta Oficial
+    </a>
+  </div>
+
+  <script>
+    // Registro del Service Worker básico para habilitar la PWA en el celular
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW error:', err));
+      });
+    }
+  </script>
+</body>
+</html>
