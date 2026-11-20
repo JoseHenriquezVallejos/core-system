@@ -9,17 +9,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body {
-            background-color: #020617;
-            color: #f1f5f9;
-            font-family: 'Inter', sans-serif;
-        }
+        body { font-family: 'Inter', sans-serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .btn-delete-table,
-        .btn-delete-table i {
-            color: #fb7185 !important;
-        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
@@ -666,122 +658,4 @@
                 if (error) throw error;
                 window.showToast(`Cuenta de ${tableId} cerrada`);
                 await window.loadCloudData();
-            } catch (err) {
-                console.error(err);
-                window.showToast("Error al cerrar cuenta");
-            }
-        };
-
-        window.createNewTableInSupabase = async function() {
-            const nums = Object.keys(window.appState.tablesData).map(k => parseInt(k.replace(/\D/g, '')) || 0);
-            const nextNum = (nums.length ? Math.max(...nums) : 0) + 1;
-            const tableName = `Mesa ${nextNum}`;
-
-            try {
-                const { error } = await window.supabaseClient
-                    .from('mesas')
-                    .insert({ numero_mesa: tableName, estado: 'free', items: [], garzon_actual: '' });
-                if (error) throw error;
-                window.showToast(`${tableName} creada`);
-                await window.loadCloudData();
-            } catch (err) {
-                console.error(err);
-                window.showToast("Error al crear mesa");
-            }
-        };
-
-        window.renderAdminTables = function() {
-            const grid = document.getElementById('admin-tables-grid');
-            if (!grid) return;
-            grid.innerHTML = '';
-
-            Object.keys(window.appState.tablesData)
-                .sort((a, b) => (parseInt(a.replace(/\D/g, '')) || 0) - (parseInt(b.replace(/\D/g, '')) || 0))
-                .forEach(tableId => {
-                    const div = document.createElement('div');
-                    div.className = "bg-slate-900 border border-slate-800 rounded-xl p-3 flex items-center justify-between";
-                    div.innerHTML = `
-                        <span class="text-xs font-bold text-white">${tableId}</span>
-                        <button onclick="window.deleteTable('${tableId}')" class="btn-delete-table text-rose-400 hover:text-rose-300 text-xs" title="Eliminar">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    `;
-                    grid.appendChild(div);
-                });
-        };
-
-        window.deleteTable = async function(tableId) {
-            try {
-                const { error } = await window.supabaseClient.from('mesas').delete().eq('numero_mesa', tableId);
-                if (error) throw error;
-                window.showToast(`${tableId} eliminada`);
-                await window.loadCloudData();
-            } catch (err) {
-                console.error(err);
-                window.showToast("Error al eliminar mesa");
-            }
-        };
-
-        window.openMenuForm = function(item = null) {
-            document.getElementById('menu-form-card').classList.remove('hidden');
-            document.getElementById('menu-form-title').textContent = item ? 'Editar Producto' : 'Nuevo Producto';
-            document.getElementById('admin-item-id').value = item ? item.id : '';
-            document.getElementById('admin-item-name').value = item ? item.name : '';
-            document.getElementById('admin-item-category').value = item ? item.category : '';
-            document.getElementById('admin-item-price').value = item ? item.price : '';
-        };
-
-        window.closeMenuForm = function() {
-            document.getElementById('menu-form-card').classList.add('hidden');
-        };
-
-        window.saveMenuItem = async function(e) {
-            e.preventDefault();
-            const id = document.getElementById('admin-item-id').value;
-            const payload = {
-                nombre: document.getElementById('admin-item-name').value.trim(),
-                categoria: document.getElementById('admin-item-category').value.trim() || 'General',
-                precio: Number(document.getElementById('admin-item-price').value) || 0,
-                disponible: true
-            };
-
-            try {
-                if (id) {
-                    const { error } = await window.supabaseClient.from('menu').update(payload).eq('id', id);
-                    if (error) throw error;
-                    window.showToast("Producto actualizado");
-                } else {
-                    const { error } = await window.supabaseClient.from('menu').insert(payload);
-                    if (error) throw error;
-                    window.showToast("Producto creado");
-                }
-                window.closeMenuForm();
-                await window.loadCloudData();
-            } catch (err) {
-                console.error(err);
-                window.showToast("Error al guardar producto");
-            }
-        };
-
-        window.toggleMenuAvailability = async function(item) {
-            try {
-                const { error } = await window.supabaseClient
-                    .from('menu')
-                    .update({ disponible: !item.available })
-                    .eq('id', item.id);
-                if (error) throw error;
-                await window.loadCloudData();
-            } catch (err) {
-                console.error(err);
-                window.showToast("Error al cambiar disponibilidad");
-            }
-        };
-
-        window.deleteMenuItem = async function(id) {
-            try {
-                const { error } = await window.supabaseClient.from('menu').delete().eq('id', id);
-                if (error) throw error;
-                window.showToast("Producto eliminado");
-                await window.loadCloudData();
-            } catch (err) {
-                console.
+            } catch
