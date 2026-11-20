@@ -658,4 +658,159 @@
                 if (error) throw error;
                 window.showToast(`Cuenta de ${tableId} cerrada`);
                 await window.loadCloudData();
-            } catch
+            } catch (err) {
+                console.error(err);
+                window.showToast("Error al cerrar cuenta");
+            }
+        };
+
+        window.createNewTableInSupabase = async function() {
+            const nums = Object.keys(window.appState.tablesData).map(k => parseInt(k.replace(/\D/g, '')) || 0);
+            const nextNum = (nums.length ? Math.max(...nums) : 0) + 1;
+            const tableName = `Mesa ${nextNum}`;
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('mesas')
+                    .insert({ numero_mesa: tableName, estado: 'free', items: [], garzon_actual: '' });
+                if (error) throw error;
+                window.showToast(`${tableName} creada`);
+                await window.loadCloudData();
+            } catch (err) {
+                console.error(err);
+                window.showToast("Error al crear mesa");
+            }
+        };
+
+        window.renderAdminTables = function() {
+            const grid = document.getElementById('admin-tables-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            Object.keys(window.appState.tablesData)
+                .sort((a, b) => (parseInt(a.replace(/\D/g, '')) || 0) - (parseInt(b.replace(/\D/g, '')) || 0))
+                .forEach(tableId => {
+                    const div = document.createElement('div');
+                    div.className = "bg-slate-900 border border-slate-800 rounded-xl p-3 flex items-center justify-between";
+                    div.innerHTML = `
+                        <span class="text-xs font-bold text-white">${tableId}</span>
+                        <button onclick="window.deleteTable('${tableId}')" class="text-rose-400 hover:text-rose-300 text-xs" title="Eliminar">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    `;
+                    grid.appendChild(div);
+                });
+        };
+
+        window.deleteTable = async function(tableId) {
+            try {
+                const { error } = await window.supabaseClient.from('mesas').delete().eq('numero_mesa', tableId);
+                if (error) throw error;
+                window.showToast(`${tableId} eliminada`);
+                await window.loadCloudData();
+            } catch (err) {
+                console.error(err);
+                window.showToast("Error al eliminar mesa");
+            }
+        };
+
+        window.openMenuForm = function(item = null) {
+            document.getElementById('menu-form-card').classList.remove('hidden');
+            document.getElementById('menu-form-title').textContent = item ? 'Editar Producto' : 'Nuevo Producto';
+            document.getElementById('admin-item-id').value = item ? item.id : '';
+            document.getElementById('admin-item-name').value = item ? item.name : '';
+            document.getElementById('admin-item-category').value = item ? item.category : '';
+            document.getElementById('admin-item-price').value = item ? item.price : '';
+        };
+
+        window.closeMenuForm = function() {
+            document.getElementById('menu-form-card').classList.add('hidden');
+        };
+
+        window.saveMenuItem = async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('admin-item-id').value;
+            const payload = {
+                nombre: document.getElementById('admin-item-name').value.trim(),
+                categoria: document.getElementById('admin-item-category').value.trim() || 'General',
+                precio: Number(document.getElementById('admin-item-price').value) || 0,
+                disponible: true
+            };
+
+            try {
+                if (id) {
+                    const { error } = await window.supabaseClient.from('menu').update(payload).eq('id', id);
+                    if (error) throw error;
+                    window.showToast("Producto actualizado");
+                } else {
+                    const { error } = await window.supabaseClient.from('menu').insert(payload);
+                    if (error) throw error;
+                    window.showToast("Producto creado");
+                }
+                window.closeMenuForm();
+                await window.loadCloudData();
+            } catch (err) {
+                console.error(err);
+                window.showToast("Error al guardar producto");
+            }
+        };
+
+        window.toggleMenuAvailability = async function(item) {
+            try {
+                const { error } = await window.supabaseClient
+                    .from('menu')
+                    .update({ disponible: !item.available })
+                    .eq('id', item.id);
+                if (error) throw error;
+                await window.loadCloudData();
+            } catch (err) {
+                console.error(err);
+                window.showToast("Error al cambiar disponibilidad");
+            }
+        };
+
+        window.deleteMenuItem = async function(id) {
+            try {
+                const { error } = await window.supabaseClient.from('menu').delete().eq('id', id);
+                if (error) throw error;
+                window.showToast("Producto eliminado");
+                await window.loadCloudData();
+            } catch (err) {
+                console.error(err);
+                window.showToast("Error al eliminar producto");
+            }
+        };
+
+        window.renderAdminMenu = function() {
+            const grid = document.getElementById('admin-menu-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            window.appState.menuData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between space-y-3";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start gap-2">
+                            <span class="text-[10px] text-indigo-400 font-semibold uppercase">${item.category}</span>
+                            <button onclick='window.toggleMenuAvailability(${JSON.stringify(item)})' class="text-[10px] font-bold px-2 py-0.5 rounded-full ${item.available ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}">
+                                ${item.available ? 'Disponible' : 'Agotado'}
+                            </button>
+                        </div>
+                        <h4 class="font-bold text-sm text-white mt-1">${item.name}</h4>
+                        <p class="text-xs text-slate-300 font-semibold mt-1">${fmtCLP(item.price)}</p>
+                    </div>
+                    <div class="flex justify-end space-x-2 pt-2 border-t border-slate-800">
+                        <button onclick='window.openMenuForm(${JSON.stringify(item)})' class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1 rounded-lg">Editar</button>
+                        <button onclick="window.deleteMenuItem(${item.id})" class="text-xs bg-rose-950/70 hover:bg-rose-900 text-rose-300 px-2.5 py-1 rounded-lg">Borrar</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        };
+
+        window.setupRealtime();
+        window.loadCloudData();
+    </script>
+</body>
+</html>
