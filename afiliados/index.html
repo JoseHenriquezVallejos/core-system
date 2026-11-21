@@ -304,7 +304,7 @@
     </div>
     
     <div id="contenido-principal">
-        <!-- Slider Galería -->
+        <!-- Slider Galería (4 diapositivas) -->
         <div class="swiper main-swiper">
             <div class="swiper-wrapper">
                 <div class="swiper-slide" id="slide-1">
@@ -329,12 +329,6 @@
                     <div class="slide-card">
                         <img id="f4" src="" alt="Slide 4">
                         <p id="desc4" class="slide-desc"></p>
-                    </div>
-                </div>
-                <div class="swiper-slide" id="slide-5">
-                    <div class="slide-card">
-                        <img id="f5" src="" alt="Slide 5">
-                        <p id="desc5" class="slide-desc"></p>
                     </div>
                 </div>
             </div>
@@ -492,7 +486,9 @@
                     btnDocum.style.display = 'none'; 
                 }
                 
-                for (let i = 0; i < 5; i++) {
+                let slidesVisibles = 0;
+
+                for (let i = 0; i < 4; i++) {
                     let fotoCol = 5 + (i * 2);
                     let descCol = 6 + (i * 2);
                     
@@ -504,6 +500,7 @@
                     if (slideElement) {
                         if (imgUrl !== "" || descText !== "") {
                             slideElement.style.display = 'flex';
+                            slidesVisibles++;
                             if (document.getElementById('f' + (i + 1))) document.getElementById('f' + (i + 1)).src = imgUrl;
                             if (document.getElementById('desc' + (i + 1))) document.getElementById('desc' + (i + 1)).innerText = descText;
                         } else {
@@ -521,11 +518,12 @@
                 });
 
                 document.getElementById('contenido-principal').style.display = 'block';
-                new Swiper('.main-swiper', { 
-                    loop: true, 
-                    autoplay: { delay: 4000, disableOnInteraction: false }, 
+                const swiperInstance = new Swiper('.main-swiper', { 
+                    loop: slidesVisibles > 2,
+                    autoplay: slidesVisibles > 1 ? { delay: 4000, disableOnInteraction: false } : false,
                     pagination: { el: '.swiper-pagination', clickable: true } 
                 });
+                swiperInstance.update();
 
             } else {
                 document.getElementById('nombre-visual').innerText = "ID NO ENCONTRADO";
