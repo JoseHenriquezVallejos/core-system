@@ -337,7 +337,7 @@
 
         <!-- Botones de Acción Inmediata -->
         <div class="button-grid">
-            <a id="btn-wa" href="#" class="btn-action btn-green">💬 Hola, quiero activar mis 14 días gratis. [Ref: ${affiliateId}]</a>
+            <a id="btn-wa" href="#" class="btn-action btn-green">💬 Quiero mis 14 días gratis.</a>
             <a id="btn-hotmart" href="#" class="btn-action btn-hotmart" style="display: none;">💳 Pagar Suscripción</a>
             <a id="btn-docum" href="#" target="_blank" class="btn-action btn-negro" style="display: none;">📁 Documentación</a>
         </div>
@@ -455,7 +455,7 @@
                 let btnWa = document.getElementById('btn-wa');
                 if (user[3] && user[3].trim() !== "") {
                     let urlBot = user[3].replace(/['"]+/g, '').trim();
-                    let textoMensaje = `Hola, quiero activar mis 14 días gratis.`;
+                    let textoMensaje = `Hola, quiero activar mis 14 días gratis. [Ref: ${affiliateId}].`;
                     let separador = urlBot.includes('?') ? '&' : '?';
                     btnWa.href = urlBot + separador + 'text=' + encodeURIComponent(textoMensaje);
                     btnWa.style.display = 'flex';
