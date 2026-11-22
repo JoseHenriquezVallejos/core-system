@@ -455,7 +455,7 @@
                 let btnWa = document.getElementById('btn-wa');
                 if (user[3] && user[3].trim() !== "") {
                     let urlBot = user[3].replace(/['"]+/g, '').trim();
-                    let textoMensaje = `Hola, quiero activar mis 14 días gratis. [Ref: ${nombreAfiliado}.`;
+                    let textoMensaje = `Hola, quiero activar mis 14 días gratis. [Ref: ${nombreAfiliado}].`;
                     let separador = urlBot.includes('?') ? '&' : '?';
                     btnWa.href = urlBot + separador + 'text=' + encodeURIComponent(textoMensaje);
                     btnWa.style.display = 'flex';
